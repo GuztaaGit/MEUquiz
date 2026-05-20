@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ElectroLearn</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{--bg:#0a0d14;--bg2:#111520;--card:#1a2035;--card2:#1f2640;--accent:#4f8ef7;--accent2:#7c5cfc;--green:#22d3a0;--amber:#f59e0b;--red:#f87171;--text:#e8eaf6;--text2:#8892b0;--text3:#4a5580;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);--r:14px;--r2:10px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+h1,h2,h3,h4{font-family:'Syne',sans-serif;}
+::-webkit-scrollbar{width:5px;height:5px;}::-webkit-scrollbar-track{background:var(--bg2);}::-webkit-scrollbar-thumb{background:var(--accent2);border-radius:99px;}
+.screen{display:none;min-height:100vh;flex-direction:column;}
+.screen.active{display:flex;}
+#auth-screen{align-items:center;justify-content:center;background:var(--bg);position:relative;overflow:hidden;}
+.auth-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(79,142,247,.13) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(124,92,252,.13) 0%,transparent 60%);pointer-events:none;}
+.auth-grid{position:absolute;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:50px 50px;opacity:.4;pointer-events:none;}
+.auth-box{position:relative;z-index:2;width:100%;max-width:420px;padding:1rem;}
+.auth-logo{text-align:center;margin-bottom:2rem;}
+.bolt{width:56px;height:56px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:16px;display:inline-flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:1rem;box-shadow:0 0 40px rgba(79,142,247,.3);}
+.auth-logo h1{font-size:2rem;font-weight:800;letter-spacing:-1px;}
+.auth-logo h1 span{background:linear-gradient(135deg,var(--accent),var(--accent2));background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.auth-logo p{color:var(--text2);font-size:.9rem;margin-top:.3rem;}
+.auth-card{background:var(--card);border:1px solid var(--border2);border-radius:var(--r);padding:2rem;}
+.auth-tabs{display:flex;gap:4px;background:var(--bg2);border-radius:var(--r2);padding:4px;margin-bottom:1.5rem;}
+.auth-tab{flex:1;padding:.5rem;text-align:center;border-radius:8px;cursor:pointer;font-size:.9rem;font-weight:500;color:var(--text2);transition:all .2s;}
+.auth-tab.active{background:var(--card2);color:var(--text);}
+.field{margin-bottom:1rem;}
+.field label{display:block;font-size:.78rem;font-weight:600;color:var(--text2);margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.05em;}
+.field input{width:100%;padding:.75rem 1rem;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r2);color:var(--text);font-size:.95rem;font-family:inherit;outline:none;transition:border .2s;}
+.field input:focus{border-color:var(--accent);}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.8rem 1.5rem;border:none;border-radius:var(--r2);font-family:inherit;font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s;}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;width:100%;}
+.btn-primary:hover{opacity:.9;transform:translateY(-1px);}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border2);}
+.btn-ghost:hover{background:var(--card2);color:var(--text);}
+.btn-green{background:linear-gradient(135deg,#22d3a0,#059669);color:#fff;}
+.btn-green:hover{opacity:.9;}
+.btn-sm{padding:.45rem .9rem;font-size:.82rem;}
+.err{color:var(--red);font-size:.82rem;margin-top:.4rem;display:none;}
+.divider{text-align:center;color:var(--text3);font-size:.8rem;margin:1rem 0;position:relative;}
+.divider::before,.divider::after{content:'';position:absolute;top:50%;width:42%;height:1px;background:var(--border2);}
+.divider::before{left:0;}.divider::after{right:0;}
+.topbar{height:60px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 1.25rem;position:sticky;top:0;z-index:100;flex-shrink:0;}
+.topbar-logo{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.user-chip{display:flex;align-items:center;gap:.5rem;background:var(--card);border:1px solid var(--border2);border-radius:99px;padding:.3rem .85rem .3rem .35rem;font-size:.82rem;}
+.av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:inline-flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;color:#fff;}
+.logout-btn{background:none;border:none;color:var(--text3);cursor:pointer;font-size:.8rem;font-family:inherit;padding:.3rem .5rem;border-radius:6px;}
+.logout-btn:hover{color:var(--red);}
+.main-nav{background:var(--bg2);border-bottom:1px solid var(--border);display:flex;overflow-x:auto;padding:0 .75rem;flex-shrink:0;}
+.nav-item{padding:.7rem 1rem;font-size:.85rem;font-weight:500;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;}
+.nav-item:hover{color:var(--text);}
+.nav-item.active{color:var(--accent);border-bottom-color:var(--accent);}
+.content{flex:1;padding:1.25rem;max-width:1080px;width:100%;margin:0 auto;}
+.banner{background:linear-gradient(135deg,rgba(79,142,247,.13),rgba(124,92,252,.13));border:1px solid rgba(79,142,247,.2);border-radius:var(--r);padding:1.4rem 1.75rem;margin-bottom:1.25rem;position:relative;overflow:hidden;}
+.banner::before{content:'⚡';position:absolute;right:1.5rem;top:50%;transform:translateY(-50%);font-size:4.5rem;opacity:.07;}
+.banner h2{font-size:1.4rem;margin-bottom:.2rem;}
+.banner p{color:var(--text2);font-size:.9rem;}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:.9rem;margin-bottom:1.25rem;}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:1.1rem;}
+.stat .v{font-size:1.7rem;font-weight:700;font-family:'Syne',sans-serif;}
+.stat .l{font-size:.75rem;color:var(--text2);margin-top:.15rem;text-transform:uppercase;letter-spacing:.04em;}
+.stat.blue .v{color:var(--accent);}.stat.purple .v{color:var(--accent2);}.stat.green .v{color:var(--green);}.stat.amber .v{color:var(--amber);}
+.lvl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:.9rem;}
+.lc{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:1.1rem;cursor:pointer;transition:all .22s;position:relative;}
+.lc:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 6px 24px rgba(79,142,247,.13);}
+.lc.locked{opacity:.5;cursor:not-allowed;}.lc.locked:hover{transform:none;box-shadow:none;border-color:var(--border);}
+.lc.done{border-color:var(--green);}
+.lbadge{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:10px;font-size:1rem;margin-bottom:.75rem;}
+.pb{background:var(--bg2);border-radius:99px;height:4px;margin-top:.75rem;}
+.pf{height:4px;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .5s;}
+.pm{font-size:.76rem;color:var(--text3);margin-top:.3rem;display:flex;justify-content:space-between;}
+.study-hdr{display:flex;align-items:center;gap:.85rem;margin-bottom:1.25rem;flex-wrap:wrap;}
+.back-btn{background:var(--card);border:1px solid var(--border2);border-radius:var(--r2);padding:.45rem .9rem;color:var(--text2);cursor:pointer;font-family:inherit;font-size:.82rem;display:flex;align-items:center;gap:.35rem;transition:all .2s;}
+.back-btn:hover{background:var(--card2);color:var(--text);}
+.tabs-row{display:flex;gap:.4rem;margin-bottom:1.25rem;flex-wrap:wrap;}
+.ptab{padding:.45rem 1rem;background:var(--card);border:1px solid var(--border);border-radius:99px;font-size:.82rem;cursor:pointer;color:var(--text2);transition:all .2s;}
+.ptab.active,.ptab:hover{background:var(--accent);color:#fff;border-color:var(--accent);}
+.study-body{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:1.6rem;margin-bottom:1.25rem;}
+.study-body h3{font-size:1.1rem;margin-bottom:.9rem;color:var(--accent);}
+.study-body h4{font-size:.9rem;margin:1.1rem 0 .4rem;font-weight:600;}
+.study-body p{color:var(--text2);font-size:.9rem;line-height:1.75;margin-bottom:.7rem;}
+.hl{background:rgba(79,142,247,.1);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:.7rem .9rem;margin:.7rem 0;font-size:.88rem;}
+.fml{background:var(--bg2);border:1px solid rgba(34,211,160,.3);border-radius:8px;padding:.85rem 1rem;font-size:1.05rem;text-align:center;margin:.7rem 0;color:var(--green);font-family:monospace;}
+.ex-box{background:rgba(34,211,160,.07);border:1px solid rgba(34,211,160,.2);border-radius:10px;padding:.9rem;margin:.7rem 0;}
+.ex-lbl{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--green);margin-bottom:.4rem;}
+.diag{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.25rem;margin:.9rem 0;text-align:center;}
+.diag .cap{font-size:.76rem;color:var(--text3);margin-top:.6rem;}
+.dl-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem;background:var(--card2);border:1px solid var(--border2);border-radius:var(--r2);padding:.9rem 1.1rem;margin-top:.9rem;}
+.dl-info h4{font-size:.9rem;margin-bottom:.15rem;}
+.dl-info p{font-size:.78rem;color:var(--text2);}
+.quiz-wrap{max-width:680px;margin:0 auto;}
+.qpb{background:var(--bg2);border-radius:99px;height:5px;margin-bottom:1.75rem;overflow:hidden;}
+.qpf{height:5px;border-radius:99px;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .5s;}
+.qnum{font-size:.78rem;color:var(--text2);margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.04em;}
+.qbadge{display:inline-block;padding:.22rem .7rem;border-radius:99px;font-size:.73rem;font-weight:600;margin-bottom:.7rem;}
+.qbadge.tf{background:rgba(79,142,247,.15);color:var(--accent);}
+.qbadge.disc{background:rgba(124,92,252,.15);color:var(--accent2);}
+.qq{font-size:1.05rem;font-weight:500;line-height:1.65;margin-bottom:1.4rem;}
+.tf-opts{display:flex;flex-direction:column;gap:.65rem;}
+.tf-opt{display:flex;align-items:center;gap:.65rem;padding:.9rem 1.1rem;background:var(--card);border:1px solid var(--border2);border-radius:var(--r2);cursor:pointer;transition:all .2s;font-size:.92rem;}
+.tf-opt:hover{border-color:var(--accent);background:var(--card2);}
+.tf-opt.ok{border-color:var(--green);background:rgba(34,211,160,.08);color:var(--green);}
+.tf-opt.bad{border-color:var(--red);background:rgba(248,113,113,.08);color:var(--red);}
+.tf-opt.dis{pointer-events:none;}
+.disc-ta{width:100%;min-height:110px;padding:.9rem;background:var(--card);border:1px solid var(--border2);border-radius:var(--r2);color:var(--text);font-size:.92rem;font-family:inherit;resize:vertical;outline:none;transition:border .2s;}
+.disc-ta:focus{border-color:var(--accent);}
+.qa{margin-top:1.1rem;display:flex;gap:.65rem;flex-wrap:wrap;}
+.fb{margin-top:1.1rem;padding:.9rem 1.1rem;border-radius:var(--r2);font-size:.88rem;line-height:1.65;}
+.fb.ok{background:rgba(34,211,160,.08);border:1px solid rgba(34,211,160,.25);}
+.fb.bad{background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.25);}
+.fb.neu{background:rgba(79,142,247,.08);border:1px solid rgba(79,142,247,.2);}
+.fb-lbl{font-weight:700;margin-bottom:.35rem;font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;}
+.fb.ok .fb-lbl{color:var(--green);}.fb.bad .fb-lbl{color:var(--red);}.fb.neu .fb-lbl{color:var(--accent);}
+.res{text-align:center;padding:2.5rem 1rem;}
+.res-score{font-family:'Syne',sans-serif;font-size:3.2rem;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.res-bd{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:1.4rem;max-width:380px;margin:1.25rem auto;text-align:left;}
+.rb{display:flex;justify-content:space-between;font-size:.88rem;padding:.35rem 0;border-bottom:1px solid var(--border);}
+.rb:last-child{border:none;}.rb .rv{font-weight:600;}
+.rank-list{display:flex;flex-direction:column;gap:.55rem;}
+.rank-item{display:flex;align-items:center;gap:.9rem;background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:.85rem 1.1rem;}
+.rpos{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:var(--text3);min-width:28px;}
+.rpos.g{color:#f59e0b;}.rpos.s{color:#94a3b8;}.rpos.b{color:#b45309;}
+.rinfo{flex:1;}.rname{font-weight:600;font-size:.9rem;}.rsub{font-size:.76rem;color:var(--text2);}
+.rscore{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;color:var(--accent);}
+.pcard{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:1.75rem;max-width:530px;}
+.pav{width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:1.7rem;font-weight:700;margin-bottom:.9rem;}
+.ach{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.75rem;}
+.chip{padding:.3rem .8rem;border-radius:99px;font-size:.76rem;font-weight:600;}
+.chip.on{background:rgba(34,211,160,.15);color:var(--green);border:1px solid rgba(34,211,160,.25);}
+.chip.off{background:var(--bg2);color:var(--text3);border:1px solid var(--border);}
+.spin-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:160px;gap:.9rem;}
+.spin{width:36px;height:36px;border:3px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:sp .8s linear infinite;}
+@keyframes sp{to{transform:rotate(360deg);}}
+.spin-wrap p{color:var(--text2);font-size:.88rem;}
+.toast{position:fixed;bottom:1.25rem;right:1.25rem;background:var(--card2);border:1px solid var(--border2);border-radius:var(--r2);padding:.85rem 1.1rem;font-size:.86rem;z-index:9999;opacity:0;transform:translateY(8px);transition:all .28s;max-width:260px;pointer-events:none;}
+.toast.show{opacity:1;transform:translateY(0);}
+.toast.ok{border-color:rgba(34,211,160,.4);}.toast.err{border-color:rgba(248,113,113,.4);}
+@media(max-width:580px){.content{padding:.9rem;}.banner{padding:1rem 1.1rem;}.stats-grid{grid-template-columns:1fr 1fr;}}
+</style>
+</head>
+<body>
+
+<div id="auth-screen" class="screen active">
+  <div class="auth-bg"></div><div class="auth-grid"></div>
+  <div class="auth-box">
+    <div class="auth-logo">
+      <div class="bolt">⚡</div>
+      <h1>Electro<span>Learn</span></h1>
+      <p>Aprenda eletrotécnica do zero ao avançado</p>
+    </div>
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <div class="auth-tab active" onclick="switchTab('login')">Entrar</div>
+        <div class="auth-tab" onclick="switchTab('register')">Cadastrar</div>
+      </div>
+      <div id="lf">
+        <div class="field"><label>E-mail</label><input type="email" id="le" placeholder="seu@email.com"/></div>
+        <div class="field"><label>Senha</label><input type="password" id="lp" placeholder="••••••••"/></div>
+        <div class="err" id="lerr">E-mail ou senha incorretos.</div>
+        <button class="btn btn-primary" onclick="doLogin()" style="margin-top:.5rem">Entrar →</button>
+        <div class="divider" style="margin-top:1.1rem">ou</div>
+        <button class="btn btn-ghost" style="width:100%;margin-top:.4rem" onclick="demoLogin()">▶ Entrar como convidado</button>
+      </div>
+      <div id="rf" style="display:none">
+        <div class="field"><label>Nome</label><input type="text" id="rn" placeholder="Seu nome"/></div>
+        <div class="field"><label>E-mail</label><input type="email" id="re" placeholder="seu@email.com"/></div>
+        <div class="field"><label>Senha</label><input type="password" id="rp" placeholder="mín. 6 caracteres"/></div>
+        <div class="err" id="rerr">Preencha todos os campos.</div>
+        <button class="btn btn-primary" onclick="doRegister()" style="margin-top:.5rem">Criar conta →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="app-screen" class="screen">
+  <div class="topbar">
+    <div class="topbar-logo">⚡ ElectroLearn</div>
+    <div style="display:flex;align-items:center;gap:.75rem">
+      <div class="user-chip"><div class="av" id="tav">?</div><span id="tname">-</span></div>
+      <button class="logout-btn" onclick="doLogout()">Sair</button>
+    </div>
+  </div>
+  <div class="main-nav">
+    <div class="nav-item active" onclick="go('dashboard')" id="n-dashboard">🏠 Início</div>
+    <div class="nav-item" onclick="go('study')" id="n-study">📚 Estudar</div>
+    <div class="nav-item" onclick="go('quiz')" id="n-quiz">⚡ Quiz</div>
+    <div class="nav-item" onclick="go('ranking')" id="n-ranking">🏆 Ranking</div>
+    <div class="nav-item" onclick="go('profile')" id="n-profile">👤 Perfil</div>
+  </div>
+  <div class="content" id="mc"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+// CONTEÚDO DIDÁTICO — sem nenhuma chamada de API
+// ═══════════════════════════════════════════════
+const CONTENT = {
+1:[
+ {title:"O que é Eletricidade?",
+  formula:null,
+  hl:"Eletricidade = movimento de elétrons em um condutor.",
+  intro:"Eletricidade é o movimento ordenado de partículas chamadas elétrons. Pense em elétrons como minúsculas bolinhas que existem dentro de qualquer material. Em metais como cobre e alumínio esses elétrons se movem com facilidade — por isso os chamamos de condutores.",
+  secs:[{h:"Condutores e isolantes",b:"Condutores deixam os elétrons passarem livremente: cobre, alumínio, ferro. Isolantes bloqueiam os elétrons: borracha, plástico, madeira seca, vidro. O fio elétrico tem miolo de cobre (conduz) coberto de plástico (isola e protege)."},
+        {h:"Por que os elétrons se movem?",b:"Para os elétrons andarem precisam de uma 'força empurrando' — chamamos isso de tensão (voltagem). Sem tensão os elétrons ficam parados e não há eletricidade. É como água que só escorre se houver diferença de altura."}],
+  ex:{t:"Lanterna",b:"Ao ligar a lanterna, a bateria empurra os elétrons pelo fio até a lâmpada e de volta. Esse fluxo de elétrons é a corrente elétrica e é ela que acende a lâmpada."},
+  diag:"circuit"},
+ {title:"Corrente Elétrica",
+  formula:"I = Q ÷ t",
+  hl:"Corrente (I) = quantidade de elétrons por segundo. Unidade: Ampère (A).",
+  intro:"Corrente elétrica é a quantidade de elétrons que passa por um fio a cada segundo. Quanto mais elétrons passam por segundo, maior a corrente. A unidade de medida é o Ampère (A), homenagem ao físico francês André-Marie Ampère.",
+  secs:[{h:"Ampère na prática",b:"Carregador de celular: ~1 A. Lâmpada LED: ~0,05 A. Chuveiro elétrico: ~25 A. Quanto mais potente o aparelho, mais corrente ele consome."},
+        {h:"Corrente contínua (CC) e alternada (CA)",b:"CC: elétrons andam sempre na mesma direção — baterias e celulares. CA: elétrons oscilam 60 vezes por segundo — tomada da sua casa. A concessionária distribui CA porque é mais fácil de transmitir por longas distâncias."}],
+  ex:{t:"Analogia com água",b:"Corrente elétrica é como a vazão de água num cano. Cano largo com muita água = corrente alta (ex: chuveiro 25 A). Cano fino com pouca água = corrente baixa (ex: carregador 1 A)."},
+  diag:"current"},
+ {title:"Tensão Elétrica",
+  formula:"V = W ÷ Q",
+  hl:"Tensão é a 'força' que empurra os elétrons. Unidade: Volt (V).",
+  intro:"Tensão elétrica (voltagem) é a diferença de energia entre dois pontos do circuito. Ela é o que 'empurra' os elétrons pelo fio. Sem tensão não há corrente e o aparelho não funciona.",
+  secs:[{h:"Tensões comuns no Brasil",b:"1,5 V: pilha AA comum. 9 V: bateria de controle remoto. 12 V: bateria de carro. 127 V ou 220 V: tomada residencial. A tomada monofásica de 127 V ou 220 V varia conforme a região e a instalação da casa."},
+        {h:"Como medir tensão",b:"Usa-se um multímetro (voltímetro). Coloque a chave na posição V (tensão), encoste uma ponta no polo positivo e outra no negativo e leia o valor em Volts. Nunca use o modo de corrente (A) para medir tensão — danifica o aparelho!"}],
+  ex:{t:"Caixa d'água",b:"A tensão é como a altura da caixa d'água. Caixa alta (alta tensão) → água sai forte (corrente grande). Caixa no chão (tensão zero) → água não sai. A concessionária mantém 127 V ou 220 V constantes para todos os aparelhos funcionarem."},
+  diag:"voltage"},
+ {title:"Resistência Elétrica",
+  formula:"R = V ÷ I",
+  hl:"Resistência (R) = dificuldade à passagem da corrente. Unidade: Ohm (Ω).",
+  intro:"Resistência é a oposição que um material oferece à passagem da corrente elétrica. Todo material tem alguma resistência. Materiais com baixa resistência conduzem bem (cobre). Materiais com altíssima resistência isolam (borracha).",
+  secs:[{h:"O que afeta a resistência?",b:"Material: cobre tem R baixíssima, borracha tem R altíssima. Comprimento: fio mais longo → mais resistência. Espessura: fio mais grosso → menos resistência. Temperatura: na maioria dos metais, calor aumenta a resistência."},
+        {h:"Resistores",b:"Resistores são componentes fabricados para ter um valor exato de resistência. São usados para controlar a corrente num circuito. O valor em Ohms é identificado pelas faixas coloridas pintadas neles (código de cores)."}],
+  ex:{t:"Lâmpada incandescente",b:"O filamento da lâmpada incandescente tem resistência alta. Quando a corrente passa, essa resistência gera tanto calor que o filamento fica incandescente e emite luz branca. Heaters e chuveiros elétricos funcionam pelo mesmo princípio."},
+  diag:"resistance"}
+],
+2:[
+ {title:"A Lei de Ohm",
+  formula:"V = R × I",
+  hl:"Triângulo de Ohm: V no topo, R e I na base. Cubra o que quer achar!",
+  intro:"A Lei de Ohm, descoberta por Georg Simon Ohm em 1827, é a regra mais importante da eletrotécnica básica. Ela relaciona tensão, corrente e resistência de forma simples e poderosa.",
+  secs:[{h:"O triângulo de Ohm",b:"Desenhe um triângulo: V no topo, R e I lado a lado na base. Para calcular qualquer valor: cubra com o dedo o que quer calcular. Se os outros dois ficam lado a lado → multiplica. Se um fica em cima do outro → divide. Fácil e rápido!"},
+        {h:"Quando a lei de Ohm vale?",b:"Vale para resistores e fios metálicos em temperatura constante (elementos ôhmicos). Não vale exatamente para lâmpadas incandescentes (resistência muda com temperatura), diodos, transistores e motores em partida."}],
+  ex:{t:"Lâmpada em 220 V",b:"Uma lâmpada tem resistência de 484 Ω ligada em 220 V. Corrente: I = V/R = 220/484 = 0,45 A ≈ 450 mA. Potência: P = V×I = 220×0,45 = 100 W. Esse é exatamente o consumo de uma lâmpada incandescente comum!"},
+  diag:"ohm"},
+ {title:"Calculando Tensão",
+  formula:"V = R × I",
+  hl:"Tensão = Resistência × Corrente. Resultado em Volts (V).",
+  intro:"Conhecendo a resistência e a corrente, você calcula a tensão com V = R × I. Isso é muito útil para descobrir a queda de tensão em cada componente do circuito.",
+  secs:[{h:"Queda de tensão",b:"Em circuitos com vários componentes em série, cada componente 'consome' parte da tensão. Essa redução chama-se queda de tensão. A soma de todas as quedas sempre igual à tensão total da fonte (Lei de Kirchhoff das tensões)."},
+        {h:"Passo a passo",b:"1. Identifique R em Ohms. 2. Identifique I em Ampères. 3. Multiplique: V = R × I. 4. Resultado em Volts. Exemplo: R = 100 Ω, I = 0,5 A → V = 100 × 0,5 = 50 V."}],
+  ex:{t:"Divisor de tensão",b:"Dois resistores de 1 kΩ em série em 12 V. I = 12/2000 = 6 mA. Tensão em cada resistor: V = 1000 × 0,006 = 6 V. O ponto do meio tem exatamente 6 V — metade da tensão. Muito usado em eletrônica!"},
+  diag:"ohm"},
+ {title:"Calculando Corrente",
+  formula:"I = V ÷ R",
+  hl:"Corrente = Tensão ÷ Resistência. Resultado em Ampères (A).",
+  intro:"Com I = V / R você calcula quantos Ampères fluem pelo circuito. Isso é essencial para escolher o fio certo e garantir que o disjuntor não 'estoure' nem o fio queime.",
+  secs:[{h:"Por que calcular a corrente?",b:"Cada fio suporta uma corrente máxima. Ultrapassar esse limite esquenta o fio, pode derreter o isolamento plástico e causar incêndio. Eletricistas sempre calculam a corrente antes de escolher a bitola do fio."},
+        {h:"Unidades menores",b:"1 A = 1000 mA (miliampères). Circuitos de celular trabalham em mA. Instalações residenciais trabalham com dezenas de Ampères. Linhas industriais podem ter centenas de Ampères."}],
+  ex:{t:"Chuveiro",b:"Chuveiro de 5500 W em 220 V. I = P/V = 5500/220 = 25 A. O fio do chuveiro precisa suportar 25 A — por isso usa-se fio de 4 mm² ou mais. Um fio de 1,5 mm² (máx ~15 A) causaria incêndio!"},
+  diag:"current"},
+ {title:"Calculando Resistência",
+  formula:"R = V ÷ I",
+  hl:"Resistência = Tensão ÷ Corrente. Resultado em Ohms (Ω).",
+  intro:"Com R = V / I você descobre a resistência de qualquer componente ou fio, o que é muito útil para diagnóstico de defeitos e seleção de componentes.",
+  secs:[{h:"Medir com multímetro",b:"Coloque o multímetro no modo Ω (ohm), circuito DESLIGADO, e toque as pontas nos dois terminais do componente. Resistência infinita (∞) = componente aberto ou fio partido. Zero ou muito baixo = curto-circuito."},
+        {h:"Resistência interna de baterias",b:"Baterias e fontes têm resistência interna que causa queda de tensão quando muita corrente é puxada. Por isso a tensão do celular 'cai' com Wi-Fi, GPS e tela no máximo ao mesmo tempo — muita corrente sendo exigida."}],
+  ex:{t:"Diagnóstico de defeito",b:"Aparelho deveria puxar 2 A em 110 V (R esperada = 55 Ω). Medindo, só passa 0,5 A → R medida = 110/0,5 = 220 Ω. A resistência quadruplicou! Provável causa: contato oxidado ou componente parcialmente queimado adicionando resistência ao circuito."},
+  diag:"resistance"}
+],
+3:[
+ {title:"O que é Potência Elétrica?",
+  formula:"P = V × I",
+  hl:"Potência (W) = Tensão (V) × Corrente (A). Quanto maior, mais energia por segundo.",
+  intro:"Potência elétrica é a taxa de conversão de energia elétrica em outra forma de energia (calor, luz, movimento) por segundo. A unidade é o Watt (W), em homenagem a James Watt.",
+  secs:[{h:"Potências típicas",b:"LED 9 W, lâmpada incandescente 60 W, geladeira 150 W, TV 100 W, microondas 1200 W, chuveiro 5500 W, ar-condicionado 1500–3000 W. Conhecer a potência permite calcular o consumo na conta de luz."},
+        {h:"Três fórmulas equivalentes",b:"P = V × I (use com tensão e corrente). P = R × I² (use com resistência e corrente). P = V² / R (use com tensão e resistência). As três são equivalentes pela Lei de Ohm — use a que tiver os dados disponíveis."}],
+  ex:{t:"Conta de luz",b:"Chuveiro 5500 W, 30 min/dia, 30 dias: 5,5 kW × 0,5 h × 30 = 82,5 kWh. A R$ 0,90/kWh = R$ 74,25/mês só no chuveiro. Calcular potência ajuda a entender e reduzir a conta de luz!"},
+  diag:"power"},
+ {title:"Fórmulas de Potência",
+  formula:"P = R×I² = V²÷R",
+  hl:"Use a fórmula que tiver os dados! Todas dão o mesmo resultado.",
+  intro:"As três fórmulas de potência são derivadas combinando P = V×I com a Lei de Ohm (V = R×I). Saber todas amplia sua capacidade de resolver problemas mesmo com dados incompletos.",
+  secs:[{h:"Quando usar cada uma",b:"P = V×I: você sabe tensão e corrente (mais comum em instalações). P = R×I²: você sabe resistência e corrente (cálculo de aquecimento de fios). P = V²/R: você sabe tensão e resistência (projeto de resistores)."},
+        {h:"Potência em CA — Fator de Potência",b:"Em corrente alternada com motores e transformadores existem Potência Ativa (W, útil), Reativa (VAr, circulante) e Aparente (VA). O fator de potência cosφ indica o aproveitamento. Abaixo de 0,92, empresas pagam multa na conta de energia."}],
+  ex:{t:"Aquecimento de fio",b:"Fio de 0,1 Ω com 20 A: P = 0,1 × 20² = 0,1 × 400 = 40 W de calor gerado no fio. Em 24 h: 40 × 24 = 960 Wh = 0,96 kWh só de perda no fio! Por isso fios de instalações industriais precisam de bitola generosa."},
+  diag:"power"},
+ {title:"Energia Elétrica",
+  formula:"E = P × t",
+  hl:"Energia (kWh) = Potência (kW) × Tempo (h). É o que aparece na conta de luz!",
+  intro:"Energia elétrica é potência multiplicada pelo tempo de uso. A unidade comercial é o kilowatt-hora (kWh), que é exatamente o que o medidor na sua casa conta para a concessionária faturar.",
+  secs:[{h:"De Watt para kWh",b:"1 kWh = 1000 W usados por 1 hora = 100 W usados por 10 horas = 500 W usados por 2 horas. O número no seu medidor de energia cresce em kWh a cada hora que os aparelhos ficam ligados."},
+        {h:"Consumo fantasma (standby)",b:"TV em standby: ~5 W. Microondas com display: ~3 W. Carregador sem celular: ~0,5 W. Multiplique por 8760 h/ano: parecem pouco, mas 10 aparelhos em standby podem somar 50–100 kWh/ano desperdiçados."}],
+  ex:{t:"Economia com LED",b:"Trocar 10 lâmpadas de 60 W por LED de 9 W: economia = 510 W. Em 5 h/dia × 30 dias = 76,5 kWh/mês a menos. A R$ 0,90 = R$ 68,85 economizados por mês só em iluminação!"},
+  diag:"power"},
+ {title:"Eficiência Elétrica",
+  formula:"η = Pútil ÷ Ptotal × 100%",
+  hl:"Eficiência: quanto maior, menos desperdício. Bom motor industrial tem η > 92%.",
+  intro:"Eficiência (ou rendimento, η — letra grega eta) indica quanto da energia elétrica de entrada é convertida em trabalho útil. A diferença sempre vira calor — por isso motores e transformadores esquentam.",
+  secs:[{h:"Eficiências típicas",b:"Motor elétrico industrial: 90–97%. Transformador de distribuição: 96–99%. Lâmpada LED: ~80% (resto vira calor). Lâmpada incandescente: ~5% (95% vira calor — por isso foram proibidas!). Painel solar: 15–22%."},
+        {h:"Perdas em transmissão",b:"Linhas de transmissão usam altíssima tensão (até 765 kV) para reduzir a corrente (I = P/V) e assim minimizar perdas por efeito Joule (P = R×I²). Quando a corrente cai 10×, as perdas caem 100×!"}],
+  ex:{t:"Rendimento de motor",b:"Motor recebe 7360 W e entrega 6800 W mecânicos. η = 6800/7360 × 100 = 92,4%. Os 560 W restantes viram calor — é o que o ventilador do motor precisa dissipar para não superaquecer."},
+  diag:"power"}
+],
+4:[
+ {title:"Circuito Série — Conceito",
+  formula:null,
+  hl:"Série: um único caminho. Mesma corrente em todos, tensão dividida.",
+  intro:"Em circuito série os componentes são conectados um após o outro, formando um único caminho para a corrente. Pense num trem: todos os vagões estão na mesma linha e a mesma corrente percorre todos.",
+  secs:[{h:"Características",b:"① A corrente é igual em todos os pontos. ② A tensão total se divide entre os componentes. ③ Se um componente abre (queima), todo o circuito para. ④ A resistência total soma todas as resistências."},
+        {h:"Onde é usado",b:"Pisca-pisca antigo de natal (por isso quando uma lâmpada queima, todas apagam!). Sensores de segurança encadeados. Divisores de tensão em eletrônica. Fusíveis e disjuntores em série com a carga."}],
+  ex:{t:"Pisca-pisca de natal",b:"20 lâmpadas em série em 220 V: cada lâmpada recebe 220/20 = 11 V. Se uma queima e 'abre', o circuito fica interrompido e todas apagam. Pisca-piscas modernos usam paralelo para evitar esse problema."},
+  diag:"series"},
+ {title:"Resistência Total em Série",
+  formula:"Rt = R1 + R2 + R3 ...",
+  hl:"Série: some todas as resistências. Resultado sempre maior que qualquer individual.",
+  intro:"Em série, cada resistor é um obstáculo a mais para os elétrons. A resistência total é simplesmente a soma de todas. Mais componentes em série = mais resistência = menos corrente.",
+  secs:[{h:"Cálculo passo a passo",b:"Identifique todos os resistores. Some os valores: Rt = R1 + R2 + ... + Rn. Aplique a Lei de Ohm com a resistência total: I = V / Rt. A corrente I é a mesma em todos os resistores."},
+        {h:"Tensão em cada resistor",b:"Depois de calcular I, aplique V = R × I em cada resistor para achar sua queda de tensão. A soma de todas as quedas = tensão da fonte (verifique sempre!)."}],
+  ex:{t:"Três resistores em série",b:"R1=10 Ω, R2=22 Ω, R3=47 Ω em 12 V. Rt = 79 Ω. I = 12/79 = 0,152 A. V1=1,52 V, V2=3,34 V, V3=7,14 V. Soma: 1,52+3,34+7,14 = 12 V ✓ (Lei de Kirchhoff confirmada!)"},
+  diag:"series"},
+ {title:"Queda de Tensão",
+  formula:"Vn = Rn × I",
+  hl:"A soma de todas as quedas de tensão = tensão da fonte. (Lei de Kirchhoff das tensões)",
+  intro:"Cada componente num circuito série 'consome' parte da tensão total. Essa redução chama-se queda de tensão e é proporcional à resistência de cada componente e à corrente que passa.",
+  secs:[{h:"Lei de Kirchhoff das Tensões (LKT)",b:"Num laço fechado, a soma algébrica de todas as tensões é zero. Na prática: tensão da fonte = soma das quedas. É uma consequência da conservação de energia aplicada a circuitos elétricos."},
+        {h:"Queda em fios longos",b:"Fios têm resistência. Em instalações longas (fazendas, galpões), a queda de tensão no fio pode ser grande o suficiente para motores e lâmpadas funcionarem mal. A NBR 5410 limita a queda de tensão a 4% em circuitos terminais residenciais."}],
+  ex:{t:"Verificação prática",b:"Fonte 24 V, R1=100 Ω, R2=140 Ω em série. I = 24/240 = 0,1 A. V1=100×0,1=10 V, V2=140×0,1=14 V. 10+14=24 V = tensão da fonte ✓. Qualquer diferença indicaria erro de medição ou componente defeituoso."},
+  diag:"series"},
+ {title:"Aplicações do Circuito Série",
+  formula:null,
+  hl:"Interruptores e fusíveis são sempre em série — quando abrem, desligam tudo!",
+  intro:"O circuito série aparece no dia a dia de formas que você já conhece, mesmo sem saber. Entender como funciona ajuda a diagnosticar defeitos e fazer instalações corretas.",
+  secs:[{h:"Interruptores e disjuntores",b:"Um interruptor de luz é um componente em série com a lâmpada. Abriu o interruptor? Circuito aberto = lâmpada apaga. O disjuntor funciona igual: quando a corrente excede o limite, ele 'abre' e interrompe tudo no circuito."},
+        {h:"Diagnóstico com multímetro",b:"Extensão elétrica parou de funcionar? Com multímetro no modo de continuidade (buzzer), teste cada trecho do fio. Onde o buzzer não apitar (resistência infinita), o fio está partido — circuito série aberto. Você achou o defeito!"}],
+  ex:{t:"Fusível queimado",b:"Fusível é uma resistência em série que funde quando a corrente ultrapassa o limite. Exemplo: fusível de 10 A funde se passar mais que 10 A, abrindo o circuito e protegendo o restante da instalação. Uma vez fundido, deve ser substituído — nunca 'remendado' com fio!"},
+  diag:"series"}
+],
+5:[
+ {title:"Circuito Paralelo — Conceito",
+  formula:null,
+  hl:"Paralelo: múltiplos caminhos. Mesma tensão em todos, corrente dividida.",
+  intro:"Em circuito paralelo os componentes estão conectados entre os mesmos dois pontos, criando múltiplos caminhos para a corrente. É como uma rodovia com várias pistas: o trânsito se divide mas todos chegam ao mesmo destino.",
+  secs:[{h:"Características",b:"① Todos os componentes recebem a mesma tensão. ② A corrente total se divide entre os ramos. ③ Se um componente falha, os outros continuam funcionando. ④ A resistência total diminui a cada componente adicionado."},
+        {h:"Por que as casas usam paralelo",b:"Toda instalação elétrica residencial é em paralelo! Isso garante que cada tomada e lâmpada receba 127 V (ou 220 V) independentemente de quantos aparelhos estejam ligados, e que desligar um não afete os outros."}],
+  ex:{t:"Tomadas em casa",b:"Sua TV (127 V) e seu carregador (127 V) estão ligados em tomadas do mesmo circuito. Os dois recebem 127 V porque estão em paralelo. Quando você desliga a TV, o carregador continua funcionando perfeitamente — independência total."},
+  diag:"parallel"},
+ {title:"Corrente em Circuito Paralelo",
+  formula:"It = I1 + I2 + I3 ...",
+  hl:"Corrente total = SOMA das correntes de todos os ramos.",
+  intro:"Em paralelo a corrente total que sai da fonte é a soma das correntes de cada ramo. Como a tensão é igual em todos os ramos, calcule cada corrente com I = V/R e depois some tudo.",
+  secs:[{h:"Como calcular",b:"1. Tensão é a mesma em todos os ramos (= tensão da fonte). 2. Calcule a corrente de cada ramo: In = V/Rn. 3. Some todas as correntes: It = I1 + I2 + ... + In. 4. Dimensione o fio principal e o disjuntor pela corrente total."},
+        {h:"Dimensionamento do fio principal",b:"O fio que alimenta o circuito paralelo precisa aguentar a soma de todas as correntes. Por isso o fio que sai do quadro geral é mais grosso que os fios individuais de cada circuito."}],
+  ex:{t:"Circuito da cozinha",b:"TV 100 W + geladeira 150 W + microondas 1200 W em 127 V: I_TV=0,79 A, I_gel=1,18 A, I_micro=9,45 A. Total = 11,42 A. O disjuntor desse circuito deve ser ≥16 A e o fio ≥2,5 mm²."},
+  diag:"parallel"},
+ {title:"Resistência Total em Paralelo",
+  formula:"1/Rt = 1/R1 + 1/R2 + 1/R3",
+  hl:"Paralelo: Rt DIMINUI a cada ramo adicionado. Sempre menor que o menor individual!",
+  intro:"Em paralelo, mais caminhos = mais fácil para a corrente passar = resistência total menor. Isso parece contraintuitivo mas faz total sentido: adicionar ramos é como adicionar pistas na rodovia.",
+  secs:[{h:"Fórmula simplificada para dois resistores",b:"Rt = (R1 × R2) / (R1 + R2). Exemplo: 60 Ω e 40 Ω em paralelo: Rt = (60×40)/(60+40) = 2400/100 = 24 Ω. Muito mais rápido que frações!"},
+        {h:"Resistores iguais em paralelo",b:"N resistores iguais de R Ω em paralelo: Rt = R/N. Dois de 100 Ω → 50 Ω. Três de 100 Ω → 33,3 Ω. Quatro de 100 Ω → 25 Ω. Simples!"}],
+  ex:{t:"Dois chuveiros em paralelo",b:"Dois chuveiros de 5500 W em 220 V. R de cada: 220²/5500 = 8,8 Ω. Rt = 8,8/2 = 4,4 Ω. Corrente total: 220/4,4 = 50 A! Jamais ligue dois chuveiros no mesmo disjuntor de 25 A — dispara na hora."},
+  diag:"parallel"},
+ {title:"Vantagens e Circuitos Mistos",
+  formula:null,
+  hl:"Paralelo = independência. Circuito misto = série + paralelo combinados.",
+  intro:"O paralelo é o padrão em instalações elétricas por suas enormes vantagens práticas. Na vida real, instalações combinam série e paralelo num arranjo chamado circuito misto.",
+  secs:[{h:"Vantagens do paralelo",b:"✔ Independência: falha de um componente não afeta os outros. ✔ Tensão constante: todos recebem a mesma tensão da rede. ✔ Facilidade de adicionar ou remover aparelhos. ✔ Redução da resistência total (melhor aproveitamento da fonte)."},
+        {h:"Circuito misto",b:"Exemplo clássico: disjuntor em série com o circuito (protege tudo de uma vez) + tomadas em paralelo entre si (independência). Esse arranjo é o padrão em todas as instalações elétricas residenciais e comerciais do Brasil."}],
+  ex:{t:"Bateria de caminhão",b:"Caminhões usam duas baterias de 12 V. Em série somam 24 V (tensão dobra). Em paralelo mantêm 12 V mas dobram a capacidade em Ah (aguentam mais tempo). Dependendo do sistema elétrico do veículo, escolhe-se série (24 V) ou paralelo (12 V, mais capacidade)."},
+  diag:"parallel"}
+],
+6:[
+ {title:"Resistores",formula:"P=I²×R",hl:"Verifique sempre a potência máxima do resistor — resistor quente demais = defeito ou subdimensionamento!",intro:"Resistores são os componentes mais comuns em eletrônica. Eles oferecem uma resistência elétrica específica e controlada, usada para limitar corrente, dividir tensão e ajustar sinais.",secs:[{h:"Código de cores",b:"As faixas coloridas indicam o valor: Preto=0, Marrom=1, Vermelho=2, Laranja=3, Amarelo=4, Verde=5, Azul=6, Violeta=7, Cinza=8, Branco=9. Ex: Marrom-Preto-Vermelho-Dourado = 1,0 × 100 ±5% = 1000 Ω (1 kΩ)."},{h:"Tipos",b:"Fixos (valor constante). Potenciômetros (variáveis — controle de volume). Termistores NTC (diminuem com calor — sensores de temperatura). LDR (diminuem com luz — automação residencial, lâmpadas automáticas)."}],ex:{t:"Identificar resistor",b:"Faixas: Amarelo-Violeta-Laranja-Dourado = 4,7 × 1000 ±5% = 47.000 Ω = 47 kΩ. Potência máxima do resistor deve ser maior que a potência dissipada P=I²×R — nunca deixe o resistor queimar!"},diag:"resistance"},
+ {title:"Capacitores",formula:"C=Q÷V",hl:"Capacitores bloqueiam CC e deixam passar CA. Sempre respeite a tensão máxima do capacitor!",intro:"Capacitores armazenam energia em campo elétrico entre duas placas separadas por um isolante (dielétrico). São como pequenas baterias que carregam e descarregam muito rapidamente.",secs:[{h:"Tipos e valores",b:"Eletrolíticos (polarizados, 1 µF–10 mF): fontes de alimentação. Cerâmicos (não polarizados, 1 pF–100 nF): filtros de alta frequência. Capacitor de polipropileno: correção de fator de potência. NUNCA inverta a polaridade de um eletrolítico — pode explodir!"},{h:"Usos principais",b:"Filtro em fontes CC (elimina ondulações da retificação). Correção de fator de potência em motores. Osciladores em circuitos de rádio. Acúmulo de energia para o flash de câmeras fotográficas."}],ex:{t:"Filtro de fonte",b:"Sem capacitor na saída de um retificador, a tensão CC teria ondulações de 60 Hz visíveis como zumbido ou cintilação. Com 1000 µF, essas ondulações são absorvidas e a tensão fica estável. É por isso que fontes de qualidade usam capacitores grandes."},diag:"circuit"},
+ {title:"Indutores",formula:"V=L×dI/dt",hl:"Indutores resistem a variações bruscas de corrente. Oposto do capacitor!",intro:"Indutores são bobinas de fio que armazenam energia em campo magnético. Enquanto capacitores resistem a variações de tensão, indutores resistem a variações de corrente — são complementares.",secs:[{h:"Construção e unidades",b:"São bobinas de fio de cobre enroladas em núcleo de ar, ferro ou ferrite. Mais espiras = maior indutância. Unidade: Henry (H). Na prática: milihenry (mH) e microhenry (µH). Indutores de ferrite são compactos e usados em alta frequência."},{h:"Usos principais",b:"Filtros em fontes chaveadas (carregadores). Transformadores (dois indutores acoplados). Motores elétricos (bobinas girantes). Solenoides (válvulas eletromagnéticas). Ferrite em cabos USB (aquele cilindro próximo ao conector)."}],ex:{t:"Ferrite em cabos USB",b:"Aquela protuberância cilíndrica no cabo USB é um indutor de ferrite. Ele bloqueia ruídos de alta frequência (RF) que poderiam corromper dados ou causar interferência em outros dispositivos. Cabos baratos sem ferrite podem ter problemas em ambientes com muito ruído elétrico."},diag:"circuit"},
+ {title:"Diodos e LEDs",formula:"If=(Vs−Vf)÷R",hl:"Diodo conduz em um sentido, bloqueia no outro. LED precisa SEMPRE de resistor limitador!",intro:"Diodos são componentes semicondutores que permitem a passagem de corrente em apenas um sentido — funcionam como válvulas de sentido único. LEDs (Light Emitting Diodes) são diodos que emitem luz ao serem percorridos por corrente.",secs:[{h:"Como funciona o diodo",b:"Anodo (+) com tensão maior que Catodo (−) → conduz (polarização direta). Sentido contrário → bloqueia (polarização reversa). Tensão de condução: ~0,7 V para silício, ~0,3 V para germânio. Usado para retificação: converter CA em CC."},{h:"Calcular resistor para LED",b:"R = (Vfonte − VLED) / ILED. LED vermelho (2 V, 20 mA) em 5 V: R = (5−2)/0,02 = 150 Ω. LED azul/branco (3,2 V, 20 mA) em 12 V: R = (12−3,2)/0,02 = 440 Ω → use 470 Ω. Nunca ligue LED diretamente sem resistor — queima em segundos!"}],ex:{t:"Retificador de meia onda",b:"Um único diodo em série com uma carga CA: bloqueia o semiciclo negativo e deixa passar só o positivo. Resultado: tensão CC pulsante (imperfeita, mas CC). Quatro diodos em ponte formam retificação de onda completa — usada em toda fonte de alimentação."},diag:"circuit"}
+],
+7:[
+ {title:"Riscos Elétricos",formula:null,hl:"50 mA pelo coração podem ser fatais! Tensão acima de 50 V já é considerada perigosa.",intro:"A eletricidade pode matar. A corrente que passa pelo corpo humano causa desde formigamento até parada cardíaca dependendo da intensidade, duração e trajeto pelo corpo.",secs:[{h:"Efeitos da corrente no corpo",b:"1 mA: formigamento leve, perceptível. 10 mA: contração muscular — não consegue soltar o fio! 30 mA: dificuldade de respirar, perigo. 50–100 mA: fibrilação cardíaca, pode ser fatal. 1 A+: queimaduras graves, parada cardíaca imediata. Tempo de exposição aumenta o dano."},{h:"Fatores que aumentam o risco",b:"Umidade: reduz a resistência da pele de ~100.000 Ω para <1.000 Ω — por isso acidentes em banheiro e área de serviço são tão graves. Tensão alta: acima de 50 V já é perigosa. Trajeto: corrente passando pelo coração é mais perigosa que pelo dedo."}],ex:{t:"Por que pássaros não tomam choque?",b:"Pássaros pousam em um único fio de alta tensão. Para a corrente fluir, precisa de entrada e saída em potenciais diferentes. Como o pássaro toca apenas um fio (mesmo potencial em todos os pontos de contato), não há diferença de tensão e nenhuma corrente flui pelo corpo. O perigo começa se tocar dois fios diferentes simultaneamente!"},diag:"safety"},
+ {title:"EPIs Obrigatórios",formula:null,hl:"EPI correto para a tensão de trabalho é obrigação legal — é questão de vida!",intro:"Equipamentos de Proteção Individual (EPIs) são obrigatórios por lei (NR-6) para trabalho com eletricidade. Eles reduzem o risco mas não eliminam totalmente — sempre siga os procedimentos de segurança.",secs:[{h:"EPIs para trabalho elétrico",b:"Luvas de borracha isolante (verifique a classe de tensão: Classe 0 = até 1000 V, Classe 2 = até 17.000 V). Capacete com suspensão. Óculos de proteção contra arco elétrico. Calçado com solado isolante. Uniforme de algodão tratado (NUNCA sintético — derrete com arco elétrico). Ferramentas com cabo isolado 1000 V."},{h:"Verificação das luvas",b:"Antes de cada uso: dobre a abertura da luva prendendo o ar e observe se há fuga (furos). Verifique a data de validade gravada na luva — luva vencida não protege! Nunca use luva com cortes ou furos. Guarde em local seco, longe de solventes e calor."}],ex:{t:"Ordem de colocação dos EPIs",b:"1) Calçado isolante. 2) Uniforme de algodão. 3) Capacete. 4) Óculos. 5) Luvas de borracha (por cima, luvas de vaqueta para proteger a borracha de perfurações). Coloque as luvas por último e retire-as primeiro ao terminar o serviço."},diag:"safety"},
+ {title:"NR-10 Básica",formula:null,hl:"Sem certificado NR-10 válido, é proibido trabalhar em instalações elétricas no Brasil.",intro:"A NR-10 é a Norma Regulamentadora do Ministério do Trabalho que estabelece requisitos mínimos para trabalhos em instalações elétricas e serviços com eletricidade. É obrigatória para qualquer trabalhador que atue com eletricidade.",secs:[{h:"Treinamentos exigidos",b:"NR-10 Básica (40 h): obrigatória para todos que trabalham em instalações elétricas. NR-10 SEP (+16 h): obrigatória para trabalho em Sistemas Elétricos de Potência (alta tensão). Reciclagem obrigatória a cada 2 anos. O certificado deve estar disponível a qualquer momento."},{h:"Os 5 passos de segurança (Zero Energia)",b:"1) Desligar — desenergizar o circuito no disjuntor/chave. 2) Bloquear — cadeado pessoal intransferível na chave. 3) Sinalizar — plaqueta 'NÃO LIGUE — Homem Trabalhando'. 4) Testar — verificar ausência de tensão com multímetro calibrado. 5) Aterrar e curto-circuitar (obrigatório em alta tensão). NUNCA pule etapas!"}],ex:{t:"Troca de disjuntor",b:"1) Desliga a chave geral do quadro. 2) Coloca cadeado pessoal na chave. 3) Coloca plaqueta de aviso. 4) Mede com multímetro: confirma zero volts em todos os terminais do quadro. 5) Somente então toca nos barramentos. Nunca confie apenas na posição da chave ou no indicador do disjuntor!"},diag:"safety"},
+ {title:"Primeiros Socorros Elétricos",formula:null,hl:"NUNCA toque na vítima sem antes desligar a energia ou usar isolamento adequado!",intro:"Saber o que fazer — e o que NÃO fazer — nos primeiros segundos após um acidente elétrico pode salvar uma vida e evitar criar novas vítimas.",secs:[{h:"O que FAZER",b:"1) NÃO toque na vítima! Desligue a energia pelo disjuntor ou chave geral. 2) Somente então aproxime-se com segurança. 3) Chame SAMU 192 ou Bombeiros 193 imediatamente. 4) Se vítima não respira e você sabe RCP, inicie. 5) Queimaduras: água corrente fria por 10 minutos — nunca manteiga, pasta de dente ou gelo."},{h:"O que NÃO fazer",b:"❌ Nunca use água para 'desligar' o fio ou a vítima. ❌ Nunca use objeto metálico para afastar a vítima. ❌ Nunca mova a vítima desnecessariamente (pode ter lesão na coluna). ❌ Nunca dê comida ou água. ❌ Nunca deixe a vítima sozinha até a chegada do socorro."}],ex:{t:"Bastão de madeira",b:"Se não for possível desligar a energia e a vítima ainda estiver em contato com o fio, use um bastão de madeira SECA (cabo de vassoura) para afastar o fio — madeira seca é isolante. Nunca use metal ou material úmido para essa finalidade. Madeira molhada conduz eletricidade!"},diag:"safety"}
+],
+8:[
+ {title:"Projeto Elétrico Residencial",formula:null,hl:"NBR 5410: norma brasileira para instalações elétricas residenciais de baixa tensão.",intro:"Todo imóvel deve ter um projeto elétrico que define circuitos, cargas, bitola dos fios e proteções. No Brasil, a norma que rege instalações residenciais é a ABNT NBR 5410.",secs:[{h:"Circuitos independentes",b:"A NBR 5410 exige circuitos separados para: iluminação, tomadas de uso geral (TUG), tomadas de uso específico (TUE — chuveiro, forno, ar-condicionado, geladeira). Circuitos independentes evitam sobrecarga e facilitam manutenção e diagnóstico."},{h:"Previsão de carga",b:"Cada ponto tem uma carga mínima prevista em norma (ex: TUG da sala = 100 VA por tomada). O projeto soma todas as cargas para dimensionar a entrada, o padrão de medição e o Quadro de Distribuição de Circuitos (QDC)."}],ex:{t:"Por que separar chuveiro?",b:"Chuveiro de 5500 W em 220 V: I = 25 A. Se dividir o circuito com iluminação (fio 1,5 mm², máx 15 A), ocorre sobrecarga grave — fio aquece, isolamento derrete, risco de incêndio. Circuito exclusivo com fio 4 mm² e disjuntor 25 A é obrigatório pela NBR 5410."},diag:"circuit"},
+ {title:"Disjuntores e Proteções",formula:null,hl:"NUNCA substitua um disjuntor por um de valor maior sem recalcular toda a instalação!",intro:"Disjuntores protegem o circuito contra sobrecarga e curto-circuito. Dispositivos de Proteção à Corrente Diferencial-Residual (DR ou DDR) protegem pessoas contra choques elétricos.",secs:[{h:"Tipos de proteção",b:"Disjuntor termomagnético: protege contra sobrecarga (bimetálico) e curto-circuito (eletromagnético). DR (30 mA): detecta fuga de corrente ≥30 mA e desliga em <40 ms — protege contra choque elétrico. IDRC: disjuntor + DR num único dispositivo (mais caro, mais prático)."},{h:"Curvas de operação",b:"Curva B (3–5× In): uso geral residencial, iluminação. Curva C (5–10× In): motores pequenos, compressores domésticos. Curva D (10–20× In): grandes motores com alta corrente de partida. Curva errada = disparo indevido (C muito baixa) ou proteção ineficaz (C muito alta)."}],ex:{t:"Dimensionar disjuntor do chuveiro",b:"Chuveiro 5500 W em 220 V → I = 25 A. Disjuntor: 25 A ou 32 A (próximo comercial acima), curva C. Fio: 4 mm² de cobre (suporta até 32 A). DR 30 mA obrigatório no banheiro. Nunca use disjuntor de 40 A com fio de 2,5 mm² — o fio queima antes do disjuntor disparar!"},diag:"circuit"},
+ {title:"Aterramento Elétrico",formula:null,hl:"Aterramento desvia a corrente de falha para o solo, não pelo usuário. Salva vidas!",intro:"O aterramento conecta partes metálicas de equipamentos ao solo (terra). Em caso de falha de isolação, a corrente vai pelo fio terra para o solo em vez de pelo corpo do usuário. O DR detecta essa fuga e desliga em milissegundos.",secs:[{h:"Como funciona",b:"Fio de proteção (verde ou verde/amarelo) conecta a carcaça metálica do equipamento a uma haste de cobre cravo enterrada no solo. Corrente de fuga → fio terra → solo → DR detecta a diferença entre fase e neutro → desliga em <40 ms."},{h:"Resistência de aterramento",b:"NBR 5410 exige resistência ≤10 Ω. Solos argilosos e úmidos têm baixa resistência (bom). Solos arenosos e rochosos têm alta resistência (ruim — precisa de mais hastes ou produto químico de aterramento). Medir com terrômetro é obrigatório em projetos industriais."}],ex:{t:"Máquina de lavar sem aterramento",b:"Fio interno encosta na carcaça metálica. Você toca → corrente passa pelo seu corpo → piso → para o neutro: choque! Com aterramento e DR 30 mA: corrente vai pelo fio terra, DR detecta a fuga de 30 mA e desliga em menos de 40 ms — antes de causar fibrilação cardíaca. O aterramento salva vidas!"},diag:"safety"},
+ {title:"Dimensionamento de Fios",formula:"I=P÷V",hl:"Fio fino demais aquece e causa incêndio. Fio grosso demais é desperdício. Calcule certo!",intro:"Escolher o fio correto é fundamental para segurança e economia. A bitola (espessura) do fio é medida pela seção transversal em mm². No Brasil usamos fios de cobre pela norma NBR 5410.",secs:[{h:"Tabela de bitolas (cobre, em eletroduto)",b:"1,5 mm² → máx 15 A (iluminação residencial). 2,5 mm² → máx 20 A (TUG). 4 mm² → máx 25 A (chuveiro, forno). 6 mm² → máx 32 A (ar-condicionado grande). 10 mm² → máx 50 A (entrada do quadro). 16 mm² → máx 63 A (alimentação de subquadros)."},{h:"Fatores de correção",b:"Múltiplos circuitos no mesmo eletroduto: o calor acumulado obriga fio mais grosso (fator de agrupamento). Temperatura ambiente alta: fator de correção. Queda de tensão em circuitos longos: calcule ΔV = ρ × L × I / S e verifique se fica dentro de 4%."}],ex:{t:"Dimensionar circuito da cozinha",b:"Geladeira 150 W + microondas 1200 W + tomadas gerais 600 W = 1950 W em 127 V → I = 15,4 A. Arredonda: 20 A. Fio: 2,5 mm². Disjuntor: 20 A curva C. Se adicionar forno elétrico 4000 W: circuito exclusivo, I = 31,5 A → fio 6 mm², disjuntor 32 A curva C."},diag:"circuit"}
+],
+9:[
+ {title:"Sistema Trifásico",formula:"Vlinha=√3×Vfase",hl:"Trifásico 380 V linha = 220 V por fase. √3 ≈ 1,732.",intro:"O sistema trifásico usa três correntes alternadas defasadas 120° entre si. É o padrão mundial para distribuição de energia elétrica e alimentação de indústrias por ser muito mais eficiente que o monofásico.",secs:[{h:"Por que usar trifásico?",b:"Motores trifásicos são mais simples, robustos e eficientes. A transmissão trifásica usa menos condutor que três linhas monofásicas para a mesma potência. Grandes cargas industriais exigem trifásico: ar-condicionado de grande porte, compressores, fornos industriais."},{h:"Ligações estrela (Y) e triângulo (Δ)",b:"Estrela (Y): neutro disponível. Tensão de fase = 127 V ou 220 V (depende do transformador). Tensão de linha = √3 × Vfase. Triângulo (Δ): sem neutro. Tensão de fase = tensão de linha. Motores: partem em estrela (menor corrente) e passam a triângulo (plena potência)."}],ex:{t:"Rede elétrica do Brasil",b:"Transformador de distribuição típico: 13,8 kV → 380/220 V. Fases L1, L2, L3 (ou R, S, T). Neutro N. Terra PE. Entre fase e neutro: 220 V. Entre duas fases: 380 V (= 220 × 1,732). Residências usam uma fase + neutro. Indústrias usam as três fases para motores."},diag:"circuit"},
+ {title:"Motores Elétricos",formula:"P=√3×V×I×cosφ×η",hl:"Motor trifásico: mais eficiente e robusto que monofásico de mesma potência.",intro:"Motores elétricos convertem energia elétrica em energia mecânica. São o maior consumidor de energia elétrica na indústria — mais de 60% de toda a energia industrial passa por motores.",secs:[{h:"Motor de indução trifásico (MIT)",b:"É o motor mais usado na indústria: simples, robusto, sem escovas (alta durabilidade). Funciona pelo campo magnético girante criado pelas três fases. Velocidade: n = 120 × f / p (f=60 Hz no Brasil, p=número de polos). Motor 4 polos: ~1800 RPM (síncrona) / ~1750 RPM (nominal)."},{h:"Leitura da placa de identificação",b:"Potência em cv (cavalos-vapor) ou kW. 1 cv = 0,736 kW. Tensão: 220/380 V (delta/estrela). Corrente nominal em A. Rotação em RPM. Rendimento η%. Fator de potência cosφ. Classe de isolamento: B=130°C, F=155°C, H=180°C."}],ex:{t:"Dimensionar proteção de motor 10 cv",b:"10 cv = 7,36 kW. Placa: 380 V, cosφ=0,87, η=91%. I = 7360/(√3×380×0,87×0,91) = 7360/518 = 14,2 A. Disjuntor curva C: 20 A (In × 1,25 mínimo). Relé térmico: ajustado em 14,2 A. Contator: ≥16 A. Fio: 2,5 mm²."},diag:"circuit"},
+ {title:"Partida de Motores",formula:null,hl:"Corrente de partida = 5–8× corrente nominal. Use partida adequada para motores >5 cv.",intro:"Na partida, motores elétricos consomem 5 a 8 vezes a corrente nominal. Isso pode causar queda de tensão na rede, sobrecarregar transformadores e danificar outros equipamentos. Sistemas de partida reduzem esse impacto.",secs:[{h:"Tipos de partida",b:"Direta: simples e barata, mas alta corrente de partida. Até 5 cv. Estrela-triângulo (Y-Δ): parte em Y (corrente 1/3), comuta para Δ em plena carga. 5–50 cv. Soft-starter: eletrônica controla rampa de tensão. Suave e versátil. Inversor de frequência (VFD): controla velocidade e partida com total suavidade. Máxima eficiência."},{h:"Inversores de frequência — VFD",b:"VFDs variam a frequência (Hz) para controlar a velocidade do motor. Uma bomba a 50% da velocidade consome apenas 12,5% da potência nominal (lei cúbica: P ∝ n³). Bombas e ventiladores com VFD pagam o investimento em 12–24 meses de economia de energia!"}],ex:{t:"Compressor industrial 15 cv",b:"Partida direta: I_pico = 15 cv × 8 = ~170 A — rede não aguenta. Estrela-triângulo: I_pico cai para ~57 A — viável. Se precisar velocidade variável (compressor de ar com demanda variável): VFD — sem pico de corrente e economia de 30–50% de energia."},diag:"circuit"},
+ {title:"CLP Básico",formula:null,hl:"CLP = computador industrial que automatiza a lógica de controle de máquinas e processos.",intro:"O Controlador Lógico Programável (CLP) é um computador robusto projetado para ambientes industriais (vibração, poeira, temperatura, interferência eletromagnética). Substituiu dezenas de relés físicos por software flexível.",secs:[{h:"Funcionamento",b:"O CLP executa um ciclo contínuo: 1) Lê todas as entradas (sensores, botões, encoders). 2) Executa o programa (lógica). 3) Atualiza todas as saídas (motores, válvulas, alarmes). O ciclo de varredura é tipicamente de 1–10 ms — milares de ciclos por segundo."},{h:"Linguagem Ladder",b:"Ladder (escada) representa a lógica como diagrama de relés: contatos (entradas, condições) e bobinas (saídas, ações) em 'degraus'. Familiar para eletricistas. Exemplo de degrau: [I0.0 NO] [I0.1 NC] --- (Q0.0) = 'Se botão Liga E sem falha → aciona motor'."}],ex:{t:"Lógica de partida com CLP",b:"Degrau 1: Se Liga (I0.0) E não Falha (I0.1) ENTÃO Liga contator (Q0.0). Degrau 2: Se Para (I0.2) OU Sobrecarga (I0.3) ENTÃO Desliga Q0.0 e Liga alarme (Q0.1). Em 5 degraus de ladder você substitui 3 relés, 1 temporizador e 2 blocos de contato — com vantagem: tudo é alterável por software!"},diag:"circuit"}
+],
+10:[
+ {title:"Revisão Geral",formula:null,hl:"Os 7 pilares da eletrotécnica: Ohm, Potência, Série, Paralelo, Segurança, Norma, Industrial.",intro:"Parabéns por chegar ao último nível! Você percorreu toda a jornada da eletrotécnica — do conceito de elétron até sistemas industriais automatizados. Vamos consolidar tudo.",secs:[{h:"Os pilares fundamentais",b:"① Lei de Ohm (V=RI): base de todo cálculo. ② Potência (P=VI): dimensionamento de carga. ③ Série (corrente igual, tensão dividida). ④ Paralelo (tensão igual, corrente dividida). ⑤ Segurança (NR-10, EPIs, 5 passos). ⑥ Norma (NBR 5410, dimensionamento). ⑦ Industrial (trifásico, motores, CLP)."},{h:"Como continuar aprendendo",b:"Prática supervisionada é essencial. Busque: Curso técnico eletrotécnica (SENAI, ETEC, IFET — 2 anos). Certificação NR-10 Básica (40 h) + SEP (16 h). Instalador solar fotovoltaico (mercado em explosão — 40% ao ano no Brasil!). Engenharia Elétrica para projetos e laudos com ART."}],ex:{t:"Sua evolução",b:"Você partiu do zero (o que é um elétron?) e chegou a entender sistemas trifásicos, inversores de frequência, CLPs e dimensionamento de instalações. Isso equivale ao conteúdo teórico de um curso técnico em eletrotécnica de nível médio. O próximo passo é a prática supervisionada!"},diag:"circuit"},
+ {title:"Projeto Elétrico Completo",formula:"Ic=P÷(V×cosφ)",hl:"Todo projeto elétrico deve seguir NBR 5410 e ser assinado por profissional habilitado (CREA).",intro:"Um projeto elétrico completo envolve: levantamento de cargas, cálculo de correntes, seleção de fios, proteções, dimensionamento do padrão de entrada e elaboração das pranchas técnicas.",secs:[{h:"Etapas do projeto",b:"1) Levantamento de cargas (VA de cada ponto). 2) Agrupamento em circuitos (iluminação, TUG, TUE). 3) Cálculo de correntes por circuito. 4) Dimensionamento de fios (corrente e queda de tensão). 5) Seleção de disjuntores e DRs. 6) Dimensionamento do QDC e do padrão de entrada. 7) Elaboração das plantas elétricas e diagrama unifilar."},{h:"Documentação técnica",b:"Projeto assinado pelo engenheiro com ART (Anotação de Responsabilidade Técnica). Memorial descritivo. Diagrama unifilar. Plantas com eletrodutos e pontos. Laudo de aterramento (medição com terrômetro). Relatório de inspeção e ensaios elétricos."}],ex:{t:"Projeto residencial 80 m²",b:"Apartamento: 8 pontos de luz → 1 circuito 15 A / 1,5 mm². 10 TUGs → 2 circuitos 20 A / 2,5 mm². Chuveiro → 1 circuito 25 A / 4 mm². Ar-condicionado → 1 circuito 20 A / 2,5 mm². Forno elétrico → 1 circuito 32 A / 6 mm². Total: 7 circuitos. QDC 12 disjuntores. Entrada bifásica 40 A."},diag:"circuit"},
+ {title:"Análise de Circuitos",formula:null,hl:"LKC: somas das correntes num nó = 0. LKT: soma das tensões numa malha = 0.",intro:"Analisar um circuito complexo significa calcular tensões e correntes em todos os pontos usando as Leis de Kirchhoff e métodos sistemáticos como nós e malhas.",secs:[{h:"Leis de Kirchhoff",b:"LKC (Corrente): a soma algébrica das correntes em qualquer nó é zero — o que entra = o que sai. LKT (Tensão): a soma algébrica das tensões em qualquer malha fechada é zero — base para o método das malhas."},{h:"Diagnóstico prático com multímetro",b:"Tensão: pontas em paralelo com o componente (modo V). Corrente: pontas em série — CUIDADO, circuito deve ser aberto para inserir o amperímetro! Resistência: modo Ω, circuito DESLIGADO. Continuidade: modo buzzer, detecta fios partidos em segundos."}],ex:{t:"Diagnóstico de motor parado",b:"1) Mede tensão nos terminais (127/220/380 V? Se não: problema antes do motor). 2) Mede resistência dos enrolamentos com o motor frio e desligado (três fases devem ter valores iguais; se uma diverge muito = enrolamento queimado). 3) Liga e mede corrente em cada fase (igual nas 3 = OK; desequilíbrio = problema)."},diag:"ohm"},
+ {title:"Certificação e Carreira",formula:null,hl:"Eletrotécnica é uma das profissões com menor desemprego no Brasil. Energia solar cresce 40%/ano!",intro:"Completar o ElectroLearn é o primeiro passo. Para atuar profissionalmente com segurança e legalidade, existem certificações formais reconhecidas pelo mercado.",secs:[{h:"Certificações e cursos",b:"NR-10 Básica (40 h): obrigatória para qualquer trabalho elétrico. NR-10 SEP (16 h): para alta tensão. Curso Técnico em Eletrotécnica (SENAI, ETEC, IFET): 2 anos, plena habilitação. Instalador Solar FV (ABSOLAR/NABCEP): alta demanda. Engenharia Elétrica (5 anos): para projetar e assinar laudos com ART."},{h:"Mercado de trabalho 2024–2025",b:"Áreas em alta: Energia solar fotovoltaica (>4 milhões de sistemas no Brasil, crescimento 40%/ano). Manutenção industrial (sempre necessária). Eficiência energética (crescente com tarifas mais altas). Automação predial e industrial. Infraestrutura de data centers (crescimento exponencial com IA)."}],ex:{t:"Instalador solar — oportunidade",b:"Eletricista com certificação de instalador solar fatura em média 2–3× mais que a média da categoria. O conhecimento de eletrotécnica que você adquiriu (corrente, tensão, dimensionamento de fios, proteções) é exatamente a base exigida para a área solar. O próximo passo é o curso prático de FV!"},diag:"circuit"}
+]
+};
+
+// Diagramas SVG inline
+function getDiag(type, color) {
+  const c = color || '#4f8ef7';
+  const d = {
+    circuit:`<svg viewBox="0 0 300 80" width="280" height="80"><rect x="10" y="25" width="55" height="30" rx="6" fill="${c}22" stroke="${c}" stroke-width="1.5"/><text x="37" y="45" text-anchor="middle" fill="${c}" font-size="9" font-family="sans-serif">Fonte</text><line x1="65" y1="40" x2="100" y2="40" stroke="${c}" stroke-width="2"/><rect x="100" y="25" width="60" height="30" rx="6" fill="${c}22" stroke="${c}" stroke-width="1.5"/><text x="130" y="45" text-anchor="middle" fill="${c}" font-size="9" font-family="sans-serif">Componente</text><line x1="160" y1="40" x2="195" y2="40" stroke="${c}" stroke-width="2"/><rect x="195" y="25" width="55" height="30" rx="6" fill="${c}22" stroke="${c}" stroke-width="1.5"/><text x="222" y="45" text-anchor="middle" fill="${c}" font-size="9" font-family="sans-serif">Carga</text><text x="150" y="72" text-anchor="middle" fill="#8892b0" font-size="8" font-family="sans-serif">Circuito elétrico básico</text></svg>`,
+    ohm:`<svg viewBox="0 0 300 90" width="280" height="90"><rect x="20" y="15" width="80" height="60" rx="8" fill="${c}22" stroke="${c}" stroke-width="1.5"/><text x="60" y="42" text-anchor="middle" fill="${c}" font-size="20" font-weight="bold" font-family="monospace">V</text><line x1="20" y1="50" x2="100" y2="50" stroke="${c}" stroke-width="1.5"/><text x="42" y="68" text-anchor="middle" fill="${c}" font-size="16" font-family="monospace">R</text><text x="78" y="68" text-anchor="middle" fill="${c}" font-size="16" font-family="monospace">I</text><text x="60" y="85" text-anchor="middle" fill="#8892b0" font-size="8" font-family="sans-serif">Triângulo de Ohm</text><text x="180" y="35" fill="${c}" font-size="11" font-family="monospace">V = R × I</text><text x="180" y="52" fill="${c}" font-size="11" font-family="monospace">I = V ÷ R</text><text x="180" y="69" fill="${c}" font-size="11" font-family="monospace">R = V ÷ I</text></svg>`,
+    current:`<svg viewBox="0 0 300 70" width="280" height="70"><rect x="8" y="22" width="45" height="26" rx="5" fill="${c}22" stroke="${c}" stroke-width="1.5"/><text x="30" y="39" text-anchor="middle" fill="${c}" font-size="8" font-family="sans-serif">Bateria</text><line x1="53" y1="35" x2="260" y2="35" stroke="${c}" stroke-width="2"/><polygon points="110,29 130,35 110,41" fill="${c}"/><polygon points="165,29 185,35 165,41" fill="${c}"/><polygon points="220,29 240,35 220,41" fill="${c}"/><text x="150" y="20" text-anchor="middle" fill="#8892b0" font-size="8" font-family="sans-serif">→ Fluxo de elétrons (corrente)</text><text x="150" y="62" text-anchor="middle" fill="#8892b0" font-size="8" font-family="sans-serif">Unidade: Ampère (A)</text></svg>`,
+    voltage:`<svg viewBox="0 0 300 90" width="280" height="90"><rect x="15" y="10" width="35" height="70" rx="5" fill="${c}22" stroke="${c}" stroke-width="1.5"/><text x="32" y="50" text-anchor="middle" fill="${c}" font-size="8" font-family="sans-serif" transform="rotate(-90,32,50)">Tensão</text><line x1="50" y1="35" x2="90" y2="35" stroke="${c}" stroke-width="2"/><rect x="90" y="28" width="170" height="20" rx="4" fill="${c}11" stroke="${c}55" stroke-width="1"/><text x="175" y="42" text-anchor="middle" fill="${c}" font-size="9" font-family="sans-serif">Alta tensão → mais corrente</text><text x="32" y="87" text-anchor="middle" fill="#8892b0" font-size="8" font-family="sans-serif">Analogia: altura = tensão</text></svg>`,
+    resistance:`<svg viewBox="0 0 300 70" width="280" height="70"><line x1="8" y1="35" x2="55" y2="35" stroke="${c}" stroke-width="2"/><path d="M55,35 L65,15 L75,55 L85,15 L95,55 L105,15 L115,35" stroke="${c}" stroke-width="2" fill="none"/><line x1="115" y1="35" x2="290" y2="35" stroke="${c}" stroke-width="2"/><text x="85" y="65" text-anchor="middle" fill="#8892b0" font-size="8" font-family="sans-serif">Símbolo do resistor (zig-zag)</text><text x="210" y="30" fill="${c}" font-size="11" font-family="monospace">R = V ÷ I</text><text x="210" y="46" fill="#8892b0" font-size="9" font-family="sans-serif">Unidade: Ohm (Ω)</text></svg>`,
+    power:`<svg viewBox="0 0 300 80" width="280" height="80"><circle cx="55" cy="40" r="32" fill="${c}22" stroke="${c}" stroke-width="1.5"/><text x="55" y="36" text-anchor="middle" fill="${c}" font-size="11" font-family="monospace">P=V×I</text><text x="55" y="52" text-anchor="middle" fill="${c}" font-size="9" font-family="sans-serif">Potência</text><text x="160" y="28" fill="${c}" font-size="10" font-family="monospace">P = V × I</text><text x="160" y="44" fill="${c}" font-size="10" font-family="monospace">P = R × I²</text><text x="160" y="60" fill="${c}" font-size="10" font-family="monospace">P = V² ÷ R</text><text x="270" y="44" text-anchor="middle" fill="${c}" font-size="20">💡</text></svg>`,
+    series:`<svg viewBox="0 0 300 80" width="280" height="80"><line x1="8" y1="40" x2="290" y2="40" stroke="${c}" stroke-width="2"/><rect x="25" y="26" width="48" height="28" rx="5" fill="${c}22" stroke="${c}" stroke-width="1.5"/><text x="49" y="44" text-anchor="middle" fill="${c}" font-size="10" font-family="sans-serif">R1</text><rect x="90" y="26" width="48" height="28" rx="5" fill="${c}22" stroke="${c}" stroke-width="1.5"/><text x="114" y="44" text-anchor="middle" fill="${c}" font-size="10" font-family="sans-serif">R2</text><rect x="155" y="26" width="48" height="28" rx="5" fill="${c}22" stroke="${c}" stroke-width="1.5"/><text x="179" y="44" text-anchor="middle" fill="${c}" font-size="10" font-family="sans-serif">R3</text><text x="150" y="72" text-anchor="middle" fill="#8892b0" font-size="8" font-family="sans-serif">Série: Rt = R1 + R2 + R3 (um caminho)</text></svg>`,
+    parallel:`<svg viewBox="0 0 300 100" width="280" height="100"><line x1="8" y1="20" x2="60" y2="20" stroke="${c}" stroke-width="2"/><line x1="8" y1="80" x2="60" y2="80" stroke="${c}" stroke-width="2"/><line x1="60" y1="20" x2="60" y2="80" stroke="${c}" stroke-width="1.5"/><rect x="68" y="12" width="48" height="18" rx="4" fill="${c}22" stroke="${c}" stroke-width="1.5"/><text x="92" y="25" text-anchor="middle" fill="${c}" font-size="9">R1</text><rect x="68" y="41" width="48" height="18" rx="4" fill="${c}22" stroke="${c}" stroke-width="1.5"/><text x="92" y="54" text-anchor="middle" fill="${c}" font-size="9">R2</text><rect x="68" y="70" width="48" height="18" rx="4" fill="${c}22" stroke="${c}" stroke-width="1.5"/><text x="92" y="83" text-anchor="middle" fill="${c}" font-size="9">R3</text><line x1="116" y1="21" x2="290" y2="21" stroke="${c}" stroke-width="1.5"/><line x1="116" y1="50" x2="290" y2="50" stroke="${c}" stroke-width="1.5"/><line x1="116" y1="79" x2="290" y2="79" stroke="${c}" stroke-width="1.5"/><line x1="290" y1="21" x2="290" y2="79" stroke="${c}" stroke-width="1.5"/><text x="150" y="97" text-anchor="middle" fill="#8892b0" font-size="8" font-family="sans-serif">1/Rt = 1/R1 + 1/R2 + 1/R3</text></svg>`,
+    safety:`<svg viewBox="0 0 300 80" width="280" height="80"><polygon points="150,6 295,74 5,74" fill="#f59e0b22" stroke="#f59e0b" stroke-width="2"/><text x="150" y="56" text-anchor="middle" fill="#f59e0b" font-size="30">⚠</text><text x="150" y="72" text-anchor="middle" fill="#f59e0b" font-size="8" font-family="sans-serif">ATENÇÃO — Segurança Elétrica</text></svg>`
+  };
+  return d[type] || d.circuit;
+}
+
+const LEVELS=[
+  {id:1,title:"Conceitos Básicos",topics:"Elétrons, corrente, tensão, resistência",color:"#4f8ef7",icon:"⚡"},
+  {id:2,title:"Lei de Ohm",topics:"V=R×I, cálculos, aplicações",color:"#7c5cfc",icon:"🔢"},
+  {id:3,title:"Potência Elétrica",topics:"Watts, energia, eficiência",color:"#22d3a0",icon:"💡"},
+  {id:4,title:"Circuitos Série",topics:"Resistores em série, corrente única",color:"#f59e0b",icon:"🔗"},
+  {id:5,title:"Circuitos Paralelo",topics:"Resistores em paralelo, tensão comum",color:"#f87171",icon:"⫶"},
+  {id:6,title:"Componentes",topics:"Resistores, capacitores, indutores, diodos",color:"#34d399",icon:"🔧"},
+  {id:7,title:"Segurança Elétrica",topics:"NR-10, EPIs, riscos, primeiros socorros",color:"#fb923c",icon:"🛡️"},
+  {id:8,title:"Instalações Residenciais",topics:"Projeto, disjuntores, aterramento, fios",color:"#a78bfa",icon:"🏠"},
+  {id:9,title:"Eletricidade Industrial",topics:"Trifásico, motores, partida, CLP",color:"#60a5fa",icon:"🏭"},
+  {id:10,title:"Mestre Eletrotécnico",topics:"Revisão geral, projetos, certificação",color:"#f472b6",icon:"🎓"}
+];
+
+// ─── STATE ───
+let DB = JSON.parse(localStorage.getItem('el2_db')||'{}');
+if(!DB.users)    DB.users={};
+if(!DB.progress) DB.progress={};
+if(!DB.scores)   DB.scores={};
+function save(){localStorage.setItem('el2_db',JSON.stringify(DB));}
+
+let me=null, slv=null, spdf=0, qlv=null, qq=[], qi=0, qs=0, qans=false;
+
+// ─── AUTH ───
+function switchTab(t){
+  document.querySelectorAll('.auth-tab').forEach((el,i)=>el.classList.toggle('active',i===(t==='login'?0:1)));
+  document.getElementById('lf').style.display=t==='login'?'':'none';
+  document.getElementById('rf').style.display=t==='register'?'':'none';
+}
+function doLogin(){
+  const e=document.getElementById('le').value.trim(), p=document.getElementById('lp').value;
+  const err=document.getElementById('lerr');
+  if(!DB.users[e]||DB.users[e].p!==p){err.style.display='block';return;}
+  err.style.display='none'; loginAs(e);
+}
+function demoLogin(){
+  if(!DB.users['demo@el.app']){DB.users['demo@el.app']={n:'Convidado',p:'x'};save();}
+  loginAs('demo@el.app');
+}
+function doRegister(){
+  const n=document.getElementById('rn').value.trim(), e=document.getElementById('re').value.trim(), p=document.getElementById('rp').value;
+  const err=document.getElementById('rerr');
+  if(!n||!e||p.length<6){err.style.display='block';err.textContent='Preencha todos os campos corretamente.';return;}
+  if(DB.users[e]){err.style.display='block';err.textContent='E-mail já cadastrado.';return;}
+  DB.users[e]={n,p};DB.progress[e]={};DB.scores[e]=0;save();loginAs(e);
+}
+function loginAs(email){
+  me=email;
+  if(!DB.progress[me])DB.progress[me]={};
+  if(DB.scores[me]===undefined)DB.scores[me]=0;
+  const u=DB.users[me];
+  document.getElementById('tav').textContent=u.n[0].toUpperCase();
+  document.getElementById('tname').textContent=u.n;
+  document.getElementById('auth-screen').classList.remove('active');
+  document.getElementById('app-screen').classList.add('active');
+  go('dashboard');
+}
+function doLogout(){
+  me=null;
+  document.getElementById('app-screen').classList.remove('active');
+  document.getElementById('auth-screen').classList.add('active');
+}
+
+// ─── NAVIGATION ───
+function go(t){
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
+  const n=document.getElementById('n-'+t); if(n)n.classList.add('active');
+  if(t==='dashboard')renderDash();
+  else if(t==='study')renderStudyHome();
+  else if(t==='quiz')renderQuizHome();
+  else if(t==='ranking')renderRanking();
+  else if(t==='profile')renderProfile();
+}
+
+// ─── DASHBOARD ───
+function renderDash(){
+  const pr=DB.progress[me]||{};
+  const done=Object.values(pr).filter(v=>v>=100).length;
+  const pts=DB.scores[me]||0;
+  const u=DB.users[me];
+  document.getElementById('mc').innerHTML=`
+  <div class="banner"><h2>Olá, ${u.n}! 👋</h2><p>Continue sua jornada. ${done} de ${LEVELS.length} níveis concluídos.</p></div>
+  <div class="stats-grid">
+    <div class="stat blue"><div class="v">${done}</div><div class="l">Concluídos</div></div>
+    <div class="stat purple"><div class="v">${LEVELS.length-done}</div><div class="l">Restantes</div></div>
+    <div class="stat green"><div class="v">${pts}</div><div class="l">Pontos</div></div>
+    <div class="stat amber"><div class="v">${Math.round(done/LEVELS.length*100)}%</div><div class="l">Progresso</div></div>
+  </div>
+  <h3 style="font-size:.95rem;margin-bottom:.9rem">Níveis de aprendizado</h3>
+  <div class="lvl-grid">${LEVELS.map((lv,i)=>{
+    const p=pr[lv.id]||0, done=p>=100, locked=i>0&&(pr[LEVELS[i-1].id]||0)<50&&!done;
+    return `<div class="lc${done?' done':''}${locked?' locked':''}" onclick="${locked?`toast('Complete o Nível ${i} primeiro!','err')`:`openLv(${lv.id})`}">
+      <div style="position:absolute;top:.8rem;right:.8rem">${done?'✅':locked?'🔒':''}</div>
+      <div class="lbadge" style="background:${lv.color}22;color:${lv.color}">${lv.icon}</div>
+      <div style="font-weight:700;font-size:.88rem;margin-bottom:.15rem">Nível ${lv.id} — ${lv.title}</div>
+      <div style="font-size:.76rem;color:var(--text2);margin-bottom:.65rem">${lv.topics}</div>
+      <div class="pb"><div class="pf" style="width:${p}%"></div></div>
+      <div class="pm"><span>${p}% completo</span></div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+// ─── STUDY ───
+function renderStudyHome(){
+  const pr=DB.progress[me]||{};
+  document.getElementById('mc').innerHTML=`
+  <h2 style="font-size:1.2rem;margin-bottom:1rem">📚 Material de Estudo</h2>
+  <div class="lvl-grid">${LEVELS.map((lv,i)=>{
+    const locked=i>0&&(pr[LEVELS[i-1].id]||0)<50&&(pr[lv.id]||0)<100;
+    return `<div class="lc${locked?' locked':''}" onclick="${locked?`toast('Desbloqueie o Nível ${i} primeiro!','err')`:`openStudy(${lv.id})`}">
+      <div style="position:absolute;top:.8rem;right:.8rem">${locked?'🔒':''}</div>
+      <div class="lbadge" style="background:${lv.color}22;color:${lv.color}">${lv.icon} Nível ${lv.id}</div>
+      <div style="font-weight:700;font-size:.88rem;margin-bottom:.15rem">${lv.title}</div>
+      <div style="font-size:.76rem;color:var(--text2)">${lv.topics}</div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function openLv(id){
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
+  document.getElementById('n-study').classList.add('active');
+  openStudy(id);
+}
+
+function openStudy(id){
+  slv=id; spdf=0;
+  const lv=LEVELS.find(l=>l.id===id);
+  const topics=CONTENT[id];
+  document.getElementById('mc').innerHTML=`
+  <div class="study-hdr">
+    <button class="back-btn" onclick="renderStudyHome()">← Voltar</button>
+    <div><div style="font-size:.76rem;color:var(--text2)">Nível ${lv.id}</div><div style="font-family:Syne,sans-serif;font-size:1.25rem;font-weight:800">${lv.icon} ${lv.title}</div></div>
+  </div>
+  <div class="tabs-row">${topics.map((t,i)=>`<div class="ptab${i===0?' active':''}" id="pt${i}" onclick="switchS(${i})">${t.title}</div>`).join('')}</div>
+  <div id="sbody"></div>
+  <div class="dl-row">
+    <div class="dl-info"><h4>📄 PDF — Nível ${lv.id}: ${lv.title}</h4><p>Resumo completo para estudo offline</p></div>
+    <button class="btn btn-green btn-sm" onclick="dlPDF(${id})">⬇ Baixar PDF</button>
+  </div>
+  <div style="margin-top:.85rem"><button class="btn btn-primary btn-sm" onclick="startQuiz(${id})">⚡ Fazer quiz deste nível</button></div>`;
+  showStudyTab(id,0);
+}
+
+function switchS(i){
+  spdf=i;
+  document.querySelectorAll('.ptab').forEach((el,j)=>el.classList.toggle('active',j===i));
+  showStudyTab(slv,i);
+}
+
+function showStudyTab(lvId, idx){
+  const lv=LEVELS.find(l=>l.id===lvId);
+  const data=CONTENT[lvId];
+  if(!data||!data[idx]){document.getElementById('sbody').innerHTML='<p style="color:var(--red)">Conteúdo não encontrado.</p>';return;}
+  const t=data[idx];
+  const svg=getDiag(t.diag,lv.color);
+  document.getElementById('sbody').innerHTML=`
+  <div class="study-body">
+    <h3>${t.title}</h3>
+    <p>${t.intro}</p>
+    ${t.formula?`<div class="fml">📐 ${t.formula}</div>`:''}
+    ${t.hl?`<div class="hl">💡 <strong>${t.hl}</strong></div>`:''}
+    ${t.secs.map(s=>`<h4>${s.h}</h4><p>${s.b}</p>`).join('')}
+    <div class="diag">${svg}<div class="cap">Diagrama — ${t.title}</div></div>
+    ${t.ex?`<div class="ex-box"><div class="ex-lbl">✅ Exemplo prático</div><strong>${t.ex.t}</strong><p style="margin-top:.35rem">${t.ex.b}</p></div>`:''}
+  </div>`;
+}
+
+// ─── PDF ───
+function dlPDF(levelId){
+  toast('Gerando PDF…','');
+  const lv=LEVELS.find(l=>l.id===levelId);
+  const data=CONTENT[levelId];
+  if(!data){toast('Dados não encontrados','err');return;}
+  try{
+    const {jsPDF}=window.jspdf;
+    const doc=new jsPDF({unit:'mm',format:'a4'});
+    const W=210,M=15;
+    const addPage=()=>{doc.addPage();doc.setFillColor(10,13,20);doc.rect(0,0,210,297,'F');};
+    doc.setFillColor(10,13,20);doc.rect(0,0,210,297,'F');
+    doc.setFillColor(30,40,80);doc.roundedRect(M,M,W-2*M,55,8,8,'F');
+    doc.setTextColor(79,142,247);doc.setFontSize(9);doc.setFont('helvetica','bold');
+    doc.text(`NÍVEL ${lv.id} — ELETROTÉCNICA`,M+8,M+14);
+    doc.setTextColor(232,234,246);doc.setFontSize(19);
+    doc.text(lv.title,M+8,M+32);
+    doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(136,146,176);
+    doc.text(lv.topics,M+8,M+44);
+    doc.setTextColor(79,142,247);doc.setFontSize(8);
+    doc.text('ElectroLearn',M,285);
+    doc.text(`Gerado em ${new Date().toLocaleDateString('pt-BR')}`,W-M-38,285);
+    let y=82;
+    data.forEach((t,i)=>{
+      if(y>250){addPage();y=M;}
+      doc.setFillColor(30,50,100);doc.roundedRect(M,y,W-2*M,9,2,2,'F');
+      doc.setTextColor(79,142,247);doc.setFontSize(10);doc.setFont('helvetica','bold');
+      doc.text(`${i+1}. ${t.title}`,M+4,y+6.5);y+=14;
+      doc.setTextColor(200,215,235);doc.setFontSize(9);doc.setFont('helvetica','normal');
+      const iL=doc.splitTextToSize(t.intro,W-2*M);
+      iL.forEach(l=>{if(y>280){addPage();y=M;}doc.text(l,M,y);y+=5;});
+      if(t.formula){
+        if(y>275){addPage();y=M;}y+=2;
+        doc.setFillColor(15,35,30);doc.roundedRect(M,y,W-2*M,10,2,2,'F');
+        doc.setTextColor(34,211,160);doc.setFontSize(10);doc.setFont('helvetica','bold');
+        doc.text(`Fórmula: ${t.formula}`,M+4,y+7);y+=14;
+      }
+      if(t.hl){
+        if(y>275){addPage();y=M;}
+        doc.setFillColor(20,30,60);doc.roundedRect(M,y,W-2*M,10,2,2,'F');
+        doc.setTextColor(150,180,255);doc.setFontSize(9);doc.setFont('helvetica','italic');
+        const hL=doc.splitTextToSize(t.hl,W-2*M-6);
+        doc.text(hL[0]||'',M+4,y+7);y+=14;
+      }
+      t.secs.forEach(s=>{
+        if(y>278){addPage();y=M;}
+        doc.setTextColor(100,170,255);doc.setFontSize(9);doc.setFont('helvetica','bold');
+        doc.text(s.h,M,y);y+=5;
+        doc.setTextColor(190,205,225);doc.setFont('helvetica','normal');
+        const bL=doc.splitTextToSize(s.b,W-2*M);
+        bL.forEach(l=>{if(y>280){addPage();y=M;}doc.text(l,M,y);y+=5;});
+        y+=2;
+      });
+      if(t.ex){
+        if(y>272){addPage();y=M;}
+        doc.setFillColor(10,40,25);doc.roundedRect(M,y,W-2*M,8,2,2,'F');
+        doc.setTextColor(34,211,160);doc.setFontSize(8.5);doc.setFont('helvetica','bold');
+        doc.text(`Exemplo: ${t.ex.t}`,M+4,y+5.5);y+=11;
+        doc.setTextColor(160,210,190);doc.setFont('helvetica','normal');doc.setFontSize(8.5);
+        const eL=doc.splitTextToSize(t.ex.b,W-2*M-4);
+        eL.forEach(l=>{if(y>280){addPage();y=M;}doc.text(l,M+4,y);y+=5;});
+      }
+      y+=8;
+    });
+    doc.save(`ElectroLearn_N${lv.id}_${lv.title.replace(/\s/g,'_')}.pdf`);
+    toast('PDF baixado com sucesso! ✅','ok');
+  }catch(e){toast('Erro ao gerar PDF: '+e.message,'err');}
+}
+
+// ─── QUIZ ───
+function renderQuizHome(){
+  const pr=DB.progress[me]||{};
+  document.getElementById('mc').innerHTML=`
+  <h2 style="font-size:1.2rem;margin-bottom:1rem">⚡ Quiz por Nível</h2>
+  <div class="lvl-grid">${LEVELS.map((lv,i)=>{
+    const locked=i>0&&(pr[LEVELS[i-1].id]||0)<50&&(pr[lv.id]||0)<100;
+    return `<div class="lc${locked?' locked':''}" onclick="${locked?`toast('Complete o Nível ${i} antes!','err')`:`startQuiz(${lv.id})`}">
+      <div style="position:absolute;top:.8rem;right:.8rem">${locked?'🔒':''}</div>
+      <div class="lbadge" style="background:${lv.color}22;color:${lv.color}">${lv.icon}</div>
+      <div style="font-weight:700;font-size:.88rem;margin-bottom:.2rem">Nível ${lv.id} — ${lv.title}</div>
+      <div style="font-size:.76rem;color:var(--text2);margin-bottom:.65rem">${lv.topics}</div>
+      <span style="font-size:.76rem;padding:.28rem .75rem;border-radius:99px;background:${locked?'var(--bg2)':'rgba(79,142,247,.15)'};color:${locked?'var(--text3)':'var(--accent)'}">${locked?'🔒 Bloqueado':'▶ Iniciar Quiz'}</span>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function startQuiz(id){
+  qlv=id;qi=0;qs=0;qans=false;qq=[];
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
+  document.getElementById('n-quiz').classList.add('active');
+  document.getElementById('mc').innerHTML=`<div class="spin-wrap"><div class="spin"></div><p>Gerando quiz do Nível ${id} com IA…</p></div>`;
+  fetchQuiz(id);
+}
+
+async function fetchQuiz(id){
+  const lv=LEVELS.find(l=>l.id===id);
+  const topics=CONTENT[id].map(t=>t.title).join(', ');
+  try{
+    const res = await fetch('/api/generate-quiz', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({levelTitle: lv.title, topics})
+    });
+
+    if(!res.ok){
+      const errorJson = await res.json().catch(()=>null);
+      const message = errorJson?.error || `Erro servidor ${res.status}`;
+      throw new Error(message);
+    }
+
+    const data = await res.json();
+    const raw = extractAiText(data);
+    const s = raw.indexOf('['), e = raw.lastIndexOf(']');
+    if(s < 0 || e < 0) throw new Error('Resposta inválida da IA');
+    qq = JSON.parse(raw.slice(s,e+1));
+    if(!Array.isArray(qq)||qq.length===0) throw new Error('Nenhuma pergunta recebida');
+    renderQ();
+    return;
+  }catch(err){
+    console.warn('Quiz IA falhou:', err);
+    qq=buildQuizFromContent(id);
+    if(qq.length){
+      toast('Quiz gerado localmente. O servidor IA falhou.','ok');
+      renderQ();
+      return;
+    }
+    document.getElementById('mc').innerHTML=`
+    <div class="quiz-wrap" style="text-align:center;padding:3rem 1rem">
+      <div style="font-size:2.5rem;margin-bottom:.75rem">⚠️</div>
+      <h3 style="margin-bottom:.6rem">Não foi possível gerar o quiz</h3>
+      <p style="color:var(--text2);font-size:.85rem;margin-bottom:1.5rem">${err.message}</p>
+      <div style="display:flex;gap:.65rem;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="startQuiz(${id})">🔄 Tentar novamente</button>
+        <button class="btn btn-ghost" onclick="renderQuizHome()">← Voltar</button>
+      </div>
+    </div>`;
+  }
+}
+
+function extractAiText(data){
+  if(!data) return '';
+  if(typeof data === 'string') return data;
+  if(Array.isArray(data.content)) return data.content.map(b=>b.text||'').join('');
+  if(typeof data.completion === 'string') return data.completion;
+  if(Array.isArray(data.choices)){
+    return data.choices.map(c=>{
+      if(c.message) return c.message.content||'';
+      if(typeof c.text === 'string') return c.text;
+      return '';
+    }).join('');
+  }
+  if(typeof data.output_text === 'string') return data.output_text;
+  if(data.response && typeof data.response.output_text === 'string') return data.response.output_text;
+  return JSON.stringify(data);
+}
+
+function buildQuizFromContent(levelId){
+  const data=CONTENT[levelId]||[];
+  if(!data.length) return [];
+  const quiz=[];
+  for(let i=0;i<4;i++){
+    const t=data[i]||data[0];
+    quiz.push({
+      type:'tf',
+      question:`"${t.title}" é um tema abordado no Nível ${levelId}?`,
+      options:['Verdadeiro','Falso'],
+      answer:'Verdadeiro',
+      explanation:t.intro || 'Revise o conteúdo para confirmar a resposta.'
+    });
+  }
+  for(let i=0;i<4;i++){
+    const t=data[i]||data[0];
+    quiz.push({
+      type:'disc',
+      question:`Explique em poucas palavras o que significa "${t.title}".`,
+      answer:t.intro || 'Use o material do nível para responder.',
+      explanation:t.intro || 'Use o conteúdo do nível para formar sua resposta.'
+    });
+  }
+  return quiz.slice(0,8);
+}
+
+function renderQ(){
+  qans=false;
+  const q=qq[qi];
+  const lv=LEVELS.find(l=>l.id===qlv);
+  const pct=Math.round(qi/qq.length*100);
+  let opts='';
+  if(q.type==='tf'){
+    opts=`<div class="tf-opts">${q.options.map((o,i)=>`<div class="tf-opt" id="o${i}" onclick="doTF('${o}')">
+      <span style="width:26px;height:26px;border-radius:50%;background:var(--bg2);border:1px solid var(--border2);display:inline-flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0">${i===0?'✓':'✗'}</span>
+      <span>${o}</span></div>`).join('')}</div>`;
+  }else{
+    opts=`<textarea class="disc-ta" id="dta" placeholder="Escreva sua resposta com suas próprias palavras…"></textarea>
+    <div class="qa"><button class="btn btn-primary" onclick="doDisc()">Confirmar →</button></div>`;
+  }
+  document.getElementById('mc').innerHTML=`<div class="quiz-wrap">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.1rem;flex-wrap:wrap;gap:.5rem">
+      <button class="back-btn" onclick="renderQuizHome()">← Sair</button>
+      <span style="font-size:.78rem;color:var(--text2)">${lv.icon} Nível ${lv.id} — ${lv.title}</span>
+    </div>
+    <div class="qpb"><div class="qpf" style="width:${pct}%"></div></div>
+    <div class="qnum">Pergunta ${qi+1} de ${qq.length}</div>
+    <span class="qbadge ${q.type}">${q.type==='tf'?'✓ Verdadeiro ou Falso':'📝 Discursiva'}</span>
+    <div class="qq">${q.question}</div>
+    <div id="oa">${opts}</div>
+    <div id="fa"></div>
+  </div>`;
+}
+
+function doTF(chosen){
+  if(qans)return; qans=true;
+  const q=qq[qi], ok=chosen===q.answer;
+  if(ok)qs++;
+  document.querySelectorAll('.tf-opt').forEach(el=>{
+    el.classList.add('dis');
+    const txt=el.querySelector('span:last-child').textContent;
+    if(txt===q.answer)el.classList.add('ok');
+    else if(txt===chosen&&!ok)el.classList.add('bad');
+  });
+  showFB(ok,q.explanation);
+}
+
+function doDisc(){
+  if(qans)return;
+  const v=document.getElementById('dta').value.trim();
+  if(!v){toast('Escreva sua resposta antes de confirmar','err');return;}
+  qans=true; qs++;
+  document.getElementById('dta').disabled=true;
+  document.querySelector('.qa').innerHTML='';
+  showFB(null,`<strong>Resposta de referência:</strong> ${qq[qi].answer}<br><br>${qq[qi].explanation}`);
+}
+
+function showFB(ok,txt){
+  const cls=ok===true?'ok':ok===false?'bad':'neu';
+  const lbl=ok===true?'✅ Correto!':ok===false?'❌ Incorreto':'📖 Veja a referência';
+  const last=qi+1>=qq.length;
+  document.getElementById('fa').innerHTML=`
+    <div class="fb ${cls}"><div class="fb-lbl">${lbl}</div><div>${txt}</div></div>
+    <div class="qa"><button class="btn btn-primary" onclick="${last?'showRes()':'nextQ()'}">${last?'Ver resultado →':'Próxima →'}</button></div>`;
+}
+
+function nextQ(){qi++;renderQ();}
+
+function showRes(){
+  const total=qq.length, pct=Math.round(qs/total*100);
+  const emoji=pct>=80?'🏆':pct>=50?'👍':'💪';
+  const msg=pct>=80?'Excelente! Você dominou este nível!':pct>=50?'Bom progresso! Continue praticando.':'Não desanime! Revise o material e tente novamente.';
+  const lv=LEVELS.find(l=>l.id===qlv);
+  const pr=DB.progress[me]||{};
+  const np=Math.max(pr[qlv]||0,pct);
+  pr[qlv]=np; DB.progress[me]=pr;
+  DB.scores[me]=(DB.scores[me]||0)+qs*10; save();
+  document.getElementById('mc').innerHTML=`<div class="quiz-wrap"><div class="res">
+    <div style="font-size:3rem;margin-bottom:.6rem">${emoji}</div>
+    <div class="res-score">${qs}/${total}</div>
+    <div style="color:var(--text2);margin:.4rem 0 1.25rem">${msg}</div>
+    <div class="res-bd">
+      <div class="rb"><span>Nível</span><span class="rv">${lv.icon} ${lv.title}</span></div>
+      <div class="rb"><span>Acertos</span><span class="rv" style="color:var(--green)">${qs} / ${total}</span></div>
+      <div class="rb"><span>Aproveitamento</span><span class="rv">${pct}%</span></div>
+      <div class="rb"><span>Pontos ganhos</span><span class="rv" style="color:var(--amber)">+${qs*10} pts</span></div>
+      <div class="rb"><span>Progresso do nível</span><span class="rv">${np}%</span></div>
+    </div>
+    <div style="display:flex;gap:.65rem;justify-content:center;flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="startQuiz(${qlv})">🔄 Novo quiz (perguntas novas)</button>
+      <button class="btn btn-ghost" onclick="openStudy(${qlv})">📚 Rever material</button>
+      <button class="btn btn-ghost" onclick="renderQuizHome()">← Níveis</button>
+    </div>
+  </div></div>`;
+}
+
+// ─── RANKING ───
+function renderRanking(){
+  const entries=Object.entries(DB.users).map(([e,u])=>({
+    name:u.n,email:e,score:DB.scores[e]||0,
+    done:Object.values(DB.progress[e]||{}).filter(v=>v>=100).length
+  })).sort((a,b)=>b.score-a.score);
+  const medals=['🥇','🥈','🥉'];
+  document.getElementById('mc').innerHTML=`
+  <h2 style="font-size:1.2rem;margin-bottom:1rem">🏆 Ranking Global</h2>
+  <div class="rank-list">
+    ${entries.length===0?'<p style="color:var(--text2);text-align:center;padding:2rem">Nenhum usuário ainda.</p>':''}
+    ${entries.map((e,i)=>`<div class="rank-item">
+      <div class="rpos ${i===0?'g':i===1?'s':i===2?'b':''}">${medals[i]||i+1}</div>
+      <div class="av" style="font-size:.78rem">${e.name[0].toUpperCase()}</div>
+      <div class="rinfo">
+        <div class="rname">${e.name}${e.email===me?' <span style="font-size:.68rem;color:var(--accent)">(você)</span>':''}</div>
+        <div class="rsub">${e.done} níveis concluídos</div>
+      </div>
+      <div class="rscore">${e.score} pts</div>
+    </div>`).join('')}
+  </div>`;
+}
+
+// ─── PROFILE ───
+function renderProfile(){
+  const u=DB.users[me], pr=DB.progress[me]||{};
+  const done=Object.values(pr).filter(v=>v>=100).length, pts=DB.scores[me]||0;
+  const ach=[
+    {l:'Primeiro passo ⚡',e:(pr[1]||0)>0},
+    {l:'Intermediário 🔧',e:(pr[3]||0)>=50},
+    {l:'Avançado 💡',e:(pr[5]||0)>=50},
+    {l:'Expert 🏭',e:(pr[7]||0)>=50},
+    {l:'Mestre 🎓',e:done>=10},
+    {l:'100 pontos 🌟',e:pts>=100},
+    {l:'500 pontos 🏆',e:pts>=500},
+    {l:'1000 pontos 👑',e:pts>=1000}
+  ];
+  document.getElementById('mc').innerHTML=`
+  <h2 style="font-size:1.2rem;margin-bottom:1rem">👤 Meu Perfil</h2>
+  <div class="pcard">
+    <div class="pav">${u.n[0].toUpperCase()}</div>
+    <h3 style="font-size:1.1rem;margin-bottom:.15rem">${u.n}</h3>
+    <div style="font-size:.8rem;color:var(--text2);margin-bottom:1.1rem">${me}</div>
+    <div class="stats-grid" style="margin-bottom:1.1rem">
+      <div class="stat blue"><div class="v">${done}</div><div class="l">Concluídos</div></div>
+      <div class="stat amber"><div class="v">${pts}</div><div class="l">Pontos</div></div>
+    </div>
+    <div style="font-size:.78rem;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.6rem">Conquistas</div>
+    <div class="ach">${ach.map(a=>`<div class="chip ${a.e?'on':'off'}">${a.e?'':'🔒 '}${a.l}</div>`).join('')}</div>
+    <div style="margin-top:1.4rem;padding-top:1.1rem;border-top:1px solid var(--border)">
+      <div style="font-size:.78rem;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.8rem">Progresso por nível</div>
+      ${LEVELS.map(lv=>{const p=pr[lv.id]||0;return`<div style="margin-bottom:.7rem">
+        <div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:.25rem">
+          <span>${lv.icon} Nível ${lv.id} — ${lv.title}</span>
+          <span style="color:var(--text2)">${p}%</span>
+        </div>
+        <div class="pb"><div class="pf" style="width:${p}%;background:${lv.color}"></div></div>
+      </div>`;}).join('')}
+    </div>
+  </div>`;
+}
+
+// ─── TOAST ───
+function toast(msg,type){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className=`toast ${type||''} show`;
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+</script>
+</body>
+</html>
