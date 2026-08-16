@@ -95,6 +95,7 @@ async function refreshSubscription(){
   if (res.status === 401) return doLogout();
   const status = await res.json();
   subscriptionActive = Boolean(status.active);
+  updateSubscriptionBubble(status);
   if (subscriptionActive) {
     document.querySelector('.main-nav').style.display = '';
     go('dashboard');
@@ -102,6 +103,24 @@ async function refreshSubscription(){
     document.querySelector('.main-nav').style.display = 'none';
     renderPaywall(status);
   }
+}
+
+function updateSubscriptionBubble(status = {}){
+  const bubble = document.getElementById('subscription-bubble');
+  if (!bubble) return;
+  if (!status.active || !status.accessUntil) {
+    bubble.classList.remove('show');
+    return;
+  }
+  const expiration = new Date(status.accessUntil);
+  const remainingMs = Math.max(0, expiration.getTime() - Date.now());
+  const days = Math.max(1, Math.ceil(remainingMs / 86400000));
+  const planName = status.plan === 'weekly' ? 'Semanal' : 'Mensal';
+  document.getElementById('sub-plan').textContent = planName;
+  document.getElementById('sub-days').textContent = days === 1 ? '1 dia restante' : `${days} dias restantes`;
+  bubble.title = `Plano ${planName} ativo até ${expiration.toLocaleString('pt-BR')}`;
+  bubble.setAttribute('aria-label', bubble.title);
+  bubble.classList.add('show');
 }
 
 function renderPaywall(status = {}){
@@ -154,6 +173,7 @@ async function doLogout(){
   if (supabaseClient) await supabaseClient.auth.signOut();
   currentSession = null;
   subscriptionActive = false;
+  document.getElementById('subscription-bubble')?.classList.remove('show');
   me = null;
   document.getElementById('app-screen').classList.remove('active');
   document.getElementById('auth-screen').classList.add('active');
