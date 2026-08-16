@@ -141,7 +141,7 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;}
 .spin-wrap p{color:var(--text2);font-size:.88rem;}
 .toast{position:fixed;bottom:1.25rem;right:1.25rem;background:var(--card2);border:1px solid var(--border2);border-radius:var(--r2);padding:.85rem 1.1rem;font-size:.86rem;z-index:9999;opacity:0;transform:translateY(8px);transition:all .28s;max-width:260px;pointer-events:none;}
 .toast.show{opacity:1;transform:translateY(0);}
-.toast.ok{border-color:rgba(34,211,160,.4);}.toast.err{border-color:rgba(248,113,113,.4);}
+.toast.ok{border-color:rgba(34,211,160,.4);}.toast.err{display:block;border-color:rgba(248,113,113,.4);}
 @media(max-width:580px){.content{padding:.9rem;}.banner{padding:1rem 1.1rem;}.stats-grid{grid-template-columns:1fr 1fr;}}
 </style>
 </head>
@@ -1066,6 +1066,7 @@ function renderPaywall(status = {}){
       <p style="color:var(--text2);margin-bottom:1.5rem">Todo o conteúdo, PDFs e quizzes são liberados automaticamente após a confirmação real do pagamento pelo Asaas.</p>
       ${new URLSearchParams(location.search).get('payment') === 'success'
         ? '<div class="hl" style="margin-bottom:1rem">Pagamento enviado. Assim que o Asaas confirmar, o acesso será liberado.</div>' : ''}
+      <div id="payment-error" style="display:none;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.35);color:var(--red);padding:.8rem 1rem;border-radius:10px;margin-bottom:1rem;text-align:left"></div>
       <div class="lvl-grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr));text-align:left">
         <div class="pcard">
           <span class="chip on">SEMANAL</span>
@@ -1097,7 +1098,13 @@ async function subscribe(plan){
     if (!res.ok) throw new Error(data.error);
     location.href = data.url;
   } catch (err) {
-    toast(err.message || 'Não foi possível abrir o pagamento.', 'err');
+    const message = err.message || 'Não foi possível abrir o pagamento.';
+    const errorBox = document.getElementById('payment-error');
+    if (errorBox) {
+      errorBox.textContent = 'Erro no pagamento: ' + message;
+      errorBox.style.display = 'block';
+    }
+    toast(message, 'err');
     if (button) { button.disabled = false; button.textContent = plan === 'weekly' ? 'Assinar semanal' : 'Assinar mensal'; }
   }
 }
