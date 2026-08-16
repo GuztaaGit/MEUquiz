@@ -119,10 +119,6 @@ app.post('/api/create-checkout', async (req, res) => {
         quantity: 1,
         value: plan.value
       }],
-      customerData: {
-        name: user.user_metadata?.name || user.email?.split('@')[0] || 'Aluno ElectroLearn',
-        email: user.email
-      },
       subscription: {
         cycle: plan.cycle,
         nextDueDate: new Date().toISOString().slice(0, 19).replace('T', ' ')
