@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>ElectroLearn</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>\n<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--bg:#0a0d14;--bg2:#111520;--card:#1a2035;--card2:#1f2640;--accent:#4f8ef7;--accent2:#7c5cfc;--green:#22d3a0;--amber:#f59e0b;--red:#f87171;--text:#e8eaf6;--text2:#8892b0;--text3:#4a5580;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);--r:14px;--r2:10px;}
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -49,6 +49,10 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;}
 .av{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:inline-flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;color:#fff;}
 .logout-btn{background:none;border:none;color:var(--text3);cursor:pointer;font-size:.8rem;font-family:inherit;padding:.3rem .5rem;border-radius:6px;}
 .logout-btn:hover{color:var(--red);}
+.subscription-bubble{display:none;align-items:center;gap:.38rem;background:rgba(34,211,160,.1);border:1px solid rgba(34,211,160,.3);color:var(--green);border-radius:99px;padding:.38rem .75rem;font-size:.76rem;font-weight:600;white-space:nowrap;cursor:default;}
+.subscription-bubble.show{display:flex;}
+.subscription-bubble .sub-dot{width:7px;height:7px;background:var(--green);border-radius:50%;box-shadow:0 0 8px var(--green);}
+@media(max-width:580px){.subscription-bubble{padding:.36rem .55rem;font-size:.7rem}.subscription-bubble .sub-plan{display:none;}}
 .main-nav{background:var(--bg2);border-bottom:1px solid var(--border);display:flex;overflow-x:auto;padding:0 .75rem;flex-shrink:0;}
 .nav-item{padding:.7rem 1rem;font-size:.85rem;font-weight:500;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;}
 .nav-item:hover{color:var(--text);}
@@ -179,7 +183,7 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;}
   <div class="topbar">
     <div class="topbar-logo">⚡ ElectroLearn</div>
     <div style="display:flex;align-items:center;gap:.75rem">
-      <div class="user-chip"><div class="av" id="tav">?</div><span id="tname">-</span></div>
+      <div class="subscription-bubble" id="subscription-bubble" aria-live="polite"><span class="sub-dot"></span><span class="sub-plan" id="sub-plan">Plano</span><span id="sub-days">—</span></div>\n      <div class="user-chip"><div class="av" id="tav">?</div><span id="tname">-</span></div>
       <button class="logout-btn" onclick="doLogout()">Sair</button>
     </div>
   </div>
@@ -685,7 +689,7 @@ async function fetchQuiz(id){
   try{
     const res = await fetch('/api/generate-quiz', {
       method: 'POST',
-      headers: {'Content-Type':'application/json'},
+      headers: {'Content-Type':'application/json', 'Authorization':'Bearer '+(currentSession?.access_token||'')},
       body: JSON.stringify({levelTitle: lv.title, topics})
     });
 
@@ -926,5 +930,5 @@ function toast(msg,type){
   setTimeout(()=>t.classList.remove('show'),3000);
 }
 </script>
-</body>
+<script src="/payment.js"></script>\n</body>
 </html>
