@@ -119,10 +119,6 @@ app.post('/api/create-checkout', async (req, res) => {
         quantity: 1,
         value: plan.value
       }],
-      customerData: {
-        name: user.user_metadata?.name || user.email?.split('@')[0] || 'Aluno ElectroLearn',
-        email: user.email
-      },
       subscription: {
         cycle: plan.cycle,
         nextDueDate: new Date().toISOString().slice(0, 19).replace('T', ' ')
@@ -143,7 +139,10 @@ app.post('/api/create-checkout', async (req, res) => {
   } catch (err) {
     const details = err.response?.data;
     console.error('Erro Asaas checkout:', details || err.message);
-    res.status(err.response?.status || 500).json({ error: 'Não foi possível abrir o pagamento agora.' });
+    const firstError = Array.isArray(details?.errors) ? details.errors[0]?.description : null;
+    res.status(err.response?.status || 500).json({
+      error: firstError || details?.message || 'Não foi possível abrir o pagamento agora.'
+    });
   }
 });
 
