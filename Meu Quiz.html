@@ -1072,27 +1072,34 @@ function renderPaywall(status = {}){
           <span class="chip on">SEMANAL</span>
           <h3 style="font-size:2rem;margin:1rem 0">R$ 21,90</h3>
           <p style="color:var(--text2);margin-bottom:1rem">Cobrança recorrente a cada 7 dias.</p>
-          <button class="btn btn-primary" onclick="subscribe('weekly')">Assinar semanal</button>
+          <div style="display:grid;gap:.55rem">
+            <button class="btn btn-primary" onclick="subscribe('weekly','card')">💳 Cartão recorrente</button>
+            <button class="btn btn-ghost" style="border-color:rgba(34,211,160,.45);color:var(--green)" onclick="subscribe('weekly','pix')">⚡ Pagar com PIX</button>
+          </div>
         </div>
         <div class="pcard" style="border-color:var(--accent)">
           <span class="chip on">MENSAL</span>
           <h3 style="font-size:2rem;margin:1rem 0">R$ 75,99</h3>
           <p style="color:var(--text2);margin-bottom:1rem">Cobrança recorrente mensal.</p>
-          <button class="btn btn-primary" onclick="subscribe('monthly')">Assinar mensal</button>
+          <div style="display:grid;gap:.55rem">
+            <button class="btn btn-primary" onclick="subscribe('monthly','card')">💳 Cartão recorrente</button>
+            <button class="btn btn-ghost" style="border-color:rgba(34,211,160,.45);color:var(--green)" onclick="subscribe('monthly','pix')">⚡ Pagar com PIX</button>
+          </div>
         </div>
       </div>
-      <button class="btn btn-ghost" style="margin-top:1rem" onclick="refreshSubscription()">Já paguei — verificar novamente</button>
+      <p style="color:var(--text3);font-size:.76rem;margin-top:1rem">No cartão, a renovação é automática. No PIX, o acesso vale pelo período escolhido e deve ser renovado manualmente ao vencer.</p>
+      <button class="btn btn-ghost" style="margin-top:.8rem" onclick="refreshSubscription()">Já paguei — verificar novamente</button>
     </div>`;
 }
 
-async function subscribe(plan){
+async function subscribe(plan, method){
   const button = event?.currentTarget;
   if (button) { button.disabled = true; button.textContent = 'Abrindo pagamento…'; }
   try {
     const res = await authFetch('/api/create-checkout', {
       method: 'POST',
       headers: { 'Content-Type':'application/json' },
-      body: JSON.stringify({ plan })
+      body: JSON.stringify({ plan, method })
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error);
@@ -1105,7 +1112,10 @@ async function subscribe(plan){
       errorBox.style.display = 'block';
     }
     toast(message, 'err');
-    if (button) { button.disabled = false; button.textContent = plan === 'weekly' ? 'Assinar semanal' : 'Assinar mensal'; }
+    if (button) {
+      button.disabled = false;
+      button.textContent = method === 'pix' ? '⚡ Pagar com PIX' : '💳 Cartão recorrente';
+    }
   }
 }
 

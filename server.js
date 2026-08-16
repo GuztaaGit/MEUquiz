@@ -100,12 +100,15 @@ app.post('/api/create-checkout', async (req, res) => {
     const user = await authenticatedUser(req);
     if (!user) return res.status(401).json({ error: 'Faça login para assinar.' });
     const planKey = String(req.body?.plan || '');
+    const method = String(req.body?.method || 'card');
     const plan = PLANS[planKey];
     if (!plan) return res.status(400).json({ error: 'Plano inválido.' });
+    if (!['card', 'pix'].includes(method)) return res.status(400).json({ error: 'Forma de pagamento inválida.' });
 
+    const recurring = method === 'card';
     const payload = {
-      billingTypes: ['CREDIT_CARD', 'PIX'],
-      chargeTypes: ['RECURRENT'],
+      billingTypes: [recurring ? 'CREDIT_CARD' : 'PIX'],
+      chargeTypes: [recurring ? 'RECURRENT' : 'DETACHED'],
       minutesToExpire: 60,
       externalReference: `electrolearn:${user.id}:${planKey}`,
       callback: {
@@ -119,11 +122,14 @@ app.post('/api/create-checkout', async (req, res) => {
         quantity: 1,
         value: plan.value
       }],
-      subscription: {
+    };
+
+    if (recurring) {
+      payload.subscription = {
         cycle: plan.cycle,
         nextDueDate: new Date().toISOString().slice(0, 19).replace('T', ' ')
-      }
-    };
+      };
+    }
 
     const { data } = await axios.post(`${ASAAS_URL}/checkouts`, payload, {
       headers: {
