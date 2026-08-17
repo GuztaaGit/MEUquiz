@@ -560,14 +560,28 @@ app.get('/api/electric-news', requireActiveSubscription, async (req, res) => {
   try {
     const url = 'https://news.google.com/rss/search?q=energia+el%C3%A9trica+tecnologia+Brasil&hl=pt-BR&gl=BR&ceid=BR:pt-419';
     const { data } = await axios.get(url, { timeout: 12000, headers: { 'User-Agent': 'ElectroLearn/2.0' } });
-    const decode = value => String(value || '').replace(/<!\[CDATA\[|\]\]>/g, '').replace(/&amp;/g, '&').replace(/&quot;/g, '"');
-    const items = [...String(data).matchAll(/<item>([\s\S]*?)<\/item>/g)].slice(0, 12).map(match => {
+    const decode = value => String(value || '').replace(/<!\[CDATA\[|\]\]>/g, '').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>');
+    const cleanText = value => decode(value).replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    const meta = (html, property) => decode(html.match(new RegExp(`<meta[^>]+(?:property|name)=["']${property}["'][^>]+content=["']([^"']+)["']`, 'i'))?.[1] || html.match(new RegExp(`<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["']${property}["']`, 'i'))?.[1] || '');
+    const baseItems = [...String(data).matchAll(/<item>([\s\S]*?)<\/item>/g)].slice(0, 10).map(match => {
       const xml = match[1];
       const pick = tag => decode(xml.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`))?.[1]);
       const rawTitle = pick('title');
       const parts = rawTitle.split(' - ');
-      return { title: parts.slice(0, -1).join(' - ') || rawTitle, source: parts.at(-1) || 'Notícia', url: pick('link'), publishedAt: pick('pubDate') };
+      const mediaImage = decode(xml.match(/<(?:media:content|enclosure)[^>]+url=["']([^"']+)["']/i)?.[1]);
+      return { title: parts.slice(0, -1).join(' - ') || rawTitle, source: parts.at(-1) || 'Notícia', url: pick('link'), publishedAt: pick('pubDate'), image: mediaImage, summary: cleanText(pick('description')) };
     }).filter(item => item.title && /^https?:/.test(item.url));
+    const items = await Promise.all(baseItems.map(async item => {
+      try {
+        const response = await axios.get(item.url, { timeout: 4500, maxContentLength: 1200000, headers: { 'User-Agent': 'Mozilla/5.0 (compatible; ElectroLearn/2.0; +https://meu-quiz-six.vercel.app)' } });
+        const html = String(response.data || '').slice(0, 1200000);
+        const description = meta(html, 'og:description') || meta(html, 'twitter:description') || meta(html, 'description');
+        const image = meta(html, 'og:image') || meta(html, 'twitter:image');
+        return { ...item, url: response.request?.res?.responseUrl || item.url, image: /^https?:\/\//i.test(image) ? image : item.image, summary: cleanText(description || item.summary).slice(0, 240) };
+      } catch {
+        return { ...item, summary: cleanText(item.summary).slice(0, 240) };
+      }
+    }));
     res.set('Cache-Control', 'public, s-maxage=1800, stale-while-revalidate=86400');
     res.json({ updatedAt: new Date().toISOString(), items });
   } catch (err) {
