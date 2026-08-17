@@ -3,7 +3,7 @@ const axios = require('axios');
 const path = require('path');
 
 const app = express();
-app.use(express.json({ limit: '1mb' }));
+app.use(express.json({ limit: '4mb' }));
 app.use(express.static(path.join(__dirname)));
 
 const PORT = process.env.PORT || 3000;
@@ -237,13 +237,13 @@ function getProviderConfig() {
   throw new Error('Nenhuma chave de IA configurada.');
 }
 
-async function openaiResponse({ instructions, input }) {
+async function openaiResponse({ instructions, input, model, maxOutputTokens = 1200 }) {
   const key = required('OPENAI_API_KEY');
   const payload = {
-    model: process.env.OPENAI_MODEL || 'gpt-5-mini',
+    model: model || process.env.OPENAI_MODEL || 'gpt-5-mini',
     instructions,
     input,
-    max_output_tokens: 2200
+    max_output_tokens: maxOutputTokens
   };
   const { data } = await axios.post('https://api.openai.com/v1/responses', payload, {
     headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
@@ -302,10 +302,25 @@ app.post('/api/ai-tutor', requireActiveSubscription, async (req, res) => {
   try {
     const message = String(req.body?.message || '').trim().slice(0, 2500);
     const context = String(req.body?.context || '').trim().slice(0, 1200);
-    if (!message) return res.status(400).json({ error: 'Digite uma dúvida.' });
+    const attachment = req.body?.attachment;
+    if (!message && !attachment) return res.status(400).json({ error: 'Digite uma mensagem ou anexe um arquivo.' });
+    const content = [{ type: 'input_text', text: `${context ? `Contexto atual: ${context}\n` : ''}${message || 'Analise e explique este anexo.'}` }];
+    if (attachment) {
+      const mime = String(attachment.mime || '');
+      const data = String(attachment.data || '');
+      const name = String(attachment.name || 'arquivo').slice(0, 120);
+      if (!/^data:(image\/(png|jpeg|webp)|application\/pdf);base64,/.test(data)) {
+        return res.status(400).json({ error: 'Envie somente PNG, JPG, WEBP ou PDF.' });
+      }
+      if (data.length > 4_100_000) return res.status(413).json({ error: 'O arquivo deve ter no máximo 3 MB.' });
+      if (mime === 'application/pdf') content.push({ type: 'input_file', filename: name.endsWith('.pdf') ? name : `${name}.pdf`, file_data: data });
+      else content.push({ type: 'input_image', image_url: data, detail: 'auto' });
+    }
     const answer = await openaiResponse({
-      instructions: `Você é o Tutor ElectroLearn. Responda exclusivamente dúvidas sobre eletricidade, eletrotécnica, eletrônica básica, instalações, normas e segurança elétrica. Para assuntos fora disso, diga educadamente que só atende ao conteúdo do ElectroLearn. Ensine por etapas e priorize segurança: nunca oriente intervenção energizada; recomende profissional habilitado quando houver risco. Não entregue apenas o gabarito: explique o raciocínio.`,
-      input: `${context ? `Contexto do nível: ${context}\n` : ''}Dúvida do aluno: ${message}`
+      model: process.env.OPENAI_TUTOR_MODEL || 'gpt-4.1-mini',
+      maxOutputTokens: 850,
+      instructions: `Você é o Tutor ElectroLearn, um assistente simpático e natural, especialista em elétrica. Pode conversar normalmente, cumprimentar, entender o contexto do aluno e responder perguntas cotidianas relacionadas ao estudo, mas mantenha o foco principal em eletricidade, eletrotécnica, eletrônica, energia, instalações, equipamentos, normas e segurança. Se o assunto fugir totalmente disso, responda brevemente e conduza a conversa de volta ao aprendizado elétrico, sem soar como robô ou bloquear a conversa. Analise fotos, esquemas e PDFs anexados; quando pedirem resumo, organize em tópicos claros. Ensine por etapas e priorize segurança: nunca oriente intervenção energizada e recomende profissional habilitado quando houver risco. Não entregue só o gabarito; explique o raciocínio. Seja direto para responder rápido.`,
+      input: [{ role: 'user', content }]
     });
     res.json({ answer });
   } catch (err) {
