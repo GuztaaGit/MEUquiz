@@ -258,13 +258,40 @@ async function openaiResponse({ instructions, input, model, maxOutputTokens = 12
   return text;
 }
 
+async function geminiResponse({ instructions, text, attachment, json = false, maxOutputTokens = 1200 }) {
+  const key = required('GEMINI_API_KEY');
+  const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash-lite';
+  const parts = [{ text }];
+  if (attachment) {
+    const match = String(attachment.data || '').match(/^data:([^;]+);base64,(.+)$/s);
+    if (!match) throw new Error('Anexo inválido.');
+    parts.push({ inline_data: { mime_type: match[1], data: match[2] } });
+  }
+  const generationConfig = { maxOutputTokens, temperature: json ? 0.2 : 0.45 };
+  if (json) generationConfig.responseMimeType = 'application/json';
+  const { data } = await axios.post(
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+    {
+      system_instruction: { parts: [{ text: instructions }] },
+      contents: [{ role: 'user', parts }],
+      generationConfig
+    },
+    { headers: { 'x-goog-api-key': key, 'Content-Type': 'application/json' }, timeout: 30000 }
+  );
+  const output = data?.candidates?.[0]?.content?.parts?.map(part => part.text || '').join('').trim();
+  if (!output) throw new Error('O Gemini não retornou conteúdo.');
+  return output;
+}
+
 app.post('/api/generate-quiz', requireActiveSubscription, async (req, res) => {
   const { levelTitle, topics } = req.body;
   if (!levelTitle || !topics) return res.status(400).json({ error: 'Dados do quiz são obrigatórios.' });
   try {
-    const text = await openaiResponse({
+    const text = await geminiResponse({
       instructions: 'Você é professor brasileiro de eletrotécnica. Seja tecnicamente preciso, considere segurança e jamais incentive trabalho energizado. Responda somente JSON válido.',
-      input: `Crie 8 perguntas didáticas sobre "${String(levelTitle).slice(0,120)}", cobrindo ${String(topics).slice(0,700)}. Retorne um array JSON com exatamente 4 itens type "tf" (options ["Verdadeiro","Falso"]) e 4 itens type "disc". Cada item deve ter question, answer e explanation.`,
+      text: `Crie 8 perguntas didáticas sobre "${String(levelTitle).slice(0,120)}", cobrindo ${String(topics).slice(0,700)}. Retorne um array JSON com exatamente 4 itens type "tf" (options ["Verdadeiro","Falso"]) e 4 itens type "disc". Cada item deve ter question, answer e explanation.`,
+      json: true,
+      maxOutputTokens: 1800
     });
     res.json({ output_text: text });
   } catch (err) {
@@ -285,9 +312,11 @@ app.post('/api/grade-quiz', requireActiveSubscription, async (req, res) => {
       explanation: String(item.explanation || '').slice(0, 1000),
       userAnswer: String(item.userAnswer || '').slice(0, 1800)
     }));
-    const text = await openaiResponse({
+    const text = await geminiResponse({
       instructions: 'Você corrige quizzes de eletrotécnica em português do Brasil. Aceite sinônimos e respostas conceitualmente equivalentes. Não dê ponto a respostas vazias, contraditórias, perigosas ou com conceito essencial ausente. Retorne somente JSON válido.',
-      input: `Corrija as respostas abaixo. Para cada uma retorne {index, correct:boolean, feedback:string, missing:string, idealAnswer:string}. Em verdadeiro/falso compare exatamente. Em discursivas avalie aderência técnica, não igualdade literal. JSON final: {"results":[...]}\n${JSON.stringify(safe)}`,
+      text: `Corrija as respostas abaixo. Para cada uma retorne {index, correct:boolean, feedback:string, missing:string, idealAnswer:string}. Em verdadeiro/falso compare exatamente. Em discursivas avalie aderência técnica, não igualdade literal. JSON final: {"results":[...]}\n${JSON.stringify(safe)}`,
+      json: true,
+      maxOutputTokens: 2200
     });
     const parsed = JSON.parse(text);
     if (!Array.isArray(parsed.results) || parsed.results.length !== safe.length) throw new Error('Correção incompleta.');
@@ -304,7 +333,6 @@ app.post('/api/ai-tutor', requireActiveSubscription, async (req, res) => {
     const context = String(req.body?.context || '').trim().slice(0, 1200);
     const attachment = req.body?.attachment;
     if (!message && !attachment) return res.status(400).json({ error: 'Digite uma mensagem ou anexe um arquivo.' });
-    const content = [{ type: 'input_text', text: `${context ? `Contexto atual: ${context}\n` : ''}${message || 'Analise e explique este anexo.'}` }];
     if (attachment) {
       const mime = String(attachment.mime || '');
       const data = String(attachment.data || '');
@@ -313,14 +341,12 @@ app.post('/api/ai-tutor', requireActiveSubscription, async (req, res) => {
         return res.status(400).json({ error: 'Envie somente PNG, JPG, WEBP ou PDF.' });
       }
       if (data.length > 4_100_000) return res.status(413).json({ error: 'O arquivo deve ter no máximo 3 MB.' });
-      if (mime === 'application/pdf') content.push({ type: 'input_file', filename: name.endsWith('.pdf') ? name : `${name}.pdf`, file_data: data });
-      else content.push({ type: 'input_image', image_url: data, detail: 'auto' });
     }
-    const answer = await openaiResponse({
-      model: process.env.OPENAI_TUTOR_MODEL || 'gpt-4.1-mini',
+    const answer = await geminiResponse({
       maxOutputTokens: 850,
       instructions: `Você é o Tutor ElectroLearn, um assistente simpático e natural, especialista em elétrica. Pode conversar normalmente, cumprimentar, entender o contexto do aluno e responder perguntas cotidianas relacionadas ao estudo, mas mantenha o foco principal em eletricidade, eletrotécnica, eletrônica, energia, instalações, equipamentos, normas e segurança. Se o assunto fugir totalmente disso, responda brevemente e conduza a conversa de volta ao aprendizado elétrico, sem soar como robô ou bloquear a conversa. Analise fotos, esquemas e PDFs anexados; quando pedirem resumo, organize em tópicos claros. Ensine por etapas e priorize segurança: nunca oriente intervenção energizada e recomende profissional habilitado quando houver risco. Não entregue só o gabarito; explique o raciocínio. Seja direto para responder rápido.`,
-      input: [{ role: 'user', content }]
+      text: `${context ? `Contexto atual: ${context}\n` : ''}${message || 'Analise e explique este anexo.'}`,
+      attachment
     });
     res.json({ answer });
   } catch (err) {
