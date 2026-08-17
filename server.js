@@ -260,7 +260,7 @@ async function openaiResponse({ instructions, input, model, maxOutputTokens = 12
 
 async function geminiResponse({ instructions, text, attachment, json = false, maxOutputTokens = 1200 }) {
   const key = required('GEMINI_API_KEY');
-  const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash-lite';
+  const model = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
   const parts = [{ text }];
   if (attachment) {
     const match = String(attachment.data || '').match(/^data:([^;]+);base64,(.+)$/s);
