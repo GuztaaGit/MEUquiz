@@ -52,3 +52,26 @@ for each row execute function public.handle_new_user();
 alter table public.profiles add column if not exists score integer not null default 0;
 alter table public.profiles add column if not exists progress jsonb not null default '{}'::jsonb;
 alter table public.profiles add column if not exists ranking_visible boolean not null default true;
+
+create table if not exists public.community_presence (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.community_messages (
+  id bigint generated always as identity primary key,
+  user_id uuid references auth.users(id) on delete cascade,
+  author_name text not null,
+  message text not null check (char_length(message) between 1 and 600),
+  is_bot boolean not null default false,
+  created_at timestamptz not null default now()
+);
+
+-- Migração segura caso a tabela do chat já tenha sido criada.
+alter table public.community_messages alter column user_id drop not null;
+alter table public.community_messages add column if not exists is_bot boolean not null default false;
+
+create index if not exists community_messages_created_idx on public.community_messages(created_at desc);
+create index if not exists community_presence_updated_idx on public.community_presence(updated_at desc);
+alter table public.community_presence enable row level security;
+alter table public.community_messages enable row level security;

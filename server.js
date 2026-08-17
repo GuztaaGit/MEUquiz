@@ -469,6 +469,93 @@ app.post('/api/ai-tutor', requireActiveSubscription, async (req, res) => {
   }
 });
 
+app.post('/api/community/heartbeat', requireActiveSubscription, async (req, res) => {
+  try {
+    await axios.post(`${required('SUPABASE_URL')}/rest/v1/community_presence?on_conflict=user_id`, {
+      user_id: req.user.id,
+      updated_at: new Date().toISOString()
+    }, { headers: { ...supabaseHeaders(), Prefer: 'resolution=merge-duplicates,return=minimal' } });
+    res.json({ active: true });
+  } catch (err) {
+    console.error('Falha presença:', err.response?.data || err.message);
+    res.status(500).json({ error: 'Não foi possível registrar sua presença.' });
+  }
+});
+
+app.get('/api/community', requireActiveSubscription, async (req, res) => {
+  try {
+    const since = new Date(Date.now() - 2 * 60 * 1000).toISOString();
+    const [{ data: presence }, { data: messages }] = await Promise.all([
+      axios.get(`${required('SUPABASE_URL')}/rest/v1/community_presence?updated_at=gte.${encodeURIComponent(since)}&select=user_id`, { headers: supabaseHeaders() }),
+      axios.get(`${required('SUPABASE_URL')}/rest/v1/community_messages?select=id,user_id,author_name,message,is_bot,created_at&order=created_at.desc&limit=100`, { headers: supabaseHeaders() })
+    ]);
+    res.set('Cache-Control', 'no-store');
+    res.json({ online: (presence || []).length, messages: (messages || []).reverse(), userId: req.user.id });
+  } catch (err) {
+    console.error('Falha comunidade:', err.response?.data || err.message);
+    res.status(500).json({ error: 'Não foi possível carregar o Chat Global.' });
+  }
+});
+
+app.post('/api/community/messages', requireActiveSubscription, async (req, res) => {
+  try {
+    const message = String(req.body?.message || '').trim();
+    if (!message) return res.status(400).json({ error: 'Digite uma mensagem.' });
+    if (message.length > 600) return res.status(400).json({ error: 'A mensagem pode ter no máximo 600 caracteres.' });
+
+    let moderation;
+    try {
+      const output = await geminiResponse({
+        instructions: `Você modera um chat brasileiro de estudantes. Retorne apenas JSON válido com allowed (boolean), category e reason em português. Permita conversa informal, discordância respeitosa e palavrões leves não dirigidos a alguém. Bloqueie racismo e intolerância contra raça, cor, origem, nacionalidade, religião, sexo, orientação sexual, identidade ou deficiência; bullying e humilhação dirigida; ameaça; assédio sexual; incentivo a automutilação; exposição de dados pessoais; e ataques graves contra pessoas ou grupos. Não bloqueie uma mensagem apenas porque cita um termo ofensivo para denunciar, explicar ou estudar o assunto.`,
+        text: `Classifique esta mensagem antes da publicação:\n${message}`,
+        json: true,
+        maxOutputTokens: 220
+      });
+      moderation = JSON.parse(output);
+    } catch (err) {
+      console.error('Falha moderação:', err.response?.data || err.message);
+      return res.status(503).json({ error: 'A moderação está indisponível agora. Tente novamente em instantes.' });
+    }
+    if (moderation?.allowed !== true) {
+      return res.status(422).json({ error: moderation?.reason || 'Mensagem bloqueada pelas regras de convivência.' });
+    }
+
+    const authorName = String(req.profile?.name || req.user?.user_metadata?.name || req.user?.email?.split('@')[0] || 'Aluno').slice(0, 80);
+    const { data } = await axios.post(`${required('SUPABASE_URL')}/rest/v1/community_messages`, {
+      user_id: req.user.id, author_name: authorName, message, is_bot: false
+    }, { headers: { ...supabaseHeaders(), Prefer: 'return=representation' } });
+
+    const normalized = message.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const mentionedLeo = /(^|\W)leo(\W|$)/.test(normalized);
+    const mentionedMarina = /(^|\W)marina(\W|$)/.test(normalized);
+    const shouldReply = mentionedLeo || mentionedMarina || Math.random() < 0.22;
+    let botMessage = null;
+    if (shouldReply) {
+      try {
+        const bot = mentionedMarina ? { name: 'Marina', style: 'acolhedora, organizada e boa em explicar conceitos passo a passo' } : { name: 'Léo', style: 'bem-humorado, direto e apaixonado por elétrica e tecnologia' };
+        const reply = await geminiResponse({
+          instructions: `Você é ${bot.name}, um bot comunitário do ElectroLearn, ${bot.style}. Todos veem um selo BOT ao lado do seu nome. Responda em português brasileiro com até 350 caracteres. Participe naturalmente, ajude principalmente em elétrica e estudos, não finja ser humano, não invente experiências pessoais e respeite as regras contra ofensas, preconceito e riscos elétricos.`,
+          text: `${authorName} escreveu no Chat Global: "${message}". Responda apenas se agregar algo; seja natural e breve.`,
+          maxOutputTokens: 180
+        });
+        const cleanReply = String(reply).trim().slice(0, 600);
+        if (cleanReply) {
+          const { data: insertedBot } = await axios.post(`${required('SUPABASE_URL')}/rest/v1/community_messages`, {
+            user_id: null, author_name: bot.name, message: cleanReply, is_bot: true
+          }, { headers: { ...supabaseHeaders(), Prefer: 'return=representation' } });
+          botMessage = insertedBot?.[0] || null;
+        }
+      } catch (err) {
+        console.error('Bot comunitário não respondeu:', err.response?.data || err.message);
+      }
+    }
+    res.status(201).json({ message: data?.[0], botMessage });
+  } catch (err) {
+    console.error('Falha ao publicar mensagem:', err.response?.data || err.message);
+    res.status(500).json({ error: 'Não foi possível publicar a mensagem.' });
+  }
+});
+
 app.get('/api/electric-news', requireActiveSubscription, async (req, res) => {
   try {
     const url = 'https://news.google.com/rss/search?q=energia+el%C3%A9trica+tecnologia+Brasil&hl=pt-BR&gl=BR&ceid=BR:pt-419';
