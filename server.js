@@ -65,6 +65,21 @@ async function requireActiveSubscription(req, res, next) {
   next();
 }
 
+const ADMIN_EMAILS = new Set(
+  (process.env.ADMIN_EMAILS || 'gustavodivino886@gmail.com')
+    .split(',').map(email => email.trim().toLowerCase()).filter(Boolean)
+);
+
+async function requireAdmin(req, res, next) {
+  const user = await authenticatedUser(req);
+  if (!user) return res.status(401).json({ error: 'Faça login para continuar.' });
+  if (!ADMIN_EMAILS.has(String(user.email || '').toLowerCase())) {
+    return res.status(403).json({ error: 'Acesso exclusivo do administrador.' });
+  }
+  req.user = user;
+  next();
+}
+
 app.get('/api/config', (req, res) => {
   try {
     res.json({
@@ -92,6 +107,96 @@ app.get('/api/subscription-status', async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ error: 'Não foi possível verificar a assinatura.' });
+  }
+});
+
+app.get('/api/my-progress', requireActiveSubscription, async (req, res) => {
+  res.json({ score: Number(req.profile?.score || 0), progress: req.profile?.progress || {} });
+});
+
+app.put('/api/my-progress', requireActiveSubscription, async (req, res) => {
+  try {
+    const score = Math.max(0, Math.min(10000000, Number(req.body?.score || 0)));
+    const rawProgress = req.body?.progress && typeof req.body.progress === 'object' ? req.body.progress : {};
+    const progress = Object.fromEntries(Object.entries(rawProgress).slice(0, 50).map(([key, value]) => [String(key), Math.max(0, Math.min(100, Number(value || 0)))]));
+    await axios.patch(`${required('SUPABASE_URL')}/rest/v1/profiles?id=eq.${req.user.id}`, {
+      score: Math.round(score), progress, ranking_visible: true, updated_at: new Date().toISOString()
+    }, { headers: { ...supabaseHeaders(), Prefer: 'return=minimal' } });
+    res.json({ saved: true });
+  } catch (err) {
+    console.error('Falha ao salvar progresso:', err.response?.data || err.message);
+    res.status(500).json({ error: 'Não foi possível salvar o progresso.' });
+  }
+});
+
+app.get('/api/leaderboard', requireActiveSubscription, async (req, res) => {
+  try {
+    const { data } = await axios.get(`${required('SUPABASE_URL')}/rest/v1/profiles?ranking_visible=eq.true&select=id,email,name,score,progress&order=score.desc&limit=100`, { headers: supabaseHeaders() });
+    res.json({ entries: (data || []).map(p => ({ name: p.name || p.email?.split('@')[0] || 'Aluno', email: p.email, score: Number(p.score || 0), done: Object.values(p.progress || {}).filter(value => Number(value) >= 100).length })) });
+  } catch (err) {
+    console.error('Falha ranking:', err.response?.data || err.message);
+    res.status(500).json({ error: 'Não foi possível carregar o ranking.' });
+  }
+});
+
+app.get('/api/admin/users', requireAdmin, async (req, res) => {
+  try {
+    const [{ data: authData }, { data: profiles }] = await Promise.all([
+      axios.get(`${required('SUPABASE_URL')}/auth/v1/admin/users?page=1&per_page=1000`, { headers: supabaseHeaders() }),
+      axios.get(`${required('SUPABASE_URL')}/rest/v1/profiles?select=*&order=created_at.desc`, { headers: supabaseHeaders() })
+    ]);
+    const profileById = new Map((profiles || []).map(p => [p.id, p]));
+    const users = (authData?.users || []).map(user => {
+      const p = profileById.get(user.id) || {};
+      return { id: user.id, email: user.email, name: p.name || user.user_metadata?.name || '', createdAt: user.created_at, lastSignInAt: user.last_sign_in_at, plan: p.subscription_plan || null, status: p.subscription_status || 'inactive', accessUntil: p.access_until || null, score: Number(p.score || 0), rankingVisible: p.ranking_visible !== false };
+    });
+    res.json({ users });
+  } catch (err) {
+    console.error('Falha admin users:', err.response?.data || err.message);
+    res.status(500).json({ error: 'Não foi possível carregar os usuários.' });
+  }
+});
+
+app.patch('/api/admin/users/:id/subscription', requireAdmin, async (req, res) => {
+  try {
+    const plan = ['weekly', 'monthly'].includes(req.body?.plan) ? req.body.plan : null;
+    const status = ['active', 'inactive', 'cancelled'].includes(req.body?.status) ? req.body.status : 'inactive';
+    const days = Math.max(0, Math.min(3650, Number(req.body?.days || 0)));
+    const accessUntil = status === 'active' ? new Date(Date.now() + days * 86400000).toISOString() : new Date().toISOString();
+    await axios.patch(`${required('SUPABASE_URL')}/rest/v1/profiles?id=eq.${encodeURIComponent(req.params.id)}`, { subscription_plan: plan, subscription_status: status, access_until: accessUntil, updated_at: new Date().toISOString() }, { headers: { ...supabaseHeaders(), Prefer: 'return=minimal' } });
+    res.json({ updated: true, accessUntil });
+  } catch (err) {
+    res.status(500).json({ error: 'Não foi possível alterar a assinatura.' });
+  }
+});
+
+app.delete('/api/admin/users/:id/ranking', requireAdmin, async (req, res) => {
+  try {
+    await axios.patch(`${required('SUPABASE_URL')}/rest/v1/profiles?id=eq.${encodeURIComponent(req.params.id)}`, { score: 0, progress: {}, ranking_visible: false, updated_at: new Date().toISOString() }, { headers: { ...supabaseHeaders(), Prefer: 'return=minimal' } });
+    res.json({ removed: true });
+  } catch { res.status(500).json({ error: 'Não foi possível remover do ranking.' }); }
+});
+
+app.post('/api/admin/users/:id/password-reset', requireAdmin, async (req, res) => {
+  try {
+    const email = String(req.body?.email || '').trim();
+    if (!email) return res.status(400).json({ error: 'E-mail obrigatório.' });
+    await axios.post(`${required('SUPABASE_URL')}/auth/v1/recover`, { email, redirect_to: SITE_URL }, { headers: { apikey: required('SUPABASE_ANON_KEY'), 'Content-Type': 'application/json' } });
+    res.json({ sent: true });
+  } catch (err) {
+    console.error('Falha reset:', err.response?.data || err.message);
+    res.status(500).json({ error: 'Não foi possível enviar a redefinição.' });
+  }
+});
+
+app.delete('/api/admin/users/:id', requireAdmin, async (req, res) => {
+  try {
+    if (req.user.id === req.params.id) return res.status(400).json({ error: 'Você não pode excluir sua própria conta administrativa.' });
+    await axios.delete(`${required('SUPABASE_URL')}/auth/v1/admin/users/${encodeURIComponent(req.params.id)}`, { headers: supabaseHeaders() });
+    res.json({ deleted: true });
+  } catch (err) {
+    console.error('Falha excluir usuário:', err.response?.data || err.message);
+    res.status(500).json({ error: 'Não foi possível excluir a conta.' });
   }
 });
 

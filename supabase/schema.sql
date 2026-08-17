@@ -8,6 +8,9 @@ create table if not exists public.profiles (
   subscription_plan text check (subscription_plan in ('weekly', 'monthly')),
   access_until timestamptz,
   asaas_subscription_id text,
+  score integer not null default 0 check (score >= 0),
+  progress jsonb not null default '{}'::jsonb,
+  ranking_visible boolean not null default true,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -44,3 +47,8 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
 after insert on auth.users
 for each row execute function public.handle_new_user();
+
+-- Migração segura para projetos que já possuem a tabela profiles.
+alter table public.profiles add column if not exists score integer not null default 0;
+alter table public.profiles add column if not exists progress jsonb not null default '{}'::jsonb;
+alter table public.profiles add column if not exists ranking_visible boolean not null default true;

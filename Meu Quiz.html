@@ -58,6 +58,7 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;}
 .nav-item{padding:.7rem 1rem;font-size:.85rem;font-weight:500;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;}
 .nav-item:hover{color:var(--text);}
 .nav-item.active{color:var(--accent);border-bottom-color:var(--accent);}
+.admin-wrap{max-width:1180px;margin:0 auto}.admin-toolbar{display:flex;justify-content:space-between;gap:.75rem;align-items:center;margin-bottom:1rem;flex-wrap:wrap}.admin-table-wrap{overflow:auto;border:1px solid var(--border);border-radius:16px}.admin-table{width:100%;border-collapse:collapse;min-width:980px;background:var(--card)}.admin-table th,.admin-table td{padding:.75rem;border-bottom:1px solid var(--border);text-align:left;font-size:.78rem;vertical-align:middle}.admin-table th{color:var(--text2);text-transform:uppercase;letter-spacing:.04em;background:var(--bg2)}.admin-actions{display:flex;gap:.35rem;flex-wrap:wrap}.admin-btn{border:1px solid var(--border2);background:var(--bg2);color:var(--text);border-radius:8px;padding:.4rem .55rem;cursor:pointer;font-size:.72rem}.admin-btn.danger{color:var(--red);border-color:rgba(248,113,113,.35)}.admin-modal{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:1000;display:none;align-items:center;justify-content:center;padding:1rem}.admin-modal.show{display:flex}.admin-modal-card{background:var(--card);border:1px solid var(--border2);border-radius:18px;padding:1.2rem;width:min(440px,100%)}
 .motivation{font-size:.73rem;color:var(--text2);max-width:520px;line-height:1.35;padding:.35rem .75rem;border-left:2px solid var(--accent);}
 .ai-shell{max-width:960px;margin:0 auto}.ai-card,.news-card{background:linear-gradient(145deg,var(--card),var(--bg2));border:1px solid var(--border);border-radius:18px;padding:1rem}.chat-log{height:min(56vh,560px);min-height:360px;overflow:auto;display:flex;flex-direction:column;gap:.75rem;padding:.5rem}.msg{padding:.78rem 1rem;border-radius:16px;max-width:86%;font-size:.9rem;line-height:1.6;white-space:pre-wrap}.msg.user{align-self:flex-end;background:linear-gradient(135deg,var(--accent),#7957ff);color:white}.msg.ai{align-self:flex-start;background:var(--bg2);border:1px solid var(--border)}.chat-compose{margin-top:.8rem;border:1px solid var(--border2);background:var(--bg);border-radius:20px;padding:.7rem;box-shadow:0 12px 35px rgba(0,0,0,.22)}.chat-compose textarea{display:block;width:100%;min-height:92px;max-height:220px;resize:none;border:0;background:transparent;color:var(--text);font:inherit;line-height:1.5;outline:0;padding:.35rem}.composer-actions{display:flex;align-items:center;justify-content:space-between;gap:.6rem;margin-top:.45rem}.attach-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--border2);background:var(--bg2);color:var(--text);cursor:pointer;font-size:1.05rem}.file-chip{display:none;align-items:center;gap:.45rem;max-width:70%;padding:.4rem .65rem;border-radius:10px;background:rgba(79,142,247,.13);color:var(--accent);font-size:.76rem}.file-chip.show{display:flex}.video-box{margin-top:1rem;padding:1rem;border:1px solid var(--border);border-radius:14px;background:linear-gradient(135deg,rgba(79,142,247,.12),rgba(124,92,252,.08))}.review-item{padding:1rem;border-radius:14px;border:1px solid var(--border);margin-top:.75rem;text-align:left}.review-item.ok{border-color:rgba(34,211,160,.45);background:rgba(34,211,160,.06)}.review-item.bad{border-color:rgba(248,113,113,.45);background:rgba(248,113,113,.06)}.pay-hero{background:radial-gradient(circle at 50% 0,rgba(79,142,247,.24),transparent 55%);padding:2rem;border-radius:24px}.plan-feature{display:flex;gap:.45rem;margin:.45rem 0;color:var(--text2);font-size:.82rem}@media(max-width:760px){.chat-log{height:52vh}.motivation{display:none}.msg{max-width:94%}}
 .content{flex:1;padding:1.25rem;max-width:1080px;width:100%;margin:0 auto;}
@@ -199,6 +200,7 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;}
     <div class="nav-item" onclick="go('quiz')" id="n-quiz">⚡ Quiz</div>
     <div class="nav-item" onclick="go('ranking')" id="n-ranking">🏆 Ranking</div>
     <div class="nav-item" onclick="go('profile')" id="n-profile">👤 Perfil</div>
+    <div class="nav-item" onclick="go('admin')" id="n-admin" style="display:none">🛠️ Administração</div>
   </div>
   <div class="content" id="mc"></div>
 </div>
@@ -463,7 +465,7 @@ let DB = JSON.parse(localStorage.getItem('el2_db')||'{}');
 if(!DB.users)    DB.users={};
 if(!DB.progress) DB.progress={};
 if(!DB.scores)   DB.scores={};
-function save(){localStorage.setItem('el2_db',JSON.stringify(DB));}
+function save(){localStorage.setItem('el2_db',JSON.stringify(DB));if(typeof queueProgressSync==='function')queueProgressSync();}
 
 let me=null, slv=null, spdf=0, qlv=null, qq=[], qi=0, qs=0, qans=false, qresponses=[],qreviews=[];
 
@@ -518,6 +520,7 @@ function go(t){
   else if(t==='quiz')renderQuizHome();
   else if(t==='ranking')renderRanking();
   else if(t==='profile')renderProfile();
+  else if(t==='admin')renderAdmin();
 }
 
 const VERSES_DAY=[
@@ -922,11 +925,9 @@ function showRes(){
 }
 
 // ─── RANKING ───
-function renderRanking(){
-  const entries=Object.entries(DB.users).map(([e,u])=>({
-    name:u.n,email:e,score:DB.scores[e]||0,
-    done:Object.values(DB.progress[e]||{}).filter(v=>v>=100).length
-  })).sort((a,b)=>b.score-a.score);
+async function renderRanking(){
+  let entries=[];
+  try{const res=await authFetch('/api/leaderboard');const data=await res.json();if(!res.ok)throw new Error(data.error);entries=data.entries||[];}catch(err){entries=Object.entries(DB.users).map(([e,u])=>({name:u.n,email:e,score:DB.scores[e]||0,done:Object.values(DB.progress[e]||{}).filter(v=>v>=100).length})).sort((a,b)=>b.score-a.score);}
   const medals=['🥇','🥈','🥉'];
   document.getElementById('mc').innerHTML=`
   <h2 style="font-size:1.2rem;margin-bottom:1rem">🏆 Ranking Global</h2>
@@ -983,6 +984,25 @@ function renderProfile(){
   </div>`;
 }
 
+// ─── ADMINISTRAÇÃO ───
+let adminUsers=[];
+async function renderAdmin(){
+  if((currentSession?.user?.email||'').toLowerCase()!=='gustavodivino886@gmail.com'){toast('Acesso exclusivo do administrador.','err');return go('dashboard');}
+  document.getElementById('mc').innerHTML='<div class="spin-wrap"><div class="spin"></div><p>Carregando usuários…</p></div>';
+  try{const res=await authFetch('/api/admin/users');const data=await res.json();if(!res.ok)throw new Error(data.error);adminUsers=data.users||[];drawAdminUsers(adminUsers);}catch(err){document.getElementById('mc').innerHTML=`<div class="admin-wrap"><div class="ai-card"><h2>Erro ao abrir administração</h2><p>${escapeHtml(err.message)}</p></div></div>`;}
+}
+function daysRemaining(date){if(!date)return 0;return Math.max(0,Math.ceil((new Date(date).getTime()-Date.now())/86400000));}
+function drawAdminUsers(users){
+  document.getElementById('mc').innerHTML=`<div class="admin-wrap"><div class="admin-toolbar"><div><h2>🛠️ Administração</h2><p style="color:var(--text2);font-size:.8rem">${users.length} contas cadastradas</p></div><input class="auth-inp" style="max-width:300px" placeholder="Buscar nome ou e-mail" oninput="filterAdmin(this.value)"></div><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Usuário</th><th>Plano</th><th>Status</th><th>Dias</th><th>Vencimento</th><th>Pontos</th><th>Último acesso</th><th>Ações</th></tr></thead><tbody>${users.map(user=>`<tr><td><strong>${escapeHtml(user.name||'Sem nome')}</strong><br><span style="color:var(--text2)">${escapeHtml(user.email||'')}</span></td><td>${user.plan==='weekly'?'Semanal':user.plan==='monthly'?'Mensal':'—'}</td><td><span class="chip ${user.status==='active'?'on':'off'}">${escapeHtml(user.status)}</span></td><td>${daysRemaining(user.accessUntil)}</td><td>${user.accessUntil?new Date(user.accessUntil).toLocaleDateString('pt-BR'):'—'}</td><td>${user.score}</td><td>${user.lastSignInAt?new Date(user.lastSignInAt).toLocaleString('pt-BR'):'Nunca'}</td><td><div class="admin-actions"><button class="admin-btn" onclick="openSubscriptionAdmin('${user.id}')">Assinatura</button><button class="admin-btn" onclick="sendPasswordReset('${user.id}','${escapeHtml(user.email||'')}')">Redefinir senha</button><button class="admin-btn" onclick="removeFromRanking('${user.id}')">Remover ranking</button><button class="admin-btn danger" onclick="deleteAdminUser('${user.id}','${escapeHtml(user.email||'')}')">Excluir conta</button></div></td></tr>`).join('')}</tbody></table></div></div><div class="admin-modal" id="admin-modal"></div>`;
+}
+function filterAdmin(value){const q=value.trim().toLowerCase();drawAdminUsers(adminUsers.filter(u=>(u.email||'').toLowerCase().includes(q)||(u.name||'').toLowerCase().includes(q)));const input=document.querySelector('.admin-toolbar input');if(input){input.value=value;input.focus();}}
+function openSubscriptionAdmin(id){const user=adminUsers.find(u=>u.id===id);if(!user)return;const modal=document.getElementById('admin-modal');modal.className='admin-modal show';modal.innerHTML=`<div class="admin-modal-card"><h3>Alterar assinatura</h3><p style="color:var(--text2);font-size:.8rem;margin:.3rem 0 1rem">${escapeHtml(user.email)}</p><label class="auth-lbl">Plano</label><select class="auth-inp" id="admin-plan"><option value="weekly" ${user.plan==='weekly'?'selected':''}>Semanal</option><option value="monthly" ${user.plan==='monthly'?'selected':''}>Mensal</option></select><label class="auth-lbl">Status</label><select class="auth-inp" id="admin-status"><option value="active" ${user.status==='active'?'selected':''}>Ativo</option><option value="inactive" ${user.status==='inactive'?'selected':''}>Inativo</option><option value="cancelled" ${user.status==='cancelled'?'selected':''}>Cancelado</option></select><label class="auth-lbl">Dias a partir de hoje</label><input class="auth-inp" id="admin-days" type="number" min="0" max="3650" value="${daysRemaining(user.accessUntil)||30}"><div style="display:flex;justify-content:flex-end;gap:.5rem;margin-top:1rem"><button class="btn btn-ghost" onclick="closeAdminModal()">Cancelar</button><button class="btn btn-primary" onclick="saveSubscriptionAdmin('${id}')">Salvar</button></div></div>`;}
+function closeAdminModal(){const modal=document.getElementById('admin-modal');if(modal)modal.className='admin-modal';}
+async function saveSubscriptionAdmin(id){const res=await authFetch(`/api/admin/users/${id}/subscription`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({plan:document.getElementById('admin-plan').value,status:document.getElementById('admin-status').value,days:Number(document.getElementById('admin-days').value)})});const data=await res.json();if(!res.ok)return toast(data.error,'err');toast('Assinatura atualizada.','ok');closeAdminModal();renderAdmin();}
+async function sendPasswordReset(id,email){if(!confirm(`Enviar redefinição de senha para ${email}?`))return;const res=await authFetch(`/api/admin/users/${id}/password-reset`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});const data=await res.json();toast(res.ok?'E-mail de redefinição enviado.':data.error,res.ok?'ok':'err');}
+async function removeFromRanking(id){if(!confirm('Remover este usuário do ranking e zerar pontos/progresso?'))return;const res=await authFetch(`/api/admin/users/${id}/ranking`,{method:'DELETE'});const data=await res.json();toast(res.ok?'Usuário removido do ranking.':data.error,res.ok?'ok':'err');if(res.ok)renderAdmin();}
+async function deleteAdminUser(id,email){if(!confirm(`EXCLUIR permanentemente a conta ${email}? Esta ação não pode ser desfeita.`))return;const typed=prompt('Digite EXCLUIR para confirmar:');if(typed!=='EXCLUIR')return;const res=await authFetch(`/api/admin/users/${id}`,{method:'DELETE'});const data=await res.json();toast(res.ok?'Conta excluída permanentemente.':data.error,res.ok?'ok':'err');if(res.ok)renderAdmin();}
+
 // ─── TOAST ───
 function toast(msg,type){
   const t=document.getElementById('toast');
@@ -995,6 +1015,19 @@ let paymentConfig = null;
 let supabaseClient = null;
 let currentSession = null;
 let subscriptionActive = false;
+let progressSyncTimer = null;
+
+function queueProgressSync(){
+  if(!currentSession?.access_token||!me)return;
+  clearTimeout(progressSyncTimer);
+  progressSyncTimer=setTimeout(async()=>{
+    try{await authFetch('/api/my-progress',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({score:DB.scores[me]||0,progress:DB.progress[me]||{}})});}catch(err){console.warn('Progresso será sincronizado depois.');}
+  },900);
+}
+
+async function loadCloudProgress(){
+  try{const res=await authFetch('/api/my-progress');if(!res.ok)return;const cloud=await res.json();DB.scores[me]=Math.max(DB.scores[me]||0,Number(cloud.score||0));const local=DB.progress[me]||{};for(const [level,value] of Object.entries(cloud.progress||{}))local[level]=Math.max(Number(local[level]||0),Number(value||0));DB.progress[me]=local;localStorage.setItem('el2_db',JSON.stringify(DB));queueProgressSync();}catch(err){console.warn('Progresso local em uso.');}
+}
 
 (async function initPayments(){
   try {
@@ -1072,7 +1105,9 @@ async function enterAuthenticatedApp(user){
   document.getElementById('tname').textContent = name;
   document.getElementById('auth-screen').classList.remove('active');
   document.getElementById('app-screen').classList.add('active');
+  document.getElementById('n-admin').style.display = email.toLowerCase()==='gustavodivino886@gmail.com' ? '' : 'none';
   await refreshSubscription();
+  if(subscriptionActive)await loadCloudProgress();
 }
 
 async function authFetch(url, options = {}){
