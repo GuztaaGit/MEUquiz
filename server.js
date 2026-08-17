@@ -350,8 +350,17 @@ app.post('/api/ai-tutor', requireActiveSubscription, async (req, res) => {
     });
     res.json({ answer });
   } catch (err) {
-    console.error('Falha tutor IA:', err.response?.data || err.message);
-    res.status(err.response?.status || 500).json({ error: 'O tutor está temporariamente indisponível.' });
+    const googleError = err.response?.data?.error;
+    const code = googleError?.status || err.code || 'ERRO_INTERNO';
+    const rawMessage = googleError?.message || err.message || 'Falha desconhecida.';
+    const safeMessage = String(rawMessage)
+      .replace(/AIza[\w-]+/g, '[chave protegida]')
+      .replace(/sk-[\w-]+/g, '[chave protegida]')
+      .slice(0, 500);
+    console.error('Falha tutor IA:', { status: err.response?.status, code, message: safeMessage });
+    res.status(err.response?.status || 500).json({
+      error: `Tutor indisponível (${code}): ${safeMessage}`
+    });
   }
 });
 
