@@ -237,24 +237,100 @@ function getProviderConfig() {
   throw new Error('Nenhuma chave de IA configurada.');
 }
 
+async function openaiResponse({ instructions, input }) {
+  const key = required('OPENAI_API_KEY');
+  const payload = {
+    model: process.env.OPENAI_MODEL || 'gpt-5-mini',
+    instructions,
+    input,
+    max_output_tokens: 2200
+  };
+  const { data } = await axios.post('https://api.openai.com/v1/responses', payload, {
+    headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+    timeout: 45000
+  });
+  const text = data.output_text || (data.output || [])
+    .flatMap(item => item.content || [])
+    .filter(item => item.type === 'output_text')
+    .map(item => item.text)
+    .join('');
+  if (!text) throw new Error('A IA não retornou conteúdo.');
+  return text;
+}
+
 app.post('/api/generate-quiz', requireActiveSubscription, async (req, res) => {
   const { levelTitle, topics } = req.body;
   if (!levelTitle || !topics) return res.status(400).json({ error: 'Dados do quiz são obrigatórios.' });
   try {
-    const config = getProviderConfig();
-    const prompt = `Crie 8 perguntas didáticas de eletrotécnica para iniciantes sobre "${levelTitle}", cobrindo ${topics}. Retorne somente JSON: 4 verdadeiro/falso e 4 discursivas, com resposta e explicação.`;
-    const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${config.key}` };
-    const body = config.provider === 'anthropic'
-      ? { model: 'claude-sonnet-4-20250514', max_tokens: 1400, messages: [{ role: 'user', content: prompt }] }
-      : { model: 'gpt-3.5-turbo', temperature: 0.7, max_tokens: 1200, messages: [{ role: 'user', content: prompt }] };
-    if (config.provider === 'anthropic') headers['x-api-key'] = config.key;
-    const url = config.provider === 'anthropic'
-      ? 'https://api.anthropic.com/v1/messages'
-      : 'https://api.openai.com/v1/chat/completions';
-    const response = await axios.post(url, body, { headers });
-    res.json(response.data);
+    const text = await openaiResponse({
+      instructions: 'Você é professor brasileiro de eletrotécnica. Seja tecnicamente preciso, considere segurança e jamais incentive trabalho energizado. Responda somente JSON válido.',
+      input: `Crie 8 perguntas didáticas sobre "${String(levelTitle).slice(0,120)}", cobrindo ${String(topics).slice(0,700)}. Retorne um array JSON com exatamente 4 itens type "tf" (options ["Verdadeiro","Falso"]) e 4 itens type "disc". Cada item deve ter question, answer e explanation.`,
+    });
+    res.json({ output_text: text });
   } catch (err) {
+    console.error('Falha quiz IA:', err.response?.data || err.message);
     res.status(err.response?.status || 500).json({ error: 'Falha ao gerar quiz.' });
+  }
+});
+
+app.post('/api/grade-quiz', requireActiveSubscription, async (req, res) => {
+  try {
+    const answers = Array.isArray(req.body?.answers) ? req.body.answers.slice(0, 12) : [];
+    if (!answers.length) return res.status(400).json({ error: 'Respostas não recebidas.' });
+    const safe = answers.map((item, index) => ({
+      index,
+      type: item.type === 'tf' ? 'tf' : 'disc',
+      question: String(item.question || '').slice(0, 600),
+      reference: String(item.reference || '').slice(0, 1000),
+      explanation: String(item.explanation || '').slice(0, 1000),
+      userAnswer: String(item.userAnswer || '').slice(0, 1800)
+    }));
+    const text = await openaiResponse({
+      instructions: 'Você corrige quizzes de eletrotécnica em português do Brasil. Aceite sinônimos e respostas conceitualmente equivalentes. Não dê ponto a respostas vazias, contraditórias, perigosas ou com conceito essencial ausente. Retorne somente JSON válido.',
+      input: `Corrija as respostas abaixo. Para cada uma retorne {index, correct:boolean, feedback:string, missing:string, idealAnswer:string}. Em verdadeiro/falso compare exatamente. Em discursivas avalie aderência técnica, não igualdade literal. JSON final: {"results":[...]}\n${JSON.stringify(safe)}`,
+    });
+    const parsed = JSON.parse(text);
+    if (!Array.isArray(parsed.results) || parsed.results.length !== safe.length) throw new Error('Correção incompleta.');
+    res.json({ results: parsed.results });
+  } catch (err) {
+    console.error('Falha correção IA:', err.response?.data || err.message);
+    res.status(err.response?.status || 500).json({ error: 'Não foi possível corrigir o quiz agora.' });
+  }
+});
+
+app.post('/api/ai-tutor', requireActiveSubscription, async (req, res) => {
+  try {
+    const message = String(req.body?.message || '').trim().slice(0, 2500);
+    const context = String(req.body?.context || '').trim().slice(0, 1200);
+    if (!message) return res.status(400).json({ error: 'Digite uma dúvida.' });
+    const answer = await openaiResponse({
+      instructions: `Você é o Tutor ElectroLearn. Responda exclusivamente dúvidas sobre eletricidade, eletrotécnica, eletrônica básica, instalações, normas e segurança elétrica. Para assuntos fora disso, diga educadamente que só atende ao conteúdo do ElectroLearn. Ensine por etapas e priorize segurança: nunca oriente intervenção energizada; recomende profissional habilitado quando houver risco. Não entregue apenas o gabarito: explique o raciocínio.`,
+      input: `${context ? `Contexto do nível: ${context}\n` : ''}Dúvida do aluno: ${message}`
+    });
+    res.json({ answer });
+  } catch (err) {
+    console.error('Falha tutor IA:', err.response?.data || err.message);
+    res.status(err.response?.status || 500).json({ error: 'O tutor está temporariamente indisponível.' });
+  }
+});
+
+app.get('/api/electric-news', requireActiveSubscription, async (req, res) => {
+  try {
+    const url = 'https://news.google.com/rss/search?q=energia+el%C3%A9trica+tecnologia+Brasil&hl=pt-BR&gl=BR&ceid=BR:pt-419';
+    const { data } = await axios.get(url, { timeout: 12000, headers: { 'User-Agent': 'ElectroLearn/2.0' } });
+    const decode = value => String(value || '').replace(/<!\[CDATA\[|\]\]>/g, '').replace(/&amp;/g, '&').replace(/&quot;/g, '"');
+    const items = [...String(data).matchAll(/<item>([\s\S]*?)<\/item>/g)].slice(0, 12).map(match => {
+      const xml = match[1];
+      const pick = tag => decode(xml.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`))?.[1]);
+      const rawTitle = pick('title');
+      const parts = rawTitle.split(' - ');
+      return { title: parts.slice(0, -1).join(' - ') || rawTitle, source: parts.at(-1) || 'Notícia', url: pick('link'), publishedAt: pick('pubDate') };
+    }).filter(item => item.title && /^https?:/.test(item.url));
+    res.set('Cache-Control', 'public, s-maxage=1800, stale-while-revalidate=86400');
+    res.json({ updatedAt: new Date().toISOString(), items });
+  } catch (err) {
+    console.error('Falha notícias:', err.message);
+    res.status(502).json({ error: 'Não foi possível atualizar as notícias agora.' });
   }
 });
 
