@@ -161,6 +161,22 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;}
 .composer-row .btn-primary,.community-compose .btn-primary{width:auto!important;max-width:150px;flex:0 0 auto}
 .news-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(285px,1fr));gap:1rem}.news-preview-card{display:flex;flex-direction:column;overflow:hidden;padding:0!important;min-height:360px;transition:transform .2s,border-color .2s}.news-preview-card:hover{transform:translateY(-4px);border-color:var(--accent)}.news-cover{height:175px;width:100%;object-fit:cover;background:linear-gradient(135deg,#12264b,#432d82)}.news-cover-fallback{height:175px;display:flex;align-items:center;justify-content:center;font-size:3rem;background:radial-gradient(circle at 30% 20%,rgba(79,142,247,.55),transparent 45%),linear-gradient(135deg,#101d39,#271b4c)}.news-body{padding:1rem;display:flex;flex-direction:column;flex:1}.news-summary{color:var(--text2);font-size:.8rem;line-height:1.55;margin:.1rem 0 1rem;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}.news-footer{margin-top:auto;font-size:.7rem;color:var(--text3);display:flex;justify-content:space-between;gap:.5rem}
 @media(max-width:650px){.chat-compose textarea,.community-compose textarea{height:82px;min-height:82px}.chat-compose .btn,.community-compose .btn{min-width:auto;padding:.7rem .85rem}.attach-btn{width:48px;height:48px}}
+@media(max-width:580px){
+  #auth-screen{justify-content:flex-start;overflow-y:auto;min-height:100dvh;padding:max(.65rem,env(safe-area-inset-top)) 0 max(.65rem,env(safe-area-inset-bottom))}
+  .auth-box{max-width:390px;padding:.65rem .8rem;margin:auto}
+  .auth-logo{margin-bottom:1rem}
+  .bolt{width:46px;height:46px;border-radius:13px;font-size:22px;margin-bottom:.55rem}
+  .auth-logo h1{font-size:1.65rem;letter-spacing:-.6px}
+  .auth-logo p{font-size:.78rem;margin-top:.15rem}
+  .auth-card{padding:1.1rem;border-radius:16px}
+  .auth-tabs{margin-bottom:1rem}
+  .auth-tab{padding:.55rem;font-size:.86rem}
+  .field{margin-bottom:.78rem}
+  .field label{font-size:.7rem;margin-bottom:.3rem}
+  .field input{min-height:46px;padding:.68rem .85rem;font-size:16px}
+  .auth-card .btn{min-height:46px;padding:.72rem 1rem;font-size:.88rem}
+  .divider{margin:.8rem 0!important}
+}
 </style>
 </head>
 <body>
