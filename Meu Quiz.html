@@ -772,8 +772,8 @@ function renderStudyHome(){
     const locked=i>0&&(pr[LEVELS[i-1].id]||0)<50&&(pr[lv.id]||0)<100;
     return `<div class="lc${locked?' locked':''}" onclick="${locked?`toast('Desbloqueie o Nível ${i} primeiro!','err')`:`openStudy(${lv.id})`}">
       <div style="position:absolute;top:.8rem;right:.8rem">${locked?'🔒':''}</div>
-      <div class="lbadge" style="background:${lv.color}22;color:${lv.color}">${lv.icon} Nível ${lv.id}</div>
-      <div style="font-weight:700;font-size:.88rem;margin-bottom:.15rem">${lv.title}</div>
+      <div class="lbadge" style="background:${lv.color}22;color:${lv.color}">${lv.icon}</div>
+      <div style="font-weight:700;font-size:.88rem;margin-bottom:.15rem">Nível ${lv.id} — ${lv.title}</div>
       <div style="font-size:.76rem;color:var(--text2)">${lv.topics}</div>
     </div>`;
   }).join('')}</div>`;
