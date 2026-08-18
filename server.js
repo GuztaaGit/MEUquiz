@@ -563,6 +563,22 @@ app.get('/api/electric-news', requireActiveSubscription, async (req, res) => {
     const decode = value => String(value || '').replace(/<!\[CDATA\[|\]\]>/g, '').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>');
     const cleanText = value => decode(value).replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
     const meta = (html, property) => decode(html.match(new RegExp(`<meta[^>]+(?:property|name)=["']${property}["'][^>]+content=["']([^"']+)["']`, 'i'))?.[1] || html.match(new RegExp(`<meta[^>]+content=["']([^"']+)["'][^>]+(?:property|name)=["']${property}["']`, 'i'))?.[1] || '');
+    const resolveGoogleNewsUrl = async googleUrl => {
+      if (!/news\.google\.com\/rss\/articles\//i.test(googleUrl)) return googleUrl;
+      const id = googleUrl.match(/\/articles\/([^?]+)/)?.[1];
+      if (!id) return googleUrl;
+      const { data: splash } = await axios.get(googleUrl, { timeout: 5000, headers: { 'User-Agent': 'Mozilla/5.0' } });
+      const timestamp = String(splash).match(/data-n-a-ts="([^"]+)"/)?.[1];
+      const signature = String(splash).match(/data-n-a-sg="([^"]+)"/)?.[1];
+      if (!timestamp || !signature) return googleUrl;
+      const request = ['garturlreq', [['X', 'X', ['X', 'X'], null, null, 1, 1, 'BR:pt-419', null, 1, null, null, null, null, null, 0, 1], 'X', 'X', 1, [1, 1, 1], 1, 1, null, 0, 0, null, 0], id, Number(timestamp), signature];
+      const form = new URLSearchParams({ 'f.req': JSON.stringify([[['Fbv4je', JSON.stringify(request), null, 'generic']]]) });
+      const { data: batch } = await axios.post('https://news.google.com/_/DotsSplashUi/data/batchexecute?rpcids=Fbv4je', form.toString(), { timeout: 5000, headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' } });
+      const outer = JSON.parse(String(batch).replace(/^\)\]\}'\s*/, ''));
+      const row = outer.find(entry => entry?.[0] === 'wrb.fr' && entry?.[1] === 'Fbv4je');
+      const resolved = row?.[2] ? JSON.parse(row[2])?.[1] : null;
+      return /^https?:\/\//i.test(resolved || '') ? resolved : googleUrl;
+    };
     const baseItems = [...String(data).matchAll(/<item>([\s\S]*?)<\/item>/g)].slice(0, 10).map(match => {
       const xml = match[1];
       const pick = tag => decode(xml.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`))?.[1]);
@@ -573,11 +589,12 @@ app.get('/api/electric-news', requireActiveSubscription, async (req, res) => {
     }).filter(item => item.title && /^https?:/.test(item.url));
     const items = await Promise.all(baseItems.map(async item => {
       try {
-        const response = await axios.get(item.url, { timeout: 4500, maxContentLength: 1200000, headers: { 'User-Agent': 'Mozilla/5.0 (compatible; ElectroLearn/2.0; +https://meu-quiz-six.vercel.app)' } });
+        const articleUrl = await resolveGoogleNewsUrl(item.url);
+        const response = await axios.get(articleUrl, { timeout: 5500, maxContentLength: 1200000, headers: { 'User-Agent': 'Mozilla/5.0 (compatible; ElectroLearn/2.0; +https://meu-quiz-six.vercel.app)' } });
         const html = String(response.data || '').slice(0, 1200000);
         const description = meta(html, 'og:description') || meta(html, 'twitter:description') || meta(html, 'description');
         const image = meta(html, 'og:image') || meta(html, 'twitter:image');
-        return { ...item, url: response.request?.res?.responseUrl || item.url, image: /^https?:\/\//i.test(image) ? image : item.image, summary: cleanText(description || item.summary).slice(0, 240) };
+        return { ...item, url: response.request?.res?.responseUrl || articleUrl, image: /^https?:\/\//i.test(image) ? image : item.image, summary: cleanText(description || item.summary).slice(0, 240) };
       } catch {
         return { ...item, summary: cleanText(item.summary).slice(0, 240) };
       }
