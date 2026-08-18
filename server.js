@@ -65,6 +65,13 @@ async function requireActiveSubscription(req, res, next) {
   next();
 }
 
+async function requireAuthenticated(req, res, next) {
+  const user = await authenticatedUser(req);
+  if (!user) return res.status(401).json({ error: 'Faça login para continuar.' });
+  req.user = user;
+  req.profile = await profile(user.id);
+  next();
+}
 const ADMIN_EMAILS = new Set(
   (process.env.ADMIN_EMAILS || 'gustavodivino886@gmail.com')
     .split(',').map(email => email.trim().toLowerCase()).filter(Boolean)
@@ -157,6 +164,71 @@ app.get('/api/admin/users', requireAdmin, async (req, res) => {
   }
 });
 
+app.get('/api/support/tickets/mine', requireAuthenticated, async (req, res) => {
+  try {
+    const { data } = await axios.get(`${required('SUPABASE_URL')}/rest/v1/support_tickets?user_id=eq.${encodeURIComponent(req.user.id)}&select=*&order=created_at.desc&limit=20`, { headers: supabaseHeaders() });
+    res.json({ tickets: data || [] });
+  } catch (err) {
+    console.error('Falha suporte:', err.response?.data || err.message);
+    res.status(500).json({ error: 'Não foi possível carregar suas mensagens.' });
+  }
+});
+
+app.post('/api/support/tickets', requireAuthenticated, async (req, res) => {
+  try {
+    const subject = String(req.body?.subject || 'Ajuda geral').trim().slice(0, 120);
+    const message = String(req.body?.message || '').trim();
+    if (message.length < 5 || message.length > 2000) return res.status(400).json({ error: 'Escreva uma mensagem entre 5 e 2000 caracteres.' });
+    const payload = { user_id: req.user.id, user_name: req.profile?.name || req.user.user_metadata?.name || 'Aluno', user_email: req.user.email || '', subject, message };
+    const { data } = await axios.post(`${required('SUPABASE_URL')}/rest/v1/support_tickets`, payload, { headers: { ...supabaseHeaders(), Prefer: 'return=representation' } });
+    res.status(201).json({ ticket: data?.[0] });
+  } catch (err) {
+    console.error('Falha ao enviar suporte:', err.response?.data || err.message);
+    res.status(500).json({ error: 'Não foi possível enviar sua mensagem.' });
+  }
+});
+
+app.post('/api/feedback', requireAuthenticated, async (req, res) => {
+  try {
+    const rating = Number(req.body?.rating);
+    const message = String(req.body?.message || '').trim();
+    if (!Number.isInteger(rating) || rating < 1 || rating > 5) return res.status(400).json({ error: 'Escolha de 1 a 5 estrelas.' });
+    if (message.length < 5 || message.length > 1200) return res.status(400).json({ error: 'Escreva um feedback entre 5 e 1200 caracteres.' });
+    const payload = { user_id: req.user.id, user_name: req.profile?.name || req.user.user_metadata?.name || 'Aluno', user_email: req.user.email || '', rating, message };
+    await axios.post(`${required('SUPABASE_URL')}/rest/v1/feedback_entries`, payload, { headers: { ...supabaseHeaders(), Prefer: 'return=minimal' } });
+    res.status(201).json({ saved: true });
+  } catch (err) {
+    console.error('Falha feedback:', err.response?.data || err.message);
+    res.status(500).json({ error: 'Não foi possível salvar seu feedback.' });
+  }
+});
+
+app.get('/api/admin/support', requireAdmin, async (req, res) => {
+  try {
+    const [{ data }, { data: profiles }] = await Promise.all([
+      axios.get(`${required('SUPABASE_URL')}/rest/v1/support_tickets?select=*&order=created_at.desc&limit=500`, { headers: supabaseHeaders() }),
+      axios.get(`${required('SUPABASE_URL')}/rest/v1/profiles?select=id,subscription_plan,subscription_status,access_until`, { headers: supabaseHeaders() })
+    ]);
+    const byId = new Map((profiles || []).map(item => [item.id, item]));
+    res.json({ tickets: (data || []).map(ticket => ({ ...ticket, profile: byId.get(ticket.user_id) || null })) });
+  } catch (err) { res.status(500).json({ error: 'Não foi possível carregar o suporte.' }); }
+});
+
+app.patch('/api/admin/support/:id', requireAdmin, async (req, res) => {
+  try {
+    const status = ['open', 'in_progress', 'resolved'].includes(req.body?.status) ? req.body.status : 'open';
+    const adminReply = String(req.body?.adminReply || '').trim().slice(0, 2000) || null;
+    await axios.patch(`${required('SUPABASE_URL')}/rest/v1/support_tickets?id=eq.${encodeURIComponent(req.params.id)}`, { status, admin_reply: adminReply, updated_at: new Date().toISOString() }, { headers: { ...supabaseHeaders(), Prefer: 'return=minimal' } });
+    res.json({ updated: true });
+  } catch (err) { res.status(500).json({ error: 'Não foi possível atualizar o atendimento.' }); }
+});
+
+app.get('/api/admin/feedback', requireAdmin, async (req, res) => {
+  try {
+    const { data } = await axios.get(`${required('SUPABASE_URL')}/rest/v1/feedback_entries?select=*&order=created_at.desc&limit=500`, { headers: supabaseHeaders() });
+    res.json({ feedback: data || [] });
+  } catch (err) { res.status(500).json({ error: 'Não foi possível carregar os feedbacks.' }); }
+});
 app.patch('/api/admin/users/:id/subscription', requireAdmin, async (req, res) => {
   try {
     const plan = ['weekly', 'monthly'].includes(req.body?.plan) ? req.body.plan : null;
