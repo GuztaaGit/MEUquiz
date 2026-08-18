@@ -25,6 +25,7 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;}
 .auth-logo h1 span{background:linear-gradient(135deg,var(--accent),var(--accent2));background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
 .auth-logo p{color:var(--text2);font-size:.9rem;margin-top:.3rem;}
 .auth-card{background:var(--card);border:1px solid var(--border2);border-radius:var(--r);padding:2rem;}
+.auth-offer{margin-bottom:1rem;padding:.85rem;border:1px solid rgba(79,142,247,.3);border-radius:12px;background:linear-gradient(135deg,rgba(79,142,247,.12),rgba(124,92,252,.1));text-align:center}.auth-offer strong{display:block;font-family:'Syne',sans-serif;font-size:.92rem;margin-bottom:.5rem}.auth-prices{display:flex;justify-content:center;gap:.45rem;flex-wrap:wrap}.auth-price{padding:.34rem .62rem;border-radius:999px;background:var(--bg2);border:1px solid var(--border2);font-size:.72rem;color:var(--text2)}.auth-price b{color:var(--green)}.auth-offer small{display:block;color:var(--text2);font-size:.66rem;margin-top:.48rem;line-height:1.4}
 .auth-tabs{display:flex;gap:4px;background:var(--bg2);border-radius:var(--r2);padding:4px;margin-bottom:1.5rem;}
 .auth-tab{flex:1;padding:.5rem;text-align:center;border-radius:8px;cursor:pointer;font-size:.9rem;font-weight:500;color:var(--text2);transition:all .2s;}
 .auth-tab.active{background:var(--card2);color:var(--text);}
@@ -169,6 +170,7 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;}
   .auth-logo h1{font-size:1.65rem;letter-spacing:-.6px}
   .auth-logo p{font-size:.78rem;margin-top:.15rem}
   .auth-card{padding:1.1rem;border-radius:16px}
+  .auth-offer{padding:.7rem;margin-bottom:.8rem}.auth-offer strong{font-size:.82rem;margin-bottom:.4rem}.auth-price{font-size:.67rem;padding:.3rem .52rem}
   .auth-tabs{margin-bottom:1rem}
   .auth-tab{padding:.55rem;font-size:.86rem}
   .field{margin-bottom:.78rem}
@@ -190,6 +192,7 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;}
       <p>Aprenda eletrotécnica do zero ao avançado</p>
     </div>
     <div class="auth-card">
+      <div class="auth-offer"><strong>🔒 Acesso completo por assinatura</strong><div class="auth-prices"><span class="auth-price">Semanal <b>R$ 21,90</b></span><span class="auth-price">Mensal <b>R$ 75,99</b></span></div><small>Entre ou crie sua conta para escolher o plano e pagar com cartão ou PIX.</small></div>
       <div class="auth-tabs">
         <div class="auth-tab active" onclick="switchTab('login')">Entrar</div>
         <div class="auth-tab" onclick="switchTab('register')">Cadastrar</div>
@@ -199,8 +202,6 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;}
         <div class="field"><label>Senha</label><input type="password" id="lp" placeholder="••••••••"/></div>
         <div class="err" id="lerr">E-mail ou senha incorretos.</div>
         <button class="btn btn-primary" onclick="doLogin()" style="margin-top:.5rem">Entrar →</button>
-        <div class="divider" style="margin-top:1.1rem">ou</div>
-        <button class="btn btn-ghost" style="width:100%;margin-top:.4rem" onclick="demoLogin()">▶ Entrar como convidado</button>
       </div>
       <div id="rf" style="display:none">
         <div class="field"><label>Nome</label><input type="text" id="rn" placeholder="Seu nome"/></div>
