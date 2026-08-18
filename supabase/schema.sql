@@ -52,6 +52,7 @@ for each row execute function public.handle_new_user();
 alter table public.profiles add column if not exists score integer not null default 0;
 alter table public.profiles add column if not exists progress jsonb not null default '{}'::jsonb;
 alter table public.profiles add column if not exists ranking_visible boolean not null default true;
+alter table public.profiles add column if not exists chat_muted_until timestamptz;
 
 create table if not exists public.community_presence (
   user_id uuid primary key references auth.users(id) on delete cascade,
