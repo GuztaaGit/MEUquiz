@@ -574,18 +574,28 @@ app.get('/api/electric-news', requireActiveSubscription, async (req, res) => {
       const request = ['garturlreq', [['X', 'X', ['X', 'X'], null, null, 1, 1, 'BR:pt-419', null, 1, null, null, null, null, null, 0, 1], 'X', 'X', 1, [1, 1, 1], 1, 1, null, 0, 0, null, 0], id, Number(timestamp), signature];
       const form = new URLSearchParams({ 'f.req': JSON.stringify([[['Fbv4je', JSON.stringify(request), null, 'generic']]]) });
       const { data: batch } = await axios.post('https://news.google.com/_/DotsSplashUi/data/batchexecute?rpcids=Fbv4je', form.toString(), { timeout: 5000, headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' } });
-      const outer = JSON.parse(String(batch).replace(/^\)\]\}'\s*/, ''));
+      const batchText = String(batch);
+      const jsonText = batchText.split('\n').find(line => line.trim().startsWith('[["wrb.fr"')) || batchText.replace(/^\)\]\}'\s*/, '');
+      const outer = JSON.parse(jsonText);
       const row = outer.find(entry => entry?.[0] === 'wrb.fr' && entry?.[1] === 'Fbv4je');
       const resolved = row?.[2] ? JSON.parse(row[2])?.[1] : null;
       return /^https?:\/\//i.test(resolved || '') ? resolved : googleUrl;
     };
-    const baseItems = [...String(data).matchAll(/<item>([\s\S]*?)<\/item>/g)].slice(0, 10).map(match => {
+    const thematicImages = [
+      'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?auto=format&fit=crop&w=900&q=80',
+      'https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=900&q=80',
+      'https://images.unsplash.com/photo-1466611653911-95081537e5b7?auto=format&fit=crop&w=900&q=80',
+      'https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?auto=format&fit=crop&w=900&q=80',
+      'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=900&q=80',
+      'https://images.unsplash.com/photo-1597404294360-feeeda04612e?auto=format&fit=crop&w=900&q=80'
+    ];
+    const baseItems = [...String(data).matchAll(/<item>([\s\S]*?)<\/item>/g)].slice(0, 10).map((match, index) => {
       const xml = match[1];
       const pick = tag => decode(xml.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`))?.[1]);
       const rawTitle = pick('title');
       const parts = rawTitle.split(' - ');
       const mediaImage = decode(xml.match(/<(?:media:content|enclosure)[^>]+url=["']([^"']+)["']/i)?.[1]);
-      return { title: parts.slice(0, -1).join(' - ') || rawTitle, source: parts.at(-1) || 'Notícia', url: pick('link'), publishedAt: pick('pubDate'), image: mediaImage, summary: cleanText(pick('description')) };
+      return { title: parts.slice(0, -1).join(' - ') || rawTitle, source: parts.at(-1) || 'Notícia', url: pick('link'), publishedAt: pick('pubDate'), image: mediaImage, summary: cleanText(pick('description')), thematicImage: thematicImages[index % thematicImages.length] };
     }).filter(item => item.title && /^https?:/.test(item.url));
     const items = await Promise.all(baseItems.map(async item => {
       try {
@@ -594,9 +604,14 @@ app.get('/api/electric-news', requireActiveSubscription, async (req, res) => {
         const html = String(response.data || '').slice(0, 1200000);
         const description = meta(html, 'og:description') || meta(html, 'twitter:description') || meta(html, 'description');
         const image = meta(html, 'og:image') || meta(html, 'twitter:image');
-        return { ...item, url: response.request?.res?.responseUrl || articleUrl, image: /^https?:\/\//i.test(image) ? image : item.image, summary: cleanText(description || item.summary).slice(0, 240) };
+        const actualUrl = response.request?.res?.responseUrl || articleUrl;
+        const googleResult = /(?:google\.com|googleusercontent\.com|gstatic\.com)/i.test(actualUrl);
+        const cleanDescription = cleanText(description || item.summary);
+        const usableDescription = !googleResult && !/comprehensive up-to-date news coverage|google news/i.test(cleanDescription) ? cleanDescription : '';
+        const usableImage = !googleResult && /^https?:\/\//i.test(image) && !/(?:googleusercontent|gstatic|google\.com)/i.test(image) ? image : '';
+        return { ...item, url: actualUrl, image: usableImage || item.image || item.thematicImage, summary: (usableDescription || `Entenda os destaques de ${item.title.toLowerCase()} e sua importância para energia, tecnologia e o setor elétrico.`).slice(0, 240) };
       } catch {
-        return { ...item, summary: cleanText(item.summary).slice(0, 240) };
+        return { ...item, image: item.image || item.thematicImage, summary: `Entenda os destaques de ${item.title.toLowerCase()} e sua importância para energia, tecnologia e o setor elétrico.`.slice(0, 240) };
       }
     }));
     res.set('Cache-Control', 'public, s-maxage=1800, stale-while-revalidate=86400');
