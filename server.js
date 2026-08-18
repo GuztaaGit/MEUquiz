@@ -229,6 +229,44 @@ app.get('/api/admin/feedback', requireAdmin, async (req, res) => {
     res.json({ feedback: data || [] });
   } catch (err) { res.status(500).json({ error: 'Não foi possível carregar os feedbacks.' }); }
 });
+
+app.get('/api/admin/community', requireAdmin, async (req, res) => {
+  try {
+    const [{ data: messages }, { data: profiles }] = await Promise.all([
+      axios.get(`${required('SUPABASE_URL')}/rest/v1/community_messages?select=id,user_id,author_name,message,is_bot,created_at&order=created_at.desc&limit=500`, { headers: supabaseHeaders() }),
+      axios.get(`${required('SUPABASE_URL')}/rest/v1/profiles?select=id,email,name,chat_muted_until`, { headers: supabaseHeaders() })
+    ]);
+    const profileById = new Map((profiles || []).map(item => [item.id, item]));
+    res.json({ messages: (messages || []).map(message => ({ ...message, profile: message.user_id ? profileById.get(message.user_id) || null : null })) });
+  } catch (err) {
+    console.error('Falha admin comunidade:', err.response?.data || err.message);
+    res.status(500).json({ error: 'Não foi possível carregar a moderação do chat.' });
+  }
+});
+
+app.delete('/api/admin/community/messages/:id', requireAdmin, async (req, res) => {
+  try {
+    await axios.delete(`${required('SUPABASE_URL')}/rest/v1/community_messages?id=eq.${encodeURIComponent(req.params.id)}`, { headers: { ...supabaseHeaders(), Prefer: 'return=minimal' } });
+    res.json({ deleted: true });
+  } catch (err) { res.status(500).json({ error: 'Não foi possível apagar a mensagem.' }); }
+});
+
+app.delete('/api/admin/community/messages', requireAdmin, async (req, res) => {
+  try {
+    await axios.delete(`${required('SUPABASE_URL')}/rest/v1/community_messages?id=gt.0`, { headers: { ...supabaseHeaders(), Prefer: 'return=minimal' } });
+    res.json({ cleared: true });
+  } catch (err) { res.status(500).json({ error: 'Não foi possível limpar o Chat Global.' }); }
+});
+
+app.patch('/api/admin/community/users/:id/mute', requireAdmin, async (req, res) => {
+  try {
+    const hours = Number(req.body?.hours);
+    if (!Number.isFinite(hours) || hours < 0 || hours > 87600) return res.status(400).json({ error: 'Informe uma duração entre 0 e 87600 horas.' });
+    const mutedUntil = hours === 0 ? null : new Date(Date.now() + hours * 3600000).toISOString();
+    await axios.patch(`${required('SUPABASE_URL')}/rest/v1/profiles?id=eq.${encodeURIComponent(req.params.id)}`, { chat_muted_until: mutedUntil, updated_at: new Date().toISOString() }, { headers: { ...supabaseHeaders(), Prefer: 'return=minimal' } });
+    res.json({ updated: true, mutedUntil });
+  } catch (err) { res.status(500).json({ error: 'Não foi possível alterar o silenciamento.' }); }
+});
 app.patch('/api/admin/users/:id/subscription', requireAdmin, async (req, res) => {
   try {
     const plan = ['weekly', 'monthly'].includes(req.body?.plan) ? req.body.plan : null;
@@ -571,6 +609,10 @@ app.get('/api/community', requireActiveSubscription, async (req, res) => {
 
 app.post('/api/community/messages', requireActiveSubscription, async (req, res) => {
   try {
+    const mutedUntil = req.profile?.chat_muted_until ? new Date(req.profile.chat_muted_until) : null;
+    if (mutedUntil && mutedUntil.getTime() > Date.now()) {
+      return res.status(403).json({ error: `Você está silenciado no Chat Global até ${mutedUntil.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}.` });
+    }
     const message = String(req.body?.message || '').trim();
     if (!message) return res.status(400).json({ error: 'Digite uma mensagem.' });
     if (message.length > 600) return res.status(400).json({ error: 'A mensagem pode ter no máximo 600 caracteres.' });
