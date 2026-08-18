@@ -25,7 +25,7 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;}
 .auth-logo h1 span{background:linear-gradient(135deg,var(--accent),var(--accent2));background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
 .auth-logo p{color:var(--text2);font-size:.9rem;margin-top:.3rem;}
 .auth-card{background:var(--card);border:1px solid var(--border2);border-radius:var(--r);padding:2rem;}
-.auth-offer{margin-bottom:1rem;padding:.85rem;border:1px solid rgba(79,142,247,.3);border-radius:12px;background:linear-gradient(135deg,rgba(79,142,247,.12),rgba(124,92,252,.1));text-align:center}.auth-offer strong{display:block;font-family:'Syne',sans-serif;font-size:.92rem;margin-bottom:.5rem}.auth-prices{display:flex;justify-content:center;gap:.45rem;flex-wrap:wrap}.auth-price{padding:.34rem .62rem;border-radius:999px;background:var(--bg2);border:1px solid var(--border2);font-size:.72rem;color:var(--text2)}.auth-price b{color:var(--green)}.auth-offer small{display:block;color:var(--text2);font-size:.66rem;margin-top:.48rem;line-height:1.4}
+.auth-offer{margin-bottom:1rem;padding:.85rem;border:1px solid rgba(79,142,247,.3);border-radius:12px;background:linear-gradient(135deg,rgba(79,142,247,.12),rgba(124,92,252,.1));text-align:center}.auth-offer strong{display:block;font-family:'Syne',sans-serif;font-size:.92rem;margin-bottom:.5rem}.auth-prices{display:flex;justify-content:center;gap:.45rem;flex-wrap:wrap}.auth-price{padding:.34rem .62rem;border-radius:999px;background:var(--bg2);border:1px solid var(--border2);font-size:.72rem;color:var(--text2)}.auth-price b{color:var(--green)}.auth-offer small{display:block;color:var(--text2);font-size:.66rem;margin-top:.48rem;line-height:1.4}.otp-box{display:none;text-align:center}.otp-box.show{display:block}.otp-box h3{font-size:1rem;margin-bottom:.35rem}.otp-box p{color:var(--text2);font-size:.76rem;line-height:1.45;margin-bottom:.8rem}.otp-input{width:100%;padding:.8rem;text-align:center;letter-spacing:.55rem;font-size:1.25rem!important;font-weight:700;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r2);color:var(--text);outline:none}.otp-input:focus{border-color:var(--accent)}.otp-actions{display:flex;justify-content:center;gap:.45rem;margin-top:.7rem;flex-wrap:wrap}.otp-link{border:0;background:none;color:var(--accent);font-family:inherit;font-size:.72rem;cursor:pointer;padding:.3rem}
 .auth-tabs{display:flex;gap:4px;background:var(--bg2);border-radius:var(--r2);padding:4px;margin-bottom:1.5rem;}
 .auth-tab{flex:1;padding:.5rem;text-align:center;border-radius:8px;cursor:pointer;font-size:.9rem;font-weight:500;color:var(--text2);transition:all .2s;}
 .auth-tab.active{background:var(--card2);color:var(--text);}
@@ -204,11 +204,8 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;}
         <button class="btn btn-primary" onclick="doLogin()" style="margin-top:.5rem">Entrar →</button>
       </div>
       <div id="rf" style="display:none">
-        <div class="field"><label>Nome</label><input type="text" id="rn" placeholder="Seu nome"/></div>
-        <div class="field"><label>E-mail</label><input type="email" id="re" placeholder="seu@email.com"/></div>
-        <div class="field"><label>Senha</label><input type="password" id="rp" placeholder="mín. 6 caracteres"/></div>
-        <div class="err" id="rerr">Preencha todos os campos.</div>
-        <button class="btn btn-primary" onclick="doRegister()" style="margin-top:.5rem">Criar conta →</button>
+        <div id="register-fields"><div class="field"><label>Nome</label><input type="text" id="rn" placeholder="Seu nome"/></div><div class="field"><label>E-mail</label><input type="email" id="re" placeholder="seu@email.com"/></div><div class="field"><label>Senha</label><input type="password" id="rp" placeholder="mín. 6 caracteres"/></div><div class="err" id="rerr">Preencha todos os campos.</div><button class="btn btn-primary" onclick="doRegister()" id="register-btn" style="margin-top:.5rem">Criar conta →</button></div>
+        <div class="otp-box" id="signup-otp"><h3>📩 Confirme seu e-mail</h3><p>Digite o código de 6 dígitos enviado para <strong id="otp-email"></strong>.</p><input class="otp-input" id="otp-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000" oninput="this.value=this.value.replace(/\D/g,'').slice(0,6)" onkeydown="if(event.key==='Enter')verifySignupOtp()"><div class="err" id="otp-error"></div><button class="btn btn-primary" onclick="verifySignupOtp()" id="otp-btn" style="margin-top:.8rem">Confirmar e-mail</button><div class="otp-actions"><button class="otp-link" onclick="resendSignupOtp()">Reenviar código</button><button class="otp-link" onclick="changeSignupEmail()">Trocar e-mail</button></div></div>
       </div>
     </div>
   </div>
@@ -1068,6 +1065,7 @@ let supabaseClient = null;
 let currentSession = null;
 let subscriptionActive = false;
 let progressSyncTimer = null;
+let pendingSignupEmail = '';
 
 function queueProgressSync(){
   if(!currentSession?.access_token||!me)return;
@@ -1120,9 +1118,12 @@ async function doRegister(){
     err.style.display = 'block';
     return;
   }
+  const registerButton = document.getElementById('register-btn');
+  registerButton.disabled = true; registerButton.textContent = 'Enviando código…';
   const { data, error } = await supabaseClient.auth.signUp({
     email, password, options: { data: { name } }
   });
+  registerButton.disabled = false; registerButton.textContent = 'Criar conta →';
   if (error) {
     err.textContent = error.message.includes('registered') ? 'E-mail já cadastrado.' : 'Não foi possível criar a conta.';
     err.style.display = 'block';
@@ -1130,13 +1131,37 @@ async function doRegister(){
   }
   err.style.display = 'none';
   if (!data.session) {
-    err.textContent = 'Cadastro criado. Confirme o e-mail e depois entre.';
-    err.style.color = 'var(--green)';
-    err.style.display = 'block';
+    pendingSignupEmail = email;
+    document.getElementById('register-fields').style.display = 'none';
+    document.getElementById('signup-otp').classList.add('show');
+    document.getElementById('otp-email').textContent = email;
+    document.getElementById('otp-code').focus();
     return;
   }
   currentSession = data.session;
   await enterAuthenticatedApp(data.user);
+}
+
+async function verifySignupOtp(){
+  const token=document.getElementById('otp-code').value.trim(),errorBox=document.getElementById('otp-error'),button=document.getElementById('otp-btn');
+  if(token.length!==6){errorBox.textContent='Digite os 6 números do código.';errorBox.style.display='block';return;}
+  button.disabled=true;button.textContent='Confirmando…';errorBox.style.display='none';
+  let result=await supabaseClient.auth.verifyOtp({email:pendingSignupEmail,token,type:'signup'});
+  if(result.error) result=await supabaseClient.auth.verifyOtp({email:pendingSignupEmail,token,type:'email'});
+  button.disabled=false;button.textContent='Confirmar e-mail';
+  if(result.error){errorBox.textContent='Código inválido ou vencido. Confira o e-mail e tente novamente.';errorBox.style.display='block';return;}
+  currentSession=result.data.session;toast('E-mail confirmado com sucesso!','ok');
+  await enterAuthenticatedApp(result.data.user);
+}
+
+async function resendSignupOtp(){
+  if(!pendingSignupEmail)return;
+  const {error}=await supabaseClient.auth.resend({type:'signup',email:pendingSignupEmail});
+  toast(error?'Não foi possível reenviar agora.':'Novo código enviado para seu e-mail.',error?'err':'ok');
+}
+
+function changeSignupEmail(){
+  pendingSignupEmail='';document.getElementById('signup-otp').classList.remove('show');document.getElementById('register-fields').style.display='block';document.getElementById('otp-code').value='';
 }
 
 function demoLogin(){
