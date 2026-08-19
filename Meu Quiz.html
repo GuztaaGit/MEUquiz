@@ -26,6 +26,7 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;}
 .auth-logo p{color:var(--text2);font-size:.9rem;margin-top:.3rem;}
 .auth-card{background:var(--card);border:1px solid var(--border2);border-radius:var(--r);padding:2rem;}
 .auth-offer{margin-bottom:1rem;padding:.85rem;border:1px solid rgba(79,142,247,.3);border-radius:12px;background:linear-gradient(135deg,rgba(79,142,247,.12),rgba(124,92,252,.1));text-align:center}.auth-offer strong{display:block;font-family:'Syne',sans-serif;font-size:.92rem;margin-bottom:.5rem}.auth-prices{display:flex;justify-content:center;gap:.45rem;flex-wrap:wrap}.auth-price{padding:.34rem .62rem;border-radius:999px;background:var(--bg2);border:1px solid var(--border2);font-size:.72rem;color:var(--text2)}.auth-price b{color:var(--green)}.auth-offer small{display:block;color:var(--text2);font-size:.66rem;margin-top:.48rem;line-height:1.4}.otp-box{display:none;text-align:center}.otp-box.show{display:block}.otp-box h3{font-size:1rem;margin-bottom:.35rem}.otp-box p{color:var(--text2);font-size:.76rem;line-height:1.45;margin-bottom:.8rem}.otp-input{width:100%;padding:.8rem;text-align:center;letter-spacing:.55rem;font-size:1.25rem!important;font-weight:700;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r2);color:var(--text);outline:none}.otp-input:focus{border-color:var(--accent)}.otp-actions{display:flex;justify-content:center;gap:.45rem;margin-top:.7rem;flex-wrap:wrap}.otp-link{border:0;background:none;color:var(--accent);font-family:inherit;font-size:.72rem;cursor:pointer;padding:.3rem}
+.auth-helper-row{display:flex;justify-content:flex-end;margin-top:.55rem}.auth-helper-row .otp-link{font-size:.76rem}.password-panel{display:none}.password-panel.show{display:block}.password-panel-icon{width:54px;height:54px;display:grid;place-items:center;margin:0 auto .9rem;border-radius:16px;background:linear-gradient(135deg,rgba(89,160,255,.2),rgba(137,92,255,.2));border:1px solid var(--border2);font-size:1.35rem}.password-panel h3{text-align:center;margin-bottom:.35rem}.password-panel>p{text-align:center;color:var(--text2);font-size:.76rem;line-height:1.5;margin-bottom:1rem}.email-confirm-card{padding:1rem;border-radius:15px;background:linear-gradient(135deg,rgba(33,230,176,.08),rgba(89,160,255,.08));border:1px solid rgba(33,230,176,.2);margin-bottom:.85rem}.email-confirm-card strong{color:var(--green)}
 .auth-tabs{display:flex;gap:4px;background:var(--bg2);border-radius:var(--r2);padding:4px;margin-bottom:1.5rem;}
 .auth-tab{flex:1;padding:.5rem;text-align:center;border-radius:8px;cursor:pointer;font-size:.9rem;font-weight:500;color:var(--text2);transition:all .2s;}
 .auth-tab.active{background:var(--card2);color:var(--text);}
@@ -306,7 +307,7 @@ h1,h2,h3,h4{letter-spacing:-.035em}
     <main>
       <section class="sales-wrap sales-hero"><div><span class="sales-kicker">⚡ Do básico à prática profissional</span><h1>Aprenda elétrica com um caminho <span class="sales-gradient">claro e completo.</span></h1><p class="sales-hero-copy">Estude eletrotécnica em 60 níveis, pratique com quizzes inteligentes e conte com um Tutor de IA para explicar cálculos, circuitos, imagens e PDFs.</p><div class="sales-cta"><button class="btn btn-primary" onclick="openAuth('register')">Começar agora →</button><button class="btn btn-ghost" onclick="document.getElementById('planos').scrollIntoView({behavior:'smooth'})">Ver planos</button></div><p class="sales-note">Cadastro com confirmação por e-mail • Pagamento seguro pelo Asaas</p></div><div class="product-preview" aria-label="Prévia da plataforma ElectroLearn"><div class="preview-top"><span class="preview-dots"><i></i><i></i><i></i></span><span>Área do aluno</span></div><div class="preview-banner"><strong>Olá, futuro profissional! 👋</strong><p>Continue sua jornada no mundo elétrico.</p></div><div class="preview-stats"><div class="preview-stat"><b>60</b><span>Níveis</span></div><div class="preview-stat"><b>IA</b><span>Tutor</span></div><div class="preview-stat"><b>24h</b><span>Acesso</span></div></div><div class="preview-levels"><div class="preview-level on">⚡ Conceitos básicos<span>Tensão, corrente e resistência</span></div><div class="preview-level">💡 Lei de Ohm<span>Cálculos e aplicações</span></div><div class="preview-level">🛡️ Segurança elétrica<span>Riscos, EPIs e proteção</span></div><div class="preview-level">🏭 Eletricidade industrial<span>Motores, comandos e CLP</span></div></div></div></section>
       <section class="sales-section" id="recursos"><div class="sales-wrap"><div class="section-head"><span class="eyebrow">Tudo em um só lugar</span><h2>Estudo que acompanha seu ritmo</h2><p>Conteúdo organizado para você entender, praticar, revisar os erros e avançar com segurança.</p></div><div class="benefit-grid"><article class="benefit-card"><div class="benefit-icon">📚</div><h3>60 níveis progressivos</h3><p>Uma trilha do básico ao avançado com explicações, materiais em PDF e apoio em vídeo.</p></article><article class="benefit-card"><div class="benefit-icon">🤖</div><h3>Tutor de IA</h3><p>Tire dúvidas, envie fotos de circuitos ou PDFs e receba explicações focadas em elétrica.</p></article><article class="benefit-card"><div class="benefit-icon">⚡</div><h3>Quizzes inteligentes</h3><p>Respostas discursivas são analisadas e os erros aparecem com explicação ao final.</p></article><article class="benefit-card"><div class="benefit-icon">🌐</div><h3>Mundo Elétrico</h3><p>Acompanhe novidades, tecnologias e tendências do setor elétrico em cards atualizados.</p></article><article class="benefit-card"><div class="benefit-icon">💬</div><h3>Comunidade de alunos</h3><p>Converse no Chat Global moderado e interaja com bots de apoio identificados.</p></article><article class="benefit-card"><div class="benefit-icon">🏆</div><h3>Progresso e ranking</h3><p>Acompanhe níveis concluídos, pontuação e sua evolução durante toda a jornada.</p></article></div></div></section>
-      <section class="sales-section"><div class="sales-wrap"><div class="section-head"><span class="eyebrow">Como funciona</span><h2>Comece em poucos minutos</h2></div><div class="journey"><div class="journey-step"><h3>Crie sua conta</h3><p>Informe nome, e-mail e uma senha segura.</p></div><div class="journey-step"><h3>Confirme o e-mail</h3><p>Digite o código recebido sem precisar abrir outro link.</p></div><div class="journey-step"><h3>Escolha o plano</h3><p>Pague com PIX ou cartão no checkout seguro.</p></div><div class="journey-step"><h3>Comece a estudar</h3><p>O acesso é liberado após a confirmação do pagamento.</p></div></div></div></section>
+      <section class="sales-section"><div class="sales-wrap"><div class="section-head"><span class="eyebrow">Como funciona</span><h2>Comece em poucos minutos</h2></div><div class="journey"><div class="journey-step"><h3>Crie sua conta</h3><p>Informe nome, e-mail e uma senha segura.</p></div><div class="journey-step"><h3>Confirme o e-mail</h3><p>Abra a mensagem recebida e clique em Confirmar cadastro.</p></div><div class="journey-step"><h3>Escolha o plano</h3><p>Pague com PIX ou cartão no checkout seguro.</p></div><div class="journey-step"><h3>Comece a estudar</h3><p>O acesso é liberado após a confirmação do pagamento.</p></div></div></div></section>
       <section class="sales-section" id="planos"><div class="sales-wrap"><div class="section-head"><span class="eyebrow">Planos</span><h2>Escolha seu período de acesso</h2><p>Os dois planos liberam todos os recursos do ElectroLearn.</p></div><div class="pricing-grid"><article class="price-card"><span class="price-label">Semanal</span><div class="price-value">R$ 21,90 <small>/ 7 dias</small></div><ul class="price-list"><li>Todos os 60 níveis</li><li>Tutor IA e análise de arquivos</li><li>Quizzes, PDFs e vídeos</li><li>Chat Global e ranking</li></ul><button class="btn btn-primary" onclick="openAuth('register')">Assinar semanal</button></article><article class="price-card featured"><span class="popular-tag">Melhor período</span><span class="price-label">Mensal</span><div class="price-value">R$ 75,99 <small>/ 30 dias</small></div><ul class="price-list"><li>Todos os 60 níveis</li><li>Tutor IA e análise de arquivos</li><li>Quizzes, PDFs e vídeos</li><li>Chat Global e ranking</li></ul><button class="btn btn-primary" onclick="openAuth('register')">Assinar mensal</button></article></div></div></section>
       <section class="sales-section"><div class="sales-wrap"><div class="section-head"><span class="eyebrow">Dúvidas frequentes</span><h2>Antes de começar</h2></div><div class="faq-list"><details><summary>Preciso entender de elétrica para começar?</summary><p>Não. A trilha começa nos conceitos fundamentais e avança progressivamente.</p></details><details><summary>Quando meu acesso é liberado?</summary><p>Após a confirmação real do pagamento pelo Asaas. O PIX costuma ser confirmado rapidamente; no cartão, depende da aprovação da operadora.</p></details><details><summary>O PIX renova automaticamente?</summary><p>Não. No PIX, você compra o período escolhido e renova manualmente ao vencer. A renovação automática é oferecida no cartão recorrente.</p></details><details><summary>Posso usar pelo celular?</summary><p>Sim. O ElectroLearn se adapta ao celular, tablet e computador.</p></details><details><summary>O Tutor substitui um profissional habilitado?</summary><p>Não. Ele é um apoio educacional. Trabalhos com risco elétrico devem seguir normas e ser realizados por profissional habilitado.</p></details></div></div></section>
       <section class="sales-section"><div class="sales-wrap sales-final"><h2>Seu próximo nível começa agora.</h2><p>Crie sua conta, escolha seu plano e avance no mundo da elétrica com uma trilha feita para manter você em movimento.</p><button class="btn btn-primary" onclick="openAuth('register')">Criar minha conta →</button></div></section>
@@ -330,11 +331,14 @@ h1,h2,h3,h4{letter-spacing:-.035em}
         <div class="field"><label>Senha</label><input type="password" id="lp" placeholder="••••••••"/></div>
         <div class="err" id="lerr">E-mail ou senha incorretos.</div>
         <button class="btn btn-primary" onclick="doLogin()" style="margin-top:.5rem">Entrar →</button>
+        <div class="auth-helper-row"><button class="otp-link" onclick="showForgotPassword()">Esqueci minha senha</button></div>
       </div>
       <div id="rf" style="display:none">
         <div id="register-fields"><div class="field"><label>Nome</label><input type="text" id="rn" placeholder="Seu nome"/></div><div class="field"><label>E-mail</label><input type="email" id="re" placeholder="seu@email.com"/></div><div class="field"><label>Senha</label><input type="password" id="rp" placeholder="mín. 6 caracteres"/></div><div class="err" id="rerr">Preencha todos os campos.</div><button class="btn btn-primary" onclick="doRegister()" id="register-btn" style="margin-top:.5rem">Criar conta →</button></div>
-        <div class="otp-box" id="signup-otp"><h3>📩 Confirme seu e-mail</h3><p>Digite o código de 6 dígitos enviado para <strong id="otp-email"></strong>.</p><input class="otp-input" id="otp-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="000000" oninput="this.value=this.value.replace(/\D/g,'').slice(0,6)" onkeydown="if(event.key==='Enter')verifySignupOtp()"><div class="err" id="otp-error"></div><button class="btn btn-primary" onclick="verifySignupOtp()" id="otp-btn" style="margin-top:.8rem">Confirmar e-mail</button><div class="otp-actions"><button class="otp-link" onclick="resendSignupOtp()">Reenviar código</button><button class="otp-link" onclick="changeSignupEmail()">Trocar e-mail</button></div></div>
+        <div class="otp-box" id="signup-confirmation"><div class="password-panel-icon">📩</div><h3>Confirme seu e-mail</h3><p>Enviamos uma mensagem para <strong id="confirmation-email"></strong>. Abra o e-mail e clique no botão <strong>Confirmar cadastro</strong>.</p><div class="email-confirm-card"><strong>Não precisa digitar código.</strong><br><span style="font-size:.72rem;color:var(--text2)">Depois da confirmação, você voltará ao ElectroLearn para entrar.</span></div><div class="otp-actions"><button class="otp-link" onclick="resendSignupConfirmation()">Reenviar e-mail</button><button class="otp-link" onclick="changeSignupEmail()">Trocar e-mail</button></div></div>
       </div>
+      <div class="password-panel" id="forgot-password"><div class="password-panel-icon">🔐</div><h3>Recuperar senha</h3><p>Informe seu e-mail e enviaremos um link seguro para criar uma nova senha.</p><div class="field"><label>E-mail</label><input type="email" id="reset-email" placeholder="seu@email.com" onkeydown="if(event.key==='Enter')requestPasswordReset()"/></div><div class="err" id="reset-error"></div><button class="btn btn-primary" id="reset-send" onclick="requestPasswordReset()">Enviar link de recuperação</button><div class="otp-actions"><button class="otp-link" onclick="returnToLogin()">← Voltar para o login</button></div></div>
+      <div class="password-panel" id="new-password"><div class="password-panel-icon">🔑</div><h3>Crie sua nova senha</h3><p>Escolha uma senha com pelo menos 8 caracteres.</p><div class="field"><label>Nova senha</label><input type="password" id="new-password-value" placeholder="mín. 8 caracteres"/></div><div class="field"><label>Confirmar nova senha</label><input type="password" id="new-password-confirm" placeholder="digite novamente" onkeydown="if(event.key==='Enter')saveNewPassword()"/></div><div class="err" id="new-password-error"></div><button class="btn btn-primary" id="new-password-save" onclick="saveNewPassword()">Salvar nova senha</button></div>
     </div>
   </div></div>
 </div>
@@ -644,6 +648,9 @@ function closeAuth(){
   document.getElementById('public-landing')?.classList.remove('auth-open');document.getElementById('auth-box')?.classList.remove('show');window.scrollTo({top:0,behavior:'smooth'});
 }
 function switchTab(t){
+  restoreAuthChrome();
+  document.getElementById('forgot-password')?.classList.remove('show');
+  document.getElementById('new-password')?.classList.remove('show');
   document.querySelectorAll('.auth-tab').forEach((el,i)=>el.classList.toggle('active',i===(t==='login'?0:1)));
   document.getElementById('lf').style.display=t==='login'?'':'none';
   document.getElementById('rf').style.display=t==='register'?'':'none';
@@ -1269,6 +1276,42 @@ let currentSession = null;
 let subscriptionActive = false;
 let progressSyncTimer = null;
 let pendingSignupEmail = '';
+let authLinkType = new URLSearchParams(location.hash.replace(/^#/,'')).get('type') || new URLSearchParams(location.search).get('type') || '';
+let handlingAuthLink = false;
+
+function hideAuthFlows(){
+  document.querySelector('.auth-offer').style.display='none';
+  document.querySelector('.auth-tabs').style.display='none';
+  document.getElementById('lf').style.display='none';
+  document.getElementById('rf').style.display='none';
+  document.getElementById('forgot-password').classList.remove('show');
+  document.getElementById('new-password').classList.remove('show');
+}
+function restoreAuthChrome(){
+  document.querySelector('.auth-offer').style.display='';
+  document.querySelector('.auth-tabs').style.display='';
+}
+function clearAuthLink(){history.replaceState({},document.title,location.pathname);authLinkType='';}
+function showForgotPassword(){
+  hideAuthFlows();
+  document.getElementById('forgot-password').classList.add('show');
+  document.getElementById('reset-email').value=document.getElementById('le').value.trim();
+  document.getElementById('reset-email').focus();
+}
+function returnToLogin(){
+  document.getElementById('forgot-password').classList.remove('show');
+  document.getElementById('new-password').classList.remove('show');
+  restoreAuthChrome();switchTab('login');
+}
+function showNewPasswordForm(){
+  document.getElementById('auth-screen').classList.add('active');
+  document.getElementById('app-screen').classList.remove('active');
+  setHelpDockVisible(false);
+  document.getElementById('public-landing').classList.add('auth-open');
+  document.getElementById('auth-box').classList.add('show');
+  hideAuthFlows();document.getElementById('new-password').classList.add('show');
+  setTimeout(()=>document.getElementById('new-password-value')?.focus(),100);
+}
 
 function queueProgressSync(){
   if(!currentSession?.access_token||!me)return;
@@ -1287,9 +1330,16 @@ async function loadCloudProgress(){
     paymentConfig = await fetch('/api/config').then(r => r.json());
     if (!paymentConfig.supabaseUrl) throw new Error(paymentConfig.error || 'Configuração indisponível');
     supabaseClient = window.supabase.createClient(paymentConfig.supabaseUrl, paymentConfig.supabaseAnonKey);
+    supabaseClient.auth.onAuthStateChange((event,session)=>{
+      currentSession=session;
+      if(event==='PASSWORD_RECOVERY'){authLinkType='recovery';setTimeout(showNewPasswordForm,0);}
+      else if(event==='SIGNED_IN'&&authLinkType==='signup'&&!handlingAuthLink)setTimeout(finishEmailConfirmation,0);
+    });
     const { data } = await supabaseClient.auth.getSession();
     currentSession = data.session;
-    if (currentSession) await enterAuthenticatedApp(currentSession.user);
+    if(authLinkType==='recovery')showNewPasswordForm();
+    else if(authLinkType==='signup'&&currentSession)await finishEmailConfirmation();
+    else if (currentSession) await enterAuthenticatedApp(currentSession.user);
   } catch (err) {
     console.error(err);
     document.getElementById('lerr').textContent = 'Sistema de acesso temporariamente indisponível.';
@@ -1303,7 +1353,7 @@ async function doLogin(){
   err.style.display = 'none';
   const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
   if (error) {
-    err.textContent = 'E-mail ou senha incorretos.';
+    err.textContent = /confirm/i.test(error.message) ? 'Confirme seu e-mail antes de entrar.' : 'E-mail ou senha incorretos.';
     err.style.display = 'block';
     return;
   }
@@ -1322,9 +1372,9 @@ async function doRegister(){
     return;
   }
   const registerButton = document.getElementById('register-btn');
-  registerButton.disabled = true; registerButton.textContent = 'Enviando código…';
+  registerButton.disabled = true; registerButton.textContent = 'Enviando confirmação…';
   const { data, error } = await supabaseClient.auth.signUp({
-    email, password, options: { data: { name } }
+    email, password, options: { data: { name }, emailRedirectTo: `${location.origin}${location.pathname}` }
   });
   registerButton.disabled = false; registerButton.textContent = 'Criar conta →';
   if (error) {
@@ -1336,35 +1386,48 @@ async function doRegister(){
   if (!data.session) {
     pendingSignupEmail = email;
     document.getElementById('register-fields').style.display = 'none';
-    document.getElementById('signup-otp').classList.add('show');
-    document.getElementById('otp-email').textContent = email;
-    document.getElementById('otp-code').focus();
+    document.getElementById('signup-confirmation').classList.add('show');
+    document.getElementById('confirmation-email').textContent = email;
     return;
   }
-  currentSession = data.session;
-  await enterAuthenticatedApp(data.user);
+  await supabaseClient.auth.signOut();
+  switchTab('login');toast('Conta criada. Agora entre com seu e-mail e senha.','ok');
 }
 
-async function verifySignupOtp(){
-  const token=document.getElementById('otp-code').value.trim(),errorBox=document.getElementById('otp-error'),button=document.getElementById('otp-btn');
-  if(token.length!==6){errorBox.textContent='Digite os 6 números do código.';errorBox.style.display='block';return;}
-  button.disabled=true;button.textContent='Confirmando…';errorBox.style.display='none';
-  let result=await supabaseClient.auth.verifyOtp({email:pendingSignupEmail,token,type:'signup'});
-  if(result.error) result=await supabaseClient.auth.verifyOtp({email:pendingSignupEmail,token,type:'email'});
-  button.disabled=false;button.textContent='Confirmar e-mail';
-  if(result.error){errorBox.textContent='Código inválido ou vencido. Confira o e-mail e tente novamente.';errorBox.style.display='block';return;}
-  currentSession=result.data.session;toast('E-mail confirmado com sucesso!','ok');
-  await enterAuthenticatedApp(result.data.user);
-}
-
-async function resendSignupOtp(){
+async function resendSignupConfirmation(){
   if(!pendingSignupEmail)return;
-  const {error}=await supabaseClient.auth.resend({type:'signup',email:pendingSignupEmail});
-  toast(error?'Não foi possível reenviar agora.':'Novo código enviado para seu e-mail.',error?'err':'ok');
+  const {error}=await supabaseClient.auth.resend({type:'signup',email:pendingSignupEmail,options:{emailRedirectTo:`${location.origin}${location.pathname}`}});
+  toast(error?'Não foi possível reenviar agora.':'Novo e-mail de confirmação enviado.',error?'err':'ok');
 }
 
 function changeSignupEmail(){
-  pendingSignupEmail='';document.getElementById('signup-otp').classList.remove('show');document.getElementById('register-fields').style.display='block';document.getElementById('otp-code').value='';
+  pendingSignupEmail='';document.getElementById('signup-confirmation').classList.remove('show');document.getElementById('register-fields').style.display='block';document.getElementById('re').focus();
+}
+
+async function finishEmailConfirmation(){
+  if(handlingAuthLink)return;handlingAuthLink=true;
+  try{await supabaseClient.auth.signOut();currentSession=null;clearAuthLink();document.getElementById('app-screen').classList.remove('active');document.getElementById('auth-screen').classList.add('active');openAuth('login');toast('E-mail confirmado! Agora faça seu login.','ok');}
+  finally{handlingAuthLink=false;}
+}
+
+async function requestPasswordReset(){
+  const email=document.getElementById('reset-email').value.trim(),errorBox=document.getElementById('reset-error'),button=document.getElementById('reset-send');
+  if(!/^\S+@\S+\.\S+$/.test(email)){errorBox.textContent='Digite um e-mail válido.';errorBox.style.color='var(--red)';errorBox.style.display='block';return;}
+  button.disabled=true;button.textContent='Enviando…';errorBox.style.display='none';
+  const {error}=await supabaseClient.auth.resetPasswordForEmail(email,{redirectTo:`${location.origin}${location.pathname}`});
+  button.disabled=false;button.textContent='Enviar link de recuperação';
+  errorBox.textContent=error?'Não foi possível enviar agora. Tente novamente.':'Se o e-mail estiver cadastrado, o link de recuperação chegará em instantes.';
+  errorBox.style.color=error?'var(--red)':'var(--green)';errorBox.style.display='block';
+}
+
+async function saveNewPassword(){
+  const password=document.getElementById('new-password-value').value,confirm=document.getElementById('new-password-confirm').value,errorBox=document.getElementById('new-password-error'),button=document.getElementById('new-password-save');
+  if(password.length<8){errorBox.textContent='Use pelo menos 8 caracteres.';errorBox.style.display='block';return;}
+  if(password!==confirm){errorBox.textContent='As senhas não são iguais.';errorBox.style.display='block';return;}
+  button.disabled=true;button.textContent='Salvando…';errorBox.style.display='none';
+  const {error}=await supabaseClient.auth.updateUser({password});
+  if(error){button.disabled=false;button.textContent='Salvar nova senha';errorBox.textContent='O link pode ter vencido. Solicite outro link.';errorBox.style.display='block';return;}
+  await supabaseClient.auth.signOut();currentSession=null;clearAuthLink();returnToLogin();toast('Senha alterada! Entre com a nova senha.','ok');
 }
 
 function demoLogin(){
