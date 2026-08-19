@@ -4,8 +4,17 @@ const path = require('path');
 
 const app = express();
 app.use(express.json({ limit: '4mb' }));
-app.use(express.static(path.join(__dirname)));
-
+app.disable('x-powered-by');
+app.use((req, res, next) => {
+  res.set({
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'DENY',
+    'Referrer-Policy': 'strict-origin-when-cross-origin',
+    'Permissions-Policy': 'camera=(), microphone=(), geolocation=()'
+  });
+  if (req.path.startsWith('/api/') && req.path !== '/api/electric-news') res.set('Cache-Control', 'no-store');
+  next();
+});
 const PORT = process.env.PORT || 3000;
 const SITE_URL = (process.env.SITE_URL || 'https://meu-quiz-six.vercel.app').replace(/\/$/, '');
 const ASAAS_URL = process.env.ASAAS_ENV === 'production'
@@ -53,12 +62,38 @@ async function profile(userId) {
   return data?.[0] || null;
 }
 
+function hasPaidAccess(p) {
+  return ['active', 'cancelled'].includes(p?.subscription_status) &&
+    p?.access_until && new Date(p.access_until).getTime() > Date.now();
+}
+
+const requestBuckets = new Map();
+function rateLimit({ windowMs, max, prefix }) {
+  return (req, res, next) => {
+    const identity = req.user?.id || req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip || 'unknown';
+    const key = `${prefix}:${identity}`;
+    const now = Date.now();
+    const current = requestBuckets.get(key);
+    if (!current || current.resetAt <= now) requestBuckets.set(key, { count: 1, resetAt: now + windowMs });
+    else {
+      current.count += 1;
+      if (current.count > max) {
+        res.set('Retry-After', String(Math.ceil((current.resetAt - now) / 1000)));
+        return res.status(429).json({ error: 'Muitas tentativas. Aguarde um pouco e tente novamente.' });
+      }
+    }
+    if (requestBuckets.size > 5000) {
+      for (const [bucketKey, bucket] of requestBuckets) if (bucket.resetAt <= now) requestBuckets.delete(bucketKey);
+    }
+    next();
+  };
+}
+
 async function requireActiveSubscription(req, res, next) {
   const user = await authenticatedUser(req);
   if (!user) return res.status(401).json({ error: 'Faça login para continuar.' });
   const p = await profile(user.id);
-  const active = p?.subscription_status === 'active' &&
-    p?.access_until && new Date(p.access_until).getTime() > Date.now();
+  const active = hasPaidAccess(p);
   if (!active) return res.status(403).json({ error: 'Assinatura necessária.', subscriptionRequired: true });
   req.user = user;
   req.profile = p;
@@ -104,13 +139,14 @@ app.get('/api/subscription-status', async (req, res) => {
     const user = await authenticatedUser(req);
     if (!user) return res.status(401).json({ error: 'Não autenticado.' });
     const p = await profile(user.id);
-    const active = p?.subscription_status === 'active' &&
-      p?.access_until && new Date(p.access_until).getTime() > Date.now();
+    const active = hasPaidAccess(p);
     res.json({
       active: Boolean(active),
       plan: p?.subscription_plan || null,
       accessUntil: p?.access_until || null,
-      status: active ? 'active' : (p?.subscription_status || 'inactive')
+      status: p?.subscription_status || 'inactive',
+      recurring: Boolean(p?.asaas_subscription_id),
+      isAdmin: ADMIN_EMAILS.has(String(user.email || '').toLowerCase())
     });
   } catch (err) {
     res.status(500).json({ error: 'Não foi possível verificar a assinatura.' });
@@ -123,11 +159,11 @@ app.get('/api/my-progress', requireActiveSubscription, async (req, res) => {
 
 app.put('/api/my-progress', requireActiveSubscription, async (req, res) => {
   try {
-    const score = Math.max(0, Math.min(10000000, Number(req.body?.score || 0)));
     const rawProgress = req.body?.progress && typeof req.body.progress === 'object' ? req.body.progress : {};
-    const progress = Object.fromEntries(Object.entries(rawProgress).slice(0, 50).map(([key, value]) => [String(key), Math.max(0, Math.min(100, Number(value || 0)))]));
+    const progress = Object.fromEntries(Object.entries(rawProgress).slice(0, 60).map(([key, value]) => [String(key), Math.max(0, Math.min(100, Math.round(Number(value || 0))))]));
+    const score = Object.values(progress).reduce((total, value) => total + Number(value || 0), 0);
     await axios.patch(`${required('SUPABASE_URL')}/rest/v1/profiles?id=eq.${req.user.id}`, {
-      score: Math.round(score), progress, ranking_visible: true, updated_at: new Date().toISOString()
+      score: Math.round(score), progress, updated_at: new Date().toISOString()
     }, { headers: { ...supabaseHeaders(), Prefer: 'return=minimal' } });
     res.json({ saved: true });
   } catch (err) {
@@ -139,7 +175,7 @@ app.put('/api/my-progress', requireActiveSubscription, async (req, res) => {
 app.get('/api/leaderboard', requireActiveSubscription, async (req, res) => {
   try {
     const { data } = await axios.get(`${required('SUPABASE_URL')}/rest/v1/profiles?ranking_visible=eq.true&select=id,email,name,score,progress&order=score.desc&limit=100`, { headers: supabaseHeaders() });
-    res.json({ entries: (data || []).map(p => ({ name: p.name || p.email?.split('@')[0] || 'Aluno', email: p.email, score: Number(p.score || 0), done: Object.values(p.progress || {}).filter(value => Number(value) >= 100).length })) });
+    res.json({ entries: (data || []).map(p => ({ name: p.name || p.email?.split('@')[0] || 'Aluno', score: Number(p.score || 0), done: Object.values(p.progress || {}).filter(value => Number(value) >= 100).length, isCurrent: p.id === req.user.id })) });
   } catch (err) {
     console.error('Falha ranking:', err.response?.data || err.message);
     res.status(500).json({ error: 'Não foi possível carregar o ranking.' });
@@ -174,7 +210,7 @@ app.get('/api/support/tickets/mine', requireAuthenticated, async (req, res) => {
   }
 });
 
-app.post('/api/support/tickets', requireAuthenticated, async (req, res) => {
+app.post('/api/support/tickets', requireAuthenticated, rateLimit({ windowMs: 10 * 60 * 1000, max: 5, prefix: 'support' }), async (req, res) => {
   try {
     const subject = String(req.body?.subject || 'Ajuda geral').trim().slice(0, 120);
     const message = String(req.body?.message || '').trim();
@@ -188,7 +224,7 @@ app.post('/api/support/tickets', requireAuthenticated, async (req, res) => {
   }
 });
 
-app.post('/api/feedback', requireAuthenticated, async (req, res) => {
+app.post('/api/feedback', requireAuthenticated, rateLimit({ windowMs: 60 * 60 * 1000, max: 5, prefix: 'feedback' }), async (req, res) => {
   try {
     const rating = Number(req.body?.rating);
     const message = String(req.body?.message || '').trim();
@@ -289,8 +325,9 @@ app.delete('/api/admin/users/:id/ranking', requireAdmin, async (req, res) => {
 
 app.post('/api/admin/users/:id/password-reset', requireAdmin, async (req, res) => {
   try {
-    const email = String(req.body?.email || '').trim();
-    if (!email) return res.status(400).json({ error: 'E-mail obrigatório.' });
+    const { data: targetUser } = await axios.get(`${required('SUPABASE_URL')}/auth/v1/admin/users/${encodeURIComponent(req.params.id)}`, { headers: supabaseHeaders() });
+    const email = String(targetUser?.email || '').trim();
+    if (!email) return res.status(404).json({ error: 'Conta não encontrada.' });
     await axios.post(`${required('SUPABASE_URL')}/auth/v1/recover`, { email, redirect_to: SITE_URL }, { headers: { apikey: required('SUPABASE_ANON_KEY'), 'Content-Type': 'application/json' } });
     res.json({ sent: true });
   } catch (err) {
@@ -310,10 +347,9 @@ app.delete('/api/admin/users/:id', requireAdmin, async (req, res) => {
   }
 });
 
-app.post('/api/create-checkout', async (req, res) => {
+app.post('/api/create-checkout', requireAuthenticated, rateLimit({ windowMs: 10 * 60 * 1000, max: 8, prefix: 'checkout' }), async (req, res) => {
   try {
-    const user = await authenticatedUser(req);
-    if (!user) return res.status(401).json({ error: 'Faça login para assinar.' });
+    const user = req.user;
     const planKey = String(req.body?.plan || '');
     const method = String(req.body?.method || 'card');
     const plan = PLANS[planKey];
@@ -367,6 +403,25 @@ app.post('/api/create-checkout', async (req, res) => {
   }
 });
 
+app.post('/api/subscription/cancel', requireActiveSubscription, rateLimit({ windowMs: 60 * 60 * 1000, max: 3, prefix: 'cancel' }), async (req, res) => {
+  try {
+    const subscriptionId = req.profile?.asaas_subscription_id;
+    if (!subscriptionId) return res.status(400).json({ error: 'Este plano não possui renovação automática ativa.' });
+    await axios.delete(`${ASAAS_URL}/subscriptions/${encodeURIComponent(subscriptionId)}`, {
+      headers: { access_token: required('ASAAS_API_KEY'), 'User-Agent': 'ElectroLearn/1.0' }
+    });
+    await axios.patch(`${required('SUPABASE_URL')}/rest/v1/profiles?id=eq.${req.user.id}`, {
+      subscription_status: 'cancelled',
+      asaas_subscription_id: null,
+      updated_at: new Date().toISOString()
+    }, { headers: { ...supabaseHeaders(), Prefer: 'return=minimal' } });
+    res.json({ cancelled: true, accessUntil: req.profile.access_until });
+  } catch (err) {
+    console.error('Falha ao cancelar assinatura:', err.response?.data || err.message);
+    res.status(err.response?.status || 500).json({ error: 'Não foi possível cancelar a renovação agora. Fale com o suporte.' });
+  }
+});
+
 app.post('/api/webhooks/asaas', async (req, res) => {
   try {
     const receivedToken = req.headers['asaas-access-token'];
@@ -398,6 +453,7 @@ app.post('/api/webhooks/asaas', async (req, res) => {
 
     if (event === 'PAYMENT_CONFIRMED' || event === 'PAYMENT_RECEIVED') {
       const grantUrl = `${required('SUPABASE_URL')}/rest/v1/payment_grants`;
+      let grantInserted = false;
       try {
         await axios.post(grantUrl, {
           payment_id: payment.id,
@@ -405,6 +461,7 @@ app.post('/api/webhooks/asaas', async (req, res) => {
           plan: planKey,
           event
         }, { headers: { ...supabaseHeaders(), Prefer: 'return=minimal' } });
+        grantInserted = true;
       } catch (err) {
         if (err.response?.status === 409) return res.status(200).json({ received: true, duplicate: true });
         throw err;
@@ -413,20 +470,25 @@ app.post('/api/webhooks/asaas', async (req, res) => {
       const current = await profile(userId);
       const base = Math.max(Date.now(), current?.access_until ? new Date(current.access_until).getTime() : 0);
       const accessUntil = new Date(base + plan.days * 86400000).toISOString();
-      await axios.patch(
-        `${required('SUPABASE_URL')}/rest/v1/profiles?id=eq.${userId}`,
-        {
-          subscription_status: 'active',
-          subscription_plan: planKey,
-          access_until: accessUntil,
-          asaas_subscription_id: payment.subscription || current?.asaas_subscription_id || null,
-          updated_at: new Date().toISOString()
-        },
-        { headers: { ...supabaseHeaders(), Prefer: 'return=minimal' } }
-      );
+      try {
+        await axios.patch(
+          `${required('SUPABASE_URL')}/rest/v1/profiles?id=eq.${userId}`,
+          {
+            subscription_status: 'active',
+            subscription_plan: planKey,
+            access_until: accessUntil,
+            asaas_subscription_id: payment.subscription || current?.asaas_subscription_id || null,
+            updated_at: new Date().toISOString()
+          },
+          { headers: { ...supabaseHeaders(), Prefer: 'return=minimal' } }
+        );
+      } catch (err) {
+        if (grantInserted) await axios.delete(`${grantUrl}?payment_id=eq.${encodeURIComponent(payment.id)}`, { headers: supabaseHeaders() }).catch(() => {});
+        throw err;
+      }
     }
 
-    if (['PAYMENT_REFUNDED', 'PAYMENT_DELETED'].includes(event)) {
+    if (event === 'PAYMENT_REFUNDED') {
       await axios.patch(
         `${required('SUPABASE_URL')}/rest/v1/profiles?id=eq.${userId}`,
         { subscription_status: 'inactive', access_until: new Date().toISOString(), updated_at: new Date().toISOString() },
@@ -440,38 +502,6 @@ app.post('/api/webhooks/asaas', async (req, res) => {
     res.status(500).json({ error: 'Falha ao processar webhook.' });
   }
 });
-
-function getProviderConfig() {
-  const openaiKey = process.env.OPENAI_API_KEY?.trim();
-  const anthropicKey = process.env.ANTHROPIC_API_KEY?.trim();
-  const providerEnv = process.env.IA_PROVIDER?.trim().toLowerCase();
-  if (providerEnv === 'openai' && openaiKey) return { provider: 'openai', key: openaiKey };
-  if (providerEnv === 'anthropic' && anthropicKey) return { provider: 'anthropic', key: anthropicKey };
-  if (openaiKey) return { provider: 'openai', key: openaiKey };
-  if (anthropicKey) return { provider: 'anthropic', key: anthropicKey };
-  throw new Error('Nenhuma chave de IA configurada.');
-}
-
-async function openaiResponse({ instructions, input, model, maxOutputTokens = 1200 }) {
-  const key = required('OPENAI_API_KEY');
-  const payload = {
-    model: model || process.env.OPENAI_MODEL || 'gpt-5-mini',
-    instructions,
-    input,
-    max_output_tokens: maxOutputTokens
-  };
-  const { data } = await axios.post('https://api.openai.com/v1/responses', payload, {
-    headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-    timeout: 45000
-  });
-  const text = data.output_text || (data.output || [])
-    .flatMap(item => item.content || [])
-    .filter(item => item.type === 'output_text')
-    .map(item => item.text)
-    .join('');
-  if (!text) throw new Error('A IA não retornou conteúdo.');
-  return text;
-}
 
 async function geminiResponse({ instructions, text, attachment, json = false, maxOutputTokens = 1200 }) {
   const key = required('GEMINI_API_KEY');
@@ -498,7 +528,28 @@ async function geminiResponse({ instructions, text, attachment, json = false, ma
   return output;
 }
 
-app.post('/api/generate-quiz', requireActiveSubscription, async (req, res) => {
+app.post('/api/generate-study', requireActiveSubscription, rateLimit({ windowMs: 10 * 60 * 1000, max: 20, prefix: 'study-ai' }), async (req, res) => {
+  try {
+    const levelId = Math.max(1, Math.min(60, Number(req.body?.levelId || 0)));
+    const levelTitle = String(req.body?.levelTitle || '').trim().slice(0, 120);
+    const topics = String(req.body?.topics || '').trim().slice(0, 700);
+    if (!levelTitle || !topics) return res.status(400).json({ error: 'Dados do nível são obrigatórios.' });
+    const text = await geminiResponse({
+      instructions: 'Você é professor brasileiro de eletrotécnica. Produza material correto, didático, prudente e compatível com normas brasileiras. Nunca oriente trabalho energizado. Retorne somente JSON válido.',
+      text: `Crie uma aula para o Nível ${levelId}: "${levelTitle}", sobre ${topics}. Retorne um array JSON com exatamente 3 módulos. Cada módulo deve conter: title, intro, formula (string ou null), hl, secs (array com exatamente 2 objetos {h,b}), ex ({t,b}) e diag (um entre circuit, ohm, current, voltage, resistance, power, series, parallel, safety). Explique fundamentos, aplicação prática e segurança. Não prometa certificação profissional.`,
+      json: true,
+      maxOutputTokens: 2400
+    });
+    const lessons = JSON.parse(text);
+    if (!Array.isArray(lessons) || lessons.length !== 3 || lessons.some(item => !item?.title || !item?.intro || !Array.isArray(item?.secs))) throw new Error('Aula incompleta.');
+    res.json({ lessons });
+  } catch (err) {
+    console.error('Falha material IA:', err.response?.data || err.message);
+    res.status(err.response?.status || 500).json({ error: 'Não foi possível preparar este material agora.' });
+  }
+});
+
+app.post('/api/generate-quiz', requireActiveSubscription, rateLimit({ windowMs: 10 * 60 * 1000, max: 20, prefix: 'quiz-ai' }), async (req, res) => {
   const { levelTitle, topics } = req.body;
   if (!levelTitle || !topics) return res.status(400).json({ error: 'Dados do quiz são obrigatórios.' });
   try {
@@ -515,7 +566,7 @@ app.post('/api/generate-quiz', requireActiveSubscription, async (req, res) => {
   }
 });
 
-app.post('/api/grade-quiz', requireActiveSubscription, async (req, res) => {
+app.post('/api/grade-quiz', requireActiveSubscription, rateLimit({ windowMs: 10 * 60 * 1000, max: 30, prefix: 'grade-ai' }), async (req, res) => {
   try {
     const answers = Array.isArray(req.body?.answers) ? req.body.answers.slice(0, 12) : [];
     if (!answers.length) return res.status(400).json({ error: 'Respostas não recebidas.' });
@@ -542,7 +593,7 @@ app.post('/api/grade-quiz', requireActiveSubscription, async (req, res) => {
   }
 });
 
-app.post('/api/ai-tutor', requireActiveSubscription, async (req, res) => {
+app.post('/api/ai-tutor', requireActiveSubscription, rateLimit({ windowMs: 10 * 60 * 1000, max: 35, prefix: 'tutor-ai' }), async (req, res) => {
   try {
     const message = String(req.body?.message || '').trim().slice(0, 2500);
     const context = String(req.body?.context || '').trim().slice(0, 1200);
@@ -607,7 +658,7 @@ app.get('/api/community', requireActiveSubscription, async (req, res) => {
   }
 });
 
-app.post('/api/community/messages', requireActiveSubscription, async (req, res) => {
+app.post('/api/community/messages', requireActiveSubscription, rateLimit({ windowMs: 60 * 1000, max: 10, prefix: 'community' }), async (req, res) => {
   try {
     const mutedUntil = req.profile?.chat_muted_until ? new Date(req.profile.chat_muted_until) : null;
     if (mutedUntil && mutedUntil.getTime() > Date.now()) {
