@@ -3,7 +3,14 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>ElectroLearn</title>
+<meta name="description" content="ElectroLearn: trilha de eletrotécnica com 60 níveis, quizzes inteligentes, Tutor de IA, PDFs e comunidade de estudos."/>
+<meta name="theme-color" content="#0a0d14"/>
+<meta property="og:title" content="ElectroLearn — Aprenda eletrotécnica"/>
+<meta property="og:description" content="Do básico ao avançado com 60 níveis, quizzes, PDFs e Tutor de IA."/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://meu-quiz-six.vercel.app"/>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%235968ff'/%3E%3Ctext x='32' y='44' text-anchor='middle' font-size='38'%3E⚡%3C/text%3E%3C/svg%3E"/>
+<title>ElectroLearn — Eletrotécnica do básico ao avançado</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -27,6 +34,7 @@ h1,h2,h3,h4{font-family:'Syne',sans-serif;}
 .auth-card{background:var(--card);border:1px solid var(--border2);border-radius:var(--r);padding:2rem;}
 .auth-offer{margin-bottom:1rem;padding:.85rem;border:1px solid rgba(79,142,247,.3);border-radius:12px;background:linear-gradient(135deg,rgba(79,142,247,.12),rgba(124,92,252,.1));text-align:center}.auth-offer strong{display:block;font-family:'Syne',sans-serif;font-size:.92rem;margin-bottom:.5rem}.auth-prices{display:flex;justify-content:center;gap:.45rem;flex-wrap:wrap}.auth-price{padding:.34rem .62rem;border-radius:999px;background:var(--bg2);border:1px solid var(--border2);font-size:.72rem;color:var(--text2)}.auth-price b{color:var(--green)}.auth-offer small{display:block;color:var(--text2);font-size:.66rem;margin-top:.48rem;line-height:1.4}.otp-box{display:none;text-align:center}.otp-box.show{display:block}.otp-box h3{font-size:1rem;margin-bottom:.35rem}.otp-box p{color:var(--text2);font-size:.76rem;line-height:1.45;margin-bottom:.8rem}.otp-input{width:100%;padding:.8rem;text-align:center;letter-spacing:.55rem;font-size:1.25rem!important;font-weight:700;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r2);color:var(--text);outline:none}.otp-input:focus{border-color:var(--accent)}.otp-actions{display:flex;justify-content:center;gap:.45rem;margin-top:.7rem;flex-wrap:wrap}.otp-link{border:0;background:none;color:var(--accent);font-family:inherit;font-size:.72rem;cursor:pointer;padding:.3rem}
 .auth-helper-row{display:flex;justify-content:flex-end;margin-top:.55rem}.auth-helper-row .otp-link{font-size:.76rem}.password-panel{display:none}.password-panel.show{display:block}.password-panel-icon{width:54px;height:54px;display:grid;place-items:center;margin:0 auto .9rem;border-radius:16px;background:linear-gradient(135deg,rgba(89,160,255,.2),rgba(137,92,255,.2));border:1px solid var(--border2);font-size:1.35rem}.password-panel h3{text-align:center;margin-bottom:.35rem}.password-panel>p{text-align:center;color:var(--text2);font-size:.76rem;line-height:1.5;margin-bottom:1rem}.email-confirm-card{padding:1rem;border-radius:15px;background:linear-gradient(135deg,rgba(33,230,176,.08),rgba(89,160,255,.08));border:1px solid rgba(33,230,176,.2);margin-bottom:.85rem}.email-confirm-card strong{color:var(--green)}
+.legal-links{display:flex;gap:.75rem;flex-wrap:wrap}.legal-link{border:0;background:none;color:var(--text2);font:inherit;font-size:.7rem;cursor:pointer;text-decoration:underline;text-underline-offset:3px}.legal-modal{position:fixed;inset:0;z-index:5000;display:none;place-items:center;padding:1rem;background:rgba(1,5,14,.82);backdrop-filter:blur(8px)}.legal-modal.show{display:grid}.legal-card{width:min(720px,100%);max-height:min(760px,calc(100vh - 2rem));overflow:auto;padding:1.4rem;background:var(--card);border:1px solid var(--border2);border-radius:20px;box-shadow:0 30px 100px rgba(0,0,0,.55)}.legal-card h2{margin-bottom:.8rem}.legal-card h3{font-size:.95rem;margin:1rem 0 .35rem}.legal-card p,.legal-card li{color:var(--text2);font-size:.82rem;line-height:1.65}.legal-card ul{padding-left:1.2rem}.legal-head{display:flex;justify-content:space-between;gap:1rem;align-items:center}.legal-close{width:36px;height:36px;border:1px solid var(--border2);border-radius:10px;background:var(--bg2);color:var(--text);cursor:pointer}.subscription-note{display:inline-flex;margin-top:.65rem;padding:.35rem .6rem;border-radius:999px;background:rgba(245,158,11,.1);color:var(--amber);font-size:.72rem}
 .auth-tabs{display:flex;gap:4px;background:var(--bg2);border-radius:var(--r2);padding:4px;margin-bottom:1.5rem;}
 .auth-tab{flex:1;padding:.5rem;text-align:center;border-radius:8px;cursor:pointer;font-size:.9rem;font-weight:500;color:var(--text2);transition:all .2s;}
 .auth-tab.active{background:var(--card2);color:var(--text);}
@@ -312,7 +320,7 @@ h1,h2,h3,h4{letter-spacing:-.035em}
       <section class="sales-section"><div class="sales-wrap"><div class="section-head"><span class="eyebrow">Dúvidas frequentes</span><h2>Antes de começar</h2></div><div class="faq-list"><details><summary>Preciso entender de elétrica para começar?</summary><p>Não. A trilha começa nos conceitos fundamentais e avança progressivamente.</p></details><details><summary>Quando meu acesso é liberado?</summary><p>Após a confirmação real do pagamento pelo Asaas. O PIX costuma ser confirmado rapidamente; no cartão, depende da aprovação da operadora.</p></details><details><summary>O PIX renova automaticamente?</summary><p>Não. No PIX, você compra o período escolhido e renova manualmente ao vencer. A renovação automática é oferecida no cartão recorrente.</p></details><details><summary>Posso usar pelo celular?</summary><p>Sim. O ElectroLearn se adapta ao celular, tablet e computador.</p></details><details><summary>O Tutor substitui um profissional habilitado?</summary><p>Não. Ele é um apoio educacional. Trabalhos com risco elétrico devem seguir normas e ser realizados por profissional habilitado.</p></details></div></div></section>
       <section class="sales-section"><div class="sales-wrap sales-final"><h2>Seu próximo nível começa agora.</h2><p>Crie sua conta, escolha seu plano e avance no mundo da elétrica com uma trilha feita para manter você em movimento.</p><button class="btn btn-primary" onclick="openAuth('register')">Criar minha conta →</button></div></section>
     </main>
-    <footer class="sales-wrap sales-footer"><span>© 2026 ElectroLearn. Conteúdo educacional.</span><span>Pagamento processado com segurança pelo Asaas.</span></footer>
+    <footer class="sales-wrap sales-footer"><span>© 2026 ElectroLearn. Conteúdo educacional.</span><div class="legal-links"><button class="legal-link" onclick="openLegal('terms')">Termos de uso</button><button class="legal-link" onclick="openLegal('privacy')">Privacidade</button><button class="legal-link" onclick="openLegal('refund')">Cancelamento e reembolso</button><a class="legal-link" href="mailto:gustavodivino886@gmail.com">Contato</a></div><span>Pagamento processado com segurança pelo Asaas.</span></footer>
   <div class="auth-box" id="auth-box">
     <button class="auth-close" onclick="closeAuth()">← Voltar para apresentação</button>
     <div class="auth-logo">
@@ -327,14 +335,14 @@ h1,h2,h3,h4{letter-spacing:-.035em}
         <div class="auth-tab" onclick="switchTab('register')">Cadastrar</div>
       </div>
       <div id="lf">
-        <div class="field"><label>E-mail</label><input type="email" id="le" placeholder="seu@email.com"/></div>
-        <div class="field"><label>Senha</label><input type="password" id="lp" placeholder="••••••••"/></div>
+        <div class="field"><label>E-mail</label><input type="email" id="le" autocomplete="email" placeholder="seu@email.com"/></div>
+        <div class="field"><label>Senha</label><input type="password" id="lp" autocomplete="current-password" placeholder="••••••••"/></div>
         <div class="err" id="lerr">E-mail ou senha incorretos.</div>
         <button class="btn btn-primary" onclick="doLogin()" style="margin-top:.5rem">Entrar →</button>
         <div class="auth-helper-row"><button class="otp-link" onclick="showForgotPassword()">Esqueci minha senha</button></div>
       </div>
       <div id="rf" style="display:none">
-        <div id="register-fields"><div class="field"><label>Nome</label><input type="text" id="rn" placeholder="Seu nome"/></div><div class="field"><label>E-mail</label><input type="email" id="re" placeholder="seu@email.com"/></div><div class="field"><label>Senha</label><input type="password" id="rp" placeholder="mín. 6 caracteres"/></div><div class="err" id="rerr">Preencha todos os campos.</div><button class="btn btn-primary" onclick="doRegister()" id="register-btn" style="margin-top:.5rem">Criar conta →</button></div>
+        <div id="register-fields"><div class="field"><label>Nome</label><input type="text" id="rn" autocomplete="name" maxlength="80" placeholder="Seu nome"/></div><div class="field"><label>E-mail</label><input type="email" id="re" autocomplete="email" placeholder="seu@email.com"/></div><div class="field"><label>Senha</label><input type="password" id="rp" autocomplete="new-password" minlength="8" placeholder="mín. 8 caracteres"/></div><div class="err" id="rerr">Preencha todos os campos.</div><button class="btn btn-primary" onclick="doRegister()" id="register-btn" style="margin-top:.5rem">Criar conta →</button></div>
         <div class="otp-box" id="signup-confirmation"><div class="password-panel-icon">📩</div><h3>Confirme seu e-mail</h3><p>Enviamos uma mensagem para <strong id="confirmation-email"></strong>. Abra o e-mail e clique no botão <strong>Confirmar cadastro</strong>.</p><div class="email-confirm-card"><strong>Não precisa digitar código.</strong><br><span style="font-size:.72rem;color:var(--text2)">Depois da confirmação, você voltará ao ElectroLearn para entrar.</span></div><div class="otp-actions"><button class="otp-link" onclick="resendSignupConfirmation()">Reenviar e-mail</button><button class="otp-link" onclick="changeSignupEmail()">Trocar e-mail</button></div></div>
       </div>
       <div class="password-panel" id="forgot-password"><div class="password-panel-icon">🔐</div><h3>Recuperar senha</h3><p>Informe seu e-mail e enviaremos um link seguro para criar uma nova senha.</p><div class="field"><label>E-mail</label><input type="email" id="reset-email" placeholder="seu@email.com" onkeydown="if(event.key==='Enter')requestPasswordReset()"/></div><div class="err" id="reset-error"></div><button class="btn btn-primary" id="reset-send" onclick="requestPasswordReset()">Enviar link de recuperação</button><div class="otp-actions"><button class="otp-link" onclick="returnToLogin()">← Voltar para o login</button></div></div>
@@ -342,6 +350,8 @@ h1,h2,h3,h4{letter-spacing:-.035em}
     </div>
   </div></div>
 </div>
+
+<div class="legal-modal" id="legal-modal" onclick="if(event.target===this)closeLegal()"><div class="legal-card"><div class="legal-head"><h2 id="legal-title">Informações</h2><button class="legal-close" onclick="closeLegal()" aria-label="Fechar">✕</button></div><div id="legal-content"></div></div></div>
 
 <div id="app-screen" class="screen">
   <div class="topbar">
@@ -620,15 +630,6 @@ const LEVELS=[
   ].map((item,index)=>({id:index+11,title:item[0],topics:item[1],color:['#4f8ef7','#7c5cfc','#22d3a0','#f59e0b','#f87171'][index%5],icon:['⚙️','📐','🔌','🧰','🌱'][index%5]}))
 ];
 
-LEVELS.slice(10).forEach(lv=>{
-  if(CONTENT[lv.id]) return;
-  CONTENT[lv.id]=[
-    {title:`Fundamentos de ${lv.title}`,formula:null,hl:`Domine os conceitos antes de partir para cálculos e prática.`,intro:`Neste nível você aprende ${lv.topics.toLowerCase()}, conectando teoria, diagnóstico e aplicação profissional.`,secs:[{h:'Objetivos de aprendizagem',b:`Identificar os elementos de ${lv.title}, interpretar suas grandezas e explicar as aplicações com linguagem técnica correta.`},{h:'Aplicação segura',b:'Antes de medir ou intervir, desenergize, bloqueie, sinalize, verifique a ausência de tensão e siga os procedimentos e normas aplicáveis.'}],ex:{t:'Estudo orientado',b:`Observe uma aplicação real de ${lv.title}, liste entradas, saídas, proteções e possíveis falhas. Depois explique como confirmaria o diagnóstico com segurança.`},diag:'circuit'},
-    {title:'Dimensionamento e análise',formula:null,hl:'Registre dados, unidades, premissas e confira a ordem de grandeza.',intro:`A análise de ${lv.title} exige separar dados conhecidos, incógnitas, limites normativos e condições reais de operação.`,secs:[{h:'Método',b:'Defina o problema, desenhe o diagrama, selecione as relações físicas, calcule com unidades e valide o resultado.'},{h:'Erros comuns',b:'Ignorar condições de operação, misturar unidades, escolher proteção sem seletividade ou copiar valores sem verificar o fabricante.'}],ex:{t:'Checklist técnico',b:'Compare o valor calculado com catálogo, capacidade térmica, queda de tensão, proteção e margem operacional.'},diag:'ohm'},
-    {title:'Prática profissional',formula:null,hl:'Serviços elétricos exigem capacitação, autorização e análise de risco.',intro:`A prática de ${lv.title} combina documentação, instrumentos adequados e uma sequência segura de trabalho.`,secs:[{h:'Documentação',b:'Use diagrama atualizado, procedimento, análise de risco, registros de ensaio e identificação clara dos circuitos.'},{h:'Comissionamento',b:'Inspecione montagem, continuidade, isolação, parametrização, proteções e comportamento sob carga antes da entrega.'}],ex:{t:'Entrega técnica',b:'Produza um relatório curto com objetivo, método, resultados, desvios, ação corretiva e conclusão.'},diag:'safety'}
-  ];
-});
-
 // ─── STATE ───
 let DB = JSON.parse(localStorage.getItem('el2_db')||'{}');
 if(!DB.users)    DB.users={};
@@ -647,6 +648,14 @@ function openAuth(tab='login'){
 function closeAuth(){
   document.getElementById('public-landing')?.classList.remove('auth-open');document.getElementById('auth-box')?.classList.remove('show');window.scrollTo({top:0,behavior:'smooth'});
 }
+const LEGAL_COPY={
+  terms:{title:'Termos de uso',html:`<p>Última atualização: 18/08/2026.</p><h3>Uso da plataforma</h3><p>O ElectroLearn oferece conteúdo educacional de apoio em eletrotécnica. O acesso é pessoal e intransferível. A plataforma não substitui formação profissional, certificação, normas técnicas, supervisão ou profissional legalmente habilitado.</p><h3>Segurança elétrica</h3><p>Não execute intervenções em circuitos energizados com base apenas no conteúdo da plataforma. Respeite capacitação, autorização, bloqueio, verificação de ausência de tensão, EPIs, normas e legislação aplicáveis.</p><h3>Assinatura e conduta</h3><p>O cartão possui renovação automática até o cancelamento; o PIX libera somente o período adquirido. É proibido compartilhar conta, fraudar pontuação, atacar a plataforma ou publicar conteúdo ilegal, discriminatório ou abusivo.</p>`},
+  privacy:{title:'Privacidade',html:`<p>Última atualização: 18/08/2026.</p><p>Tratamos nome, e-mail, autenticação, plano, vencimento, progresso, mensagens de suporte, feedback e publicações na comunidade para fornecer o serviço, liberar acesso, prestar suporte, moderar a comunidade e melhorar o aprendizado.</p><p>Usamos fornecedores necessários à operação, como Supabase, Vercel, Asaas e o provedor do Tutor IA. Não vendemos dados pessoais. Pagamentos são processados pelo Asaas; o ElectroLearn não armazena o número completo do cartão.</p><p>Você pode solicitar acesso, correção ou exclusão de seus dados pelo e-mail <a href="mailto:gustavodivino886@gmail.com">gustavodivino886@gmail.com</a>. Alguns registros de pagamento poderão ser mantidos pelo prazo exigido por lei.</p>`},
+  refund:{title:'Cancelamento e reembolso',html:`<p>Última atualização: 18/08/2026.</p><h3>Renovação</h3><p>Assinaturas recorrentes no cartão podem ter a renovação cancelada em <b>Perfil → Minha assinatura</b>. O acesso já pago permanece disponível até o vencimento mostrado no perfil. Pagamentos por PIX não renovam automaticamente.</p><h3>Reembolso</h3><p>Solicitações devem ser enviadas para <a href="mailto:gustavodivino886@gmail.com">gustavodivino886@gmail.com</a> com o e-mail da conta e a identificação da cobrança. Elas serão analisadas conforme a legislação aplicável, incluindo o direito de arrependimento quando cabível.</p>`}
+};
+function openLegal(type){const item=LEGAL_COPY[type];if(!item)return;document.getElementById('legal-title').textContent=item.title;document.getElementById('legal-content').innerHTML=item.html;document.getElementById('legal-modal').classList.add('show');}
+function closeLegal(){document.getElementById('legal-modal')?.classList.remove('show');}
+document.addEventListener('keydown',event=>{if(event.key==='Escape')closeLegal();});
 function switchTab(t){
   restoreAuthChrome();
   document.getElementById('forgot-password')?.classList.remove('show');
@@ -668,7 +677,7 @@ function demoLogin(){
 function doRegister(){
   const n=document.getElementById('rn').value.trim(), e=document.getElementById('re').value.trim(), p=document.getElementById('rp').value;
   const err=document.getElementById('rerr');
-  if(!n||!e||p.length<6){err.style.display='block';err.textContent='Preencha todos os campos corretamente.';return;}
+  if(!n||!e||p.length<8){err.style.display='block';err.textContent='Preencha os campos e use uma senha com pelo menos 8 caracteres.';return;}
   if(DB.users[e]){err.style.display='block';err.textContent='E-mail já cadastrado.';return;}
   DB.users[e]={n,p};DB.progress[e]={};DB.scores[e]=0;save();loginAs(e);
 }
@@ -781,7 +790,7 @@ function renderDash(){
   const current=LEVELS[currentIndex],currentProgress=Number(pr[current.id]||0);
   const recommended=LEVELS.slice(Math.max(0,currentIndex-1),Math.min(LEVELS.length,currentIndex+7));
   document.getElementById('mc').innerHTML=`
-  <div class="banner"><h2>Olá, ${u.n}! 👋</h2><p>Continue sua jornada. ${done} de ${LEVELS.length} níveis concluídos.</p></div>
+  <div class="banner"><h2>Olá, ${escapeHtml(u.n)}! 👋</h2><p>Continue sua jornada. ${done} de ${LEVELS.length} níveis concluídos.</p></div>
   <div class="stats-grid">
     <div class="stat blue"><div class="v">${done}</div><div class="l">Concluídos</div></div>
     <div class="stat purple"><div class="v">${LEVELS.length-done}</div><div class="l">Restantes</div></div>
@@ -833,18 +842,37 @@ function openLv(id){
   openStudy(id);
 }
 
-function openStudy(id){
+function normalizeLesson(raw,index,lv){
+  const diagrams=['circuit','ohm','current','voltage','resistance','power','series','parallel','components','safety','home','industrial','master'];
+  return {title:String(raw?.title||`Módulo ${index+1}`),intro:String(raw?.intro||`Introdução prática a ${lv.title}.`),formula:raw?.formula?String(raw.formula):null,hl:raw?.hl?String(raw.hl):null,secs:(Array.isArray(raw?.secs)?raw.secs:[]).slice(0,5).map(s=>({h:String(s?.h||'Conceito'),b:String(s?.b||'')})),ex:raw?.ex?{t:String(raw.ex.t||'Aplicação'),b:String(raw.ex.b||'')}:null,diag:diagrams.includes(raw?.diag)?raw.diag:'circuit'};
+}
+function fallbackExtendedStudy(lv){
+  const items=lv.topics.split(',').map(v=>v.trim()).filter(Boolean);
+  return [
+    {title:`Fundamentos de ${lv.title}`,intro:`Visão geral dos conceitos essenciais de ${lv.title} e sua aplicação segura em eletrotécnica.`,hl:'Compreenda o princípio antes de aplicar fórmulas ou realizar medições.',secs:items.slice(0,3).map((v,i)=>({h:v,b:`Estude o significado de ${v}, suas unidades, comportamento e relação com os demais elementos do sistema.`})),ex:{t:'Análise inicial',b:'Identifique grandezas, condições de operação, proteções e riscos antes de resolver o problema.'},diag:'circuit'},
+    {title:'Aplicação e dimensionamento',intro:`Método prático para analisar situações envolvendo ${lv.title}.`,hl:'Registre dados, unidades e hipóteses; depois confira se o resultado é fisicamente coerente.',secs:[{h:'Procedimento',b:'Levante os dados, desenhe o circuito ou sistema, escolha as relações técnicas adequadas e faça os cálculos com unidades.'},{h:'Verificação',b:'Confira limites dos componentes, coordenação das proteções, aquecimento e condições reais de instalação.'}],ex:{t:'Boa prática',b:'Compare o resultado calculado com valores nominais e recomendações de normas e fabricantes.'},diag:'industrial'},
+    {title:'Segurança e revisão',intro:`Revisão aplicada de ${lv.title}, com foco em prevenção de falhas e trabalho responsável.`,hl:'Nunca intervenha em circuito energizado sem capacitação, autorização e procedimento adequado.',secs:[{h:'Segurança',b:'Desenergize, bloqueie, sinalize, confirme ausência de tensão e utilize instrumentos e EPIs compatíveis.'},{h:'Checklist',b:'Revise conexões, isolação, aterramento, proteção, identificação e documentação antes da energização.'}],ex:{t:'Conclusão',b:'Explique o funcionamento com suas palavras e só então avance para o quiz do nível.'},diag:'safety'}
+  ].map((x,i)=>normalizeLesson(x,i,lv));
+}
+async function loadExtendedStudy(lv){
+  const key=`el-study-v2-${lv.id}`;
+  try{const cached=JSON.parse(localStorage.getItem(key)||'null');if(Array.isArray(cached)&&cached.length){CONTENT[lv.id]=cached.map((x,i)=>normalizeLesson(x,i,lv));return CONTENT[lv.id];}}catch{}
+  try{const res=await authFetch('/api/generate-study',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({levelId:lv.id,levelTitle:lv.title,topics:lv.topics})});const data=await res.json();if(!res.ok)throw new Error(data.error);const lessons=(data.lessons||[]).slice(0,3).map((x,i)=>normalizeLesson(x,i,lv));if(!lessons.length)throw new Error('Conteúdo vazio.');CONTENT[lv.id]=lessons;localStorage.setItem(key,JSON.stringify(lessons));return lessons;}catch(err){toast('Material complementar carregado em modo seguro.','err');CONTENT[lv.id]=fallbackExtendedStudy(lv);return CONTENT[lv.id];}
+}
+async function openStudy(id){
   slv=id; spdf=0;
   const lv=LEVELS.find(l=>l.id===id);
-  const topics=CONTENT[id];
+  if(!lv)return renderStudyHome();
+  let topics=CONTENT[id];
+  if(!topics){document.getElementById('mc').innerHTML='<div class="spin-wrap"><div class="spin"></div><p>Preparando o material deste nível…</p></div>';topics=await loadExtendedStudy(lv);}
   document.getElementById('mc').innerHTML=`
   <div class="study-hdr">
     <button class="back-btn" onclick="renderStudyHome()">← Voltar</button>
     <div><div style="font-size:.76rem;color:var(--text2)">Nível ${lv.id}</div><div style="font-family:Syne,sans-serif;font-size:1.25rem;font-weight:800">${lv.icon} ${lv.title}</div></div>
   </div>
-  <div class="tabs-row">${topics.map((t,i)=>`<div class="ptab${i===0?' active':''}" id="pt${i}" onclick="switchS(${i})">${t.title}</div>`).join('')}</div>
+  <div class="tabs-row">${topics.map((t,i)=>`<div class="ptab${i===0?' active':''}" id="pt${i}" onclick="switchS(${i})">${escapeHtml(t.title)}</div>`).join('')}</div>
   <div id="sbody"></div>
-  <div class="video-box"><strong>▶ Videoaula de apoio verificada</strong><p style="color:var(--text2);font-size:.8rem;margin:.35rem 0 .75rem">Seleção de aulas reais do Mundo da Elétrica e canais técnicos. Confira o autor e a descrição antes de aplicar.</p><a class="btn btn-primary btn-sm" target="_blank" rel="noopener noreferrer" href="https://www.youtube.com/results?search_query=${encodeURIComponent('Mundo da Elétrica '+lv.title)}">Assistir videoaula sobre ${lv.title} ↗</a></div>
+  <div class="video-box"><strong>▶ Videoaula de apoio</strong><p style="color:var(--text2);font-size:.8rem;margin:.35rem 0 .75rem">Abra a busca orientada e escolha uma aula de canal técnico confiável. Confira autor, descrição e data antes de aplicar.</p><a class="btn btn-primary btn-sm" target="_blank" rel="noopener noreferrer" href="https://www.youtube.com/results?search_query=${encodeURIComponent('Mundo da Elétrica '+lv.title)}">Buscar videoaula sobre ${escapeHtml(lv.title)} ↗</a></div>
   <div class="dl-row">
     <div class="dl-info"><h4>📄 PDF — Nível ${lv.id}: ${lv.title}</h4><p>Resumo completo para estudo offline</p></div>
     <button class="btn btn-green btn-sm" onclick="dlPDF(${id})">⬇ Baixar PDF</button>
@@ -867,13 +895,13 @@ function showStudyTab(lvId, idx){
   const svg=getDiag(t.diag,lv.color);
   document.getElementById('sbody').innerHTML=`
   <div class="study-body">
-    <h3>${t.title}</h3>
-    <p>${t.intro}</p>
-    ${t.formula?`<div class="fml">📐 ${t.formula}</div>`:''}
-    ${t.hl?`<div class="hl">💡 <strong>${t.hl}</strong></div>`:''}
-    ${t.secs.map(s=>`<h4>${s.h}</h4><p>${s.b}</p>`).join('')}
-    <div class="diag">${svg}<div class="cap">Diagrama — ${t.title}</div></div>
-    ${t.ex?`<div class="ex-box"><div class="ex-lbl">✅ Exemplo prático</div><strong>${t.ex.t}</strong><p style="margin-top:.35rem">${t.ex.b}</p></div>`:''}
+    <h3>${escapeHtml(t.title)}</h3>
+    <p>${escapeHtml(t.intro)}</p>
+    ${t.formula?`<div class="fml">📐 ${escapeHtml(t.formula)}</div>`:''}
+    ${t.hl?`<div class="hl">💡 <strong>${escapeHtml(t.hl)}</strong></div>`:''}
+    ${t.secs.map(s=>`<h4>${escapeHtml(s.h)}</h4><p>${escapeHtml(s.b)}</p>`).join('')}
+    <div class="diag">${svg}<div class="cap">Diagrama — ${escapeHtml(t.title)}</div></div>
+    ${t.ex?`<div class="ex-box"><div class="ex-lbl">✅ Exemplo prático</div><strong>${escapeHtml(t.ex.t)}</strong><p style="margin-top:.35rem">${escapeHtml(t.ex.b)}</p></div>`:''}
   </div>`;
 }
 
@@ -975,7 +1003,7 @@ function startQuiz(id){
 
 async function fetchQuiz(id){
   const lv=LEVELS.find(l=>l.id===id);
-  const topics=CONTENT[id].map(t=>t.title).join(', ');
+  const topics=(CONTENT[id]||[]).map(t=>t.title).join(', ')||lv.topics;
   try{
     const res = await fetch('/api/generate-quiz', {
       method: 'POST',
@@ -1130,9 +1158,10 @@ function showRes(){
   const msg=pct>=80?'Excelente! Você dominou este nível!':pct>=50?'Bom progresso! Continue praticando.':'Não desanime! Revise o material e tente novamente.';
   const lv=LEVELS.find(l=>l.id===qlv);
   const pr=DB.progress[me]||{};
-  const np=Math.max(pr[qlv]||0,pct);
+  const previous=Number(pr[qlv]||0);
+  const np=Math.max(previous,pct);
   pr[qlv]=np; DB.progress[me]=pr;
-  DB.scores[me]=(DB.scores[me]||0)+qs*10; save();
+  DB.scores[me]=Object.values(pr).reduce((sum,value)=>sum+Math.max(0,Math.min(100,Number(value)||0)),0);const gained=np-previous;save();
   document.getElementById('mc').innerHTML=`<div class="quiz-wrap"><div class="res">
     <div style="font-size:3rem;margin-bottom:.6rem">${emoji}</div>
     <div class="res-score">${qs}/${total}</div>
@@ -1141,7 +1170,7 @@ function showRes(){
       <div class="rb"><span>Nível</span><span class="rv">${lv.icon} ${lv.title}</span></div>
       <div class="rb"><span>Acertos</span><span class="rv" style="color:var(--green)">${qs} / ${total}</span></div>
       <div class="rb"><span>Aproveitamento</span><span class="rv">${pct}%</span></div>
-      <div class="rb"><span>Pontos ganhos</span><span class="rv" style="color:var(--amber)">+${qs*10} pts</span></div>
+      <div class="rb"><span>Pontos ganhos</span><span class="rv" style="color:var(--amber)">+${gained} pts</span></div>
       <div class="rb"><span>Progresso do nível</span><span class="rv">${np}%</span></div>
     </div>
     <div style="text-align:left;margin:1.25rem 0"><h3>Revisão das respostas</h3>${qreviews.map((r,index)=>`<div class="review-item ${r.correct?'ok':'bad'}"><strong>${r.correct?'✅':'❌'} Questão ${index+1}</strong><p style="margin:.45rem 0"><b>Sua resposta:</b> ${escapeHtml(qresponses[index]||'Não respondida')}</p><p>${escapeHtml(r.feedback||'')}</p>${r.correct?'':`<p style="color:var(--amber);margin-top:.35rem"><b>O que faltou/errou:</b> ${escapeHtml(r.missing||'Revise o conceito.')}</p><p style="margin-top:.35rem"><b>Resposta esperada:</b> ${escapeHtml(r.idealAnswer||qq[index].answer||'')}</p>`}</div>`).join('')}</div>
@@ -1164,9 +1193,9 @@ async function renderRanking(){
     ${entries.length===0?'<p style="color:var(--text2);text-align:center;padding:2rem">Nenhum usuário ainda.</p>':''}
     ${entries.map((e,i)=>`<div class="rank-item">
       <div class="rpos ${i===0?'g':i===1?'s':i===2?'b':''}">${medals[i]||i+1}</div>
-      <div class="av" style="font-size:.78rem">${e.name[0].toUpperCase()}</div>
+      <div class="av" style="font-size:.78rem">${String(e.name||'A')[0].toUpperCase()}</div>
       <div class="rinfo">
-        <div class="rname">${e.name}${e.email===me?' <span style="font-size:.68rem;color:var(--accent)">(você)</span>':''}</div>
+        <div class="rname">${escapeHtml(e.name)}${e.isCurrent||e.email===me?' <span style="font-size:.68rem;color:var(--accent)">(você)</span>':''}</div>
         <div class="rsub">${e.done} níveis concluídos</div>
       </div>
       <div class="rscore">${e.score} pts</div>
@@ -1191,15 +1220,20 @@ function renderProfile(){
   document.getElementById('mc').innerHTML=`
   <h2 style="font-size:1.2rem;margin-bottom:1rem">👤 Meu Perfil</h2>
   <div class="pcard">
-    <div class="pav">${u.n[0].toUpperCase()}</div>
-    <h3 style="font-size:1.1rem;margin-bottom:.15rem">${u.n}</h3>
-    <div style="font-size:.8rem;color:var(--text2);margin-bottom:1.1rem">${me}</div>
+    <div class="pav">${String(u.n||'A')[0].toUpperCase()}</div>
+    <h3 style="font-size:1.1rem;margin-bottom:.15rem">${escapeHtml(u.n)}</h3>
+    <div style="font-size:.8rem;color:var(--text2);margin-bottom:1.1rem">${escapeHtml(me)}</div>
     <div class="stats-grid" style="margin-bottom:1.1rem">
       <div class="stat blue"><div class="v">${done}</div><div class="l">Concluídos</div></div>
       <div class="stat amber"><div class="v">${pts}</div><div class="l">Pontos</div></div>
     </div>
     <div style="font-size:.78rem;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.6rem">Conquistas</div>
     <div class="ach">${ach.map(a=>`<div class="chip ${a.e?'on':'off'}">${a.e?'':'🔒 '}${a.l}</div>`).join('')}</div>
+    <div style="margin-top:1.4rem;padding-top:1.1rem;border-top:1px solid var(--border)">
+      <div style="font-size:.78rem;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.6rem">Minha assinatura</div>
+      <p style="font-size:.82rem;color:var(--text2)">${currentSubscriptionStatus?.active?`Plano ${currentSubscriptionStatus.plan==='weekly'?'Semanal':'Mensal'} com acesso até ${new Date(currentSubscriptionStatus.accessUntil).toLocaleDateString('pt-BR')}.`:'Nenhuma assinatura ativa.'}</p>
+      ${currentSubscriptionStatus?.status==='cancelled'?'<span class="subscription-note">Renovação cancelada; seu acesso continua até o vencimento.</span>':currentSubscriptionStatus?.recurring?'<button class="btn btn-ghost btn-sm" style="margin-top:.7rem" onclick="cancelMySubscription()">Cancelar renovação automática</button>':''}
+    </div>
     <div style="margin-top:1.4rem;padding-top:1.1rem;border-top:1px solid var(--border)">
       <div style="font-size:.78rem;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.8rem">Progresso por nível</div>
       ${LEVELS.map(lv=>{const p=pr[lv.id]||0;return`<div style="margin-bottom:.7rem">
@@ -1216,7 +1250,7 @@ function renderProfile(){
 // ─── ADMINISTRAÇÃO ───
 let adminUsers=[];
 async function renderAdmin(){
-  if((currentSession?.user?.email||'').toLowerCase()!=='gustavodivino886@gmail.com'){toast('Acesso exclusivo do administrador.','err');return go('dashboard');}
+  if(!isAdmin){toast('Acesso exclusivo do administrador.','err');return go('dashboard');}
   document.getElementById('mc').innerHTML='<div class="spin-wrap"><div class="spin"></div><p>Carregando usuários…</p></div>';
   try{const res=await authFetch('/api/admin/users');const data=await res.json();if(!res.ok)throw new Error(data.error);adminUsers=data.users||[];drawAdminUsers(adminUsers);}catch(err){document.getElementById('mc').innerHTML=`<div class="admin-wrap"><div class="ai-card"><h2>Erro ao abrir administração</h2><p>${escapeHtml(err.message)}</p></div></div>`;}
 }
@@ -1231,7 +1265,7 @@ function clearAdminSearch(){const input=document.getElementById('admin-user-sear
 function openSubscriptionAdmin(id){const user=adminUsers.find(u=>u.id===id);if(!user)return;const modal=document.getElementById('admin-modal');modal.className='admin-modal show';modal.innerHTML=`<div class="admin-modal-card"><h3>Alterar assinatura</h3><p style="color:var(--text2);font-size:.8rem;margin:.3rem 0 1rem">${escapeHtml(user.email)}</p><label class="auth-lbl">Plano</label><select class="auth-inp" id="admin-plan"><option value="weekly" ${user.plan==='weekly'?'selected':''}>Semanal</option><option value="monthly" ${user.plan==='monthly'?'selected':''}>Mensal</option></select><label class="auth-lbl">Status</label><select class="auth-inp" id="admin-status"><option value="active" ${user.status==='active'?'selected':''}>Ativo</option><option value="inactive" ${user.status==='inactive'?'selected':''}>Inativo</option><option value="cancelled" ${user.status==='cancelled'?'selected':''}>Cancelado</option></select><label class="auth-lbl">Dias a partir de hoje</label><input class="auth-inp" id="admin-days" type="number" min="0" max="3650" value="${daysRemaining(user.accessUntil)||30}"><div style="display:flex;justify-content:flex-end;gap:.5rem;margin-top:1rem"><button class="btn btn-ghost" onclick="closeAdminModal()">Cancelar</button><button class="btn btn-primary" onclick="saveSubscriptionAdmin('${id}')">Salvar</button></div></div>`;}
 function closeAdminModal(){const modal=document.getElementById('admin-modal');if(modal)modal.className='admin-modal';}
 async function saveSubscriptionAdmin(id){const res=await authFetch(`/api/admin/users/${id}/subscription`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({plan:document.getElementById('admin-plan').value,status:document.getElementById('admin-status').value,days:Number(document.getElementById('admin-days').value)})});const data=await res.json();if(!res.ok)return toast(data.error,'err');toast('Assinatura atualizada.','ok');closeAdminModal();renderAdmin();}
-async function sendPasswordReset(id,email){if(!confirm(`Enviar redefinição de senha para ${email}?`))return;const res=await authFetch(`/api/admin/users/${id}/password-reset`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});const data=await res.json();toast(res.ok?'E-mail de redefinição enviado.':data.error,res.ok?'ok':'err');}
+async function sendPasswordReset(id,email){if(!confirm(`Enviar redefinição de senha para ${email}?`))return;const res=await authFetch(`/api/admin/users/${id}/password-reset`,{method:'POST'});const data=await res.json();toast(res.ok?'E-mail de redefinição enviado.':data.error,res.ok?'ok':'err');}
 async function removeFromRanking(id){if(!confirm('Remover este usuário do ranking e zerar pontos/progresso?'))return;const res=await authFetch(`/api/admin/users/${id}/ranking`,{method:'DELETE'});const data=await res.json();toast(res.ok?'Usuário removido do ranking.':data.error,res.ok?'ok':'err');if(res.ok)renderAdmin();}
 async function deleteAdminUser(id,email){if(!confirm(`EXCLUIR permanentemente a conta ${email}? Esta ação não pode ser desfeita.`))return;const typed=prompt('Digite EXCLUIR para confirmar:');if(typed!=='EXCLUIR')return;const res=await authFetch(`/api/admin/users/${id}`,{method:'DELETE'});const data=await res.json();toast(res.ok?'Conta excluída permanentemente.':data.error,res.ok?'ok':'err');if(res.ok)renderAdmin();}
 
@@ -1273,7 +1307,7 @@ function toast(msg,type){
 let paymentConfig = null;
 let supabaseClient = null;
 let currentSession = null;
-let subscriptionActive = false;
+let subscriptionActive = false, currentSubscriptionStatus = null, isAdmin = false;
 let progressSyncTimer = null;
 let pendingSignupEmail = '';
 let authLinkType = new URLSearchParams(location.hash.replace(/^#/,'')).get('type') || new URLSearchParams(location.search).get('type') || '';
@@ -1366,8 +1400,8 @@ async function doRegister(){
   const email = document.getElementById('re').value.trim();
   const password = document.getElementById('rp').value;
   const err = document.getElementById('rerr');
-  if (!name || !email || password.length < 6) {
-    err.textContent = 'Preencha todos os campos corretamente.';
+  if (!name || !/^\S+@\S+\.\S+$/.test(email) || password.length < 8) {
+    err.textContent = 'Informe nome, e-mail válido e uma senha com pelo menos 8 caracteres.';
     err.style.display = 'block';
     return;
   }
@@ -1448,7 +1482,7 @@ async function enterAuthenticatedApp(user){
   document.getElementById('tname').textContent = name;
   document.getElementById('auth-screen').classList.remove('active');
   document.getElementById('app-screen').classList.add('active');
-  document.getElementById('n-admin').style.display = email.toLowerCase()==='gustavodivino886@gmail.com' ? '' : 'none';
+  document.getElementById('n-admin').style.display = 'none';
   setHelpDockVisible(true);
   await refreshSubscription();
   if(subscriptionActive)await loadCloudProgress();
@@ -1466,7 +1500,11 @@ async function refreshSubscription(){
   const res = await authFetch('/api/subscription-status');
   if (res.status === 401) return doLogout();
   const status = await res.json();
+  if(!res.ok){toast(status.error||'Não foi possível verificar a assinatura.','err');return;}
   subscriptionActive = Boolean(status.active);
+  currentSubscriptionStatus = status;
+  isAdmin = Boolean(status.isAdmin);
+  document.getElementById('n-admin').style.display = isAdmin ? '' : 'none';
   updateSubscriptionBubble(status);
   if (subscriptionActive) {
     document.querySelector('.main-nav').style.display = '';
@@ -1490,9 +1528,16 @@ function updateSubscriptionBubble(status = {}){
   const planName = status.plan === 'weekly' ? 'Semanal' : 'Mensal';
   document.getElementById('sub-plan').textContent = planName;
   document.getElementById('sub-days').textContent = days === 1 ? '1 dia restante' : `${days} dias restantes`;
-  bubble.title = `Plano ${planName} ativo até ${expiration.toLocaleString('pt-BR')}`;
+  bubble.title = status.status==='cancelled'?`Plano ${planName} sem renovação; acesso até ${expiration.toLocaleString('pt-BR')}`:`Plano ${planName} ativo até ${expiration.toLocaleString('pt-BR')}`;
   bubble.setAttribute('aria-label', bubble.title);
   bubble.classList.add('show');
+}
+
+async function cancelMySubscription(){
+  if(!confirm('Cancelar a renovação automática? Seu acesso continuará até o vencimento já pago.'))return;
+  const res=await authFetch('/api/subscription/cancel',{method:'POST'}),data=await res.json();
+  if(!res.ok)return toast(data.error||'Não foi possível cancelar.','err');
+  toast('Renovação cancelada. O acesso continua até o vencimento.','ok');await refreshSubscription();
 }
 
 function renderPaywall(status = {}){
@@ -1564,6 +1609,7 @@ async function doLogout(){
   if (supabaseClient) await supabaseClient.auth.signOut();
   currentSession = null;
   subscriptionActive = false;
+  currentSubscriptionStatus = null;isAdmin = false;
   document.getElementById('subscription-bubble')?.classList.remove('show');
   setHelpDockVisible(false);
   me = null;
