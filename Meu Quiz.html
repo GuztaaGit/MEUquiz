@@ -630,6 +630,69 @@ const LEVELS=[
   ].map((item,index)=>({id:index+11,title:item[0],topics:item[1],color:['#4f8ef7','#7c5cfc','#22d3a0','#f59e0b','#f87171'][index%5],icon:['⚙️','📐','🔌','🧰','🌱'][index%5]}))
 ];
 
+const VIDEO_LESSONS={
+  1:{title:"Eletrotécnica: conceitos básicos — Aula 1",url:"https://www.youtube.com/watch?v=1A3lnx_-1tw"},
+  2:{title:"Primeira Lei de Ohm — Eletrodinâmica",url:"https://www.youtube.com/watch?v=LC0nL4cjxYg"},
+  3:{title:"Potência Elétrica — Eletrodinâmica",url:"https://www.youtube.com/watch?v=fwMDK4h3Bbg"},
+  4:{title:"Circuito em Série e Circuito em Paralelo",url:"https://www.youtube.com/watch?v=Vfvk6c24pFQ"},
+  5:{title:"Circuitos elétricos em paralelo",url:"https://www.youtube.com/watch?v=rb_zlO-une8"},
+  6:{title:"Para que servem os componentes eletrônicos?",url:"https://www.youtube.com/watch?v=C54Cp819Ebc"},
+  7:{title:"Treinamento NR10: segurança em instalações elétricas",url:"https://www.youtube.com/watch?v=qimHWEgBaco"},
+  8:{title:"Curso de eletricista iniciante — passo a passo",url:"https://www.youtube.com/watch?v=wvTfrmoLfqo"},
+  9:{title:"Introdução à Eletricidade Industrial — Aula 1",url:"https://www.youtube.com/watch?v=AsSm1Mm09Is"},
+  10:{title:"Curso completo de eletricidade básica",url:"https://www.youtube.com/watch?v=sUuqKz8oVFs"},
+  11:{title:"Unidades elétricas: Volt, Ampère, Watt e Ohm",url:"https://www.youtube.com/watch?v=qJTyjr0tqq4"},
+  12:{title:"Leis de Kirchhoff — Eletrodinâmica",url:"https://www.youtube.com/watch?v=5q0ss9G8Xlc"},
+  13:{title:"Análise de circuito misto — exercícios resolvidos",url:"https://www.youtube.com/watch?v=fULdGwx8T7c"},
+  14:{title:"Divisores de Tensão e Corrente",url:"https://www.youtube.com/watch?v=sNa-8wl_5X0"},
+  15:{title:"Teoremas de Thevenin e Norton",url:"https://www.youtube.com/watch?v=CPEI3exOi08"},
+  16:{title:"Diferença entre corrente alternada e corrente contínua",url:"https://www.youtube.com/watch?v=ftrFwrtZmKY"},
+  17:{title:"Capacitância, reatância e susceptância capacitiva",url:"https://www.youtube.com/watch?v=KSYmYsKtVys"},
+  18:{title:"Reatância indutiva: o que é e como calcular",url:"https://www.youtube.com/watch?v=_9wC2y6N1hE"},
+  19:{title:"Impedância: definição e elementos R, L e C",url:"https://www.youtube.com/watch?v=eoQ-Csre2IM"},
+  20:{title:"Circuito RLC série e frequência de ressonância",url:"https://www.youtube.com/watch?v=41aTRKDk4Fg"},
+  21:{title:"Potência CA: aparente, ativa e reativa",url:"https://www.youtube.com/watch?v=IUI_C-wrll0"},
+  22:{title:"Introdução aos circuitos trifásicos",url:"https://www.youtube.com/watch?v=z2Xt_va1U0g"},
+  23:{title:"Transformadores elétricos explicados",url:"https://www.youtube.com/watch?v=djmGPAET7p8"},
+  24:{title:"Máquinas elétricas: fundamentos de máquinas CC",url:"https://www.youtube.com/watch?v=GkiRF1wtasY"},
+  25:{title:"Características dos motores de indução",url:"https://www.youtube.com/watch?v=VonfPu62ffk"},
+  26:{title:"Motores síncronos e assíncronos",url:"https://www.youtube.com/watch?v=CAhuh49h0NI"},
+  27:{title:"Partida de motores: conceitos básicos",url:"https://www.youtube.com/watch?v=VS1u2aD4-jg"},
+  28:{title:"Inversores de frequência: entenda as ligações",url:"https://www.youtube.com/watch?v=exndWZDbj7A"},
+  29:{title:"Comandos elétricos — Aula 1",url:"https://www.youtube.com/watch?v=8YuNpjUwmYE"},
+  30:{title:"Como ler diagramas elétricos",url:"https://www.youtube.com/watch?v=Viz03SFumUE"},
+  31:{title:"Introdução ao CLP — Aula 1",url:"https://www.youtube.com/watch?v=TCLu3ZbJJGw"},
+  32:{title:"Sensores industriais: funcionamento e aplicação",url:"https://www.youtube.com/watch?v=xZl8q7Axfsw"},
+  33:{title:"Instrumentação Industrial — Aula 1",url:"https://www.youtube.com/watch?v=6vs0ijmAUyY"},
+  34:{title:"História e características das redes industriais",url:"https://www.youtube.com/watch?v=KxrW-tBaKMo"},
+  35:{title:"Como é um BMS — Sistema de Gestão Predial",url:"https://www.youtube.com/watch?v=D5aW5831c-c"},
+  36:{title:"Variações de tensão de curta duração",url:"https://www.youtube.com/watch?v=EWIzV3XbYwc"},
+  37:{title:"Proteção dos sistemas elétricos",url:"https://www.youtube.com/watch?v=2CGc3n4XpRY"},
+  38:{title:"Aterramento elétrico: função e tipos",url:"https://www.youtube.com/watch?v=ZGBfB3uVGx4"},
+  39:{title:"SPDA — proteção contra descargas atmosféricas",url:"https://www.youtube.com/watch?v=aYMZgbXxPgQ"},
+  40:{title:"Subestações: leitura de diagramas elétricos",url:"https://www.youtube.com/watch?v=TPzX0vyc7vw"},
+  41:{title:"Como gerar a própria energia: geração distribuída",url:"https://www.youtube.com/watch?v=Qs4PPytCASY"},
+  42:{title:"Energia Solar Fotovoltaica: conceitos básicos",url:"https://www.youtube.com/watch?v=TBREaaezzkE"},
+  43:{title:"Armazenamento de energia elétrica em larga escala",url:"https://www.youtube.com/watch?v=j469I68poJo"},
+  44:{title:"Como funciona um carro elétrico?",url:"https://www.youtube.com/watch?v=k9lw8v8izfk"},
+  45:{title:"Eficiência energética na eletrotécnica industrial",url:"https://www.youtube.com/watch?v=n_2eYI6q5cQ"},
+  46:{title:"Manutenção Elétrica Industrial — Aula 3",url:"https://www.youtube.com/watch?v=0Ep7TiEB2_0"},
+  47:{title:"O que é Termografia? — Aula 1",url:"https://www.youtube.com/watch?v=W6sQLMPlUDM"},
+  48:{title:"Ensaios elétricos de transformador",url:"https://www.youtube.com/watch?v=EP1Jve9kLBM"},
+  49:{title:"Projetos de instalações elétricas",url:"https://www.youtube.com/watch?v=rOKdznExdxA"},
+  50:{title:"Projeto elétrico industrial: metodologia para dimensionamento",url:"https://www.youtube.com/watch?v=11eglBLnXK4"},
+  51:{title:"NR-10: o que é e como se aplica",url:"https://www.youtube.com/watch?v=vFwDdckuTCM"},
+  52:{title:"NBR 5410: principais pontos em 30 minutos",url:"https://www.youtube.com/watch?v=vlYfRV1UGMo"},
+  53:{title:"Montagem de painel elétrico industrial",url:"https://www.youtube.com/watch?v=2P6AXu2bB7M"},
+  54:{title:"O que é Eletrônica de Potência? — Aula 1",url:"https://www.youtube.com/watch?v=NhDkp-kxwYI"},
+  55:{title:"As cinco principais fontes de energia renovável",url:"https://www.youtube.com/watch?v=rs-kBJKCABA"},
+  56:{title:"Redes inteligentes — Smart Grids",url:"https://www.youtube.com/watch?v=IT8_HSPVZvE"},
+  57:{title:"Smart Grid: tecnologia e IoT na rede elétrica",url:"https://www.youtube.com/watch?v=PgWDrwszp1E"},
+  58:{title:"Infraestrutura elétrica de um Data Center",url:"https://www.youtube.com/watch?v=4P6_Gxe2HjA"},
+  59:{title:"Partes e gestão de um projeto elétrico",url:"https://www.youtube.com/watch?v=-DWLe3BWbhc"},
+  60:{title:"O que faz um Técnico em Eletrotécnica",url:"https://www.youtube.com/watch?v=-rEpWgLSztE"}
+};
+
 // ─── STATE ───
 let DB = JSON.parse(localStorage.getItem('el2_db')||'{}');
 if(!DB.users)    DB.users={};
@@ -863,6 +926,7 @@ async function openStudy(id){
   slv=id; spdf=0;
   const lv=LEVELS.find(l=>l.id===id);
   if(!lv)return renderStudyHome();
+  const video=VIDEO_LESSONS[id];
   let topics=CONTENT[id];
   if(!topics){document.getElementById('mc').innerHTML='<div class="spin-wrap"><div class="spin"></div><p>Preparando o material deste nível…</p></div>';topics=await loadExtendedStudy(lv);}
   document.getElementById('mc').innerHTML=`
@@ -872,7 +936,7 @@ async function openStudy(id){
   </div>
   <div class="tabs-row">${topics.map((t,i)=>`<div class="ptab${i===0?' active':''}" id="pt${i}" onclick="switchS(${i})">${escapeHtml(t.title)}</div>`).join('')}</div>
   <div id="sbody"></div>
-  <div class="video-box"><strong>▶ Videoaula de apoio</strong><p style="color:var(--text2);font-size:.8rem;margin:.35rem 0 .75rem">Abra a busca orientada e escolha uma aula de canal técnico confiável. Confira autor, descrição e data antes de aplicar.</p><a class="btn btn-primary btn-sm" target="_blank" rel="noopener noreferrer" href="https://www.youtube.com/results?search_query=${encodeURIComponent('Mundo da Elétrica '+lv.title)}">Buscar videoaula sobre ${escapeHtml(lv.title)} ↗</a></div>
+  <div class="video-box"><strong>▶ Videoaula de apoio</strong><p style="color:var(--text2);font-size:.8rem;margin:.35rem 0 .2rem">Conteúdo selecionado para complementar este nível:</p><p style="font-weight:700;margin:.2rem 0 .8rem">${escapeHtml(video.title)}</p><a class="btn btn-primary btn-sm" target="_blank" rel="noopener noreferrer" href="${escapeHtml(video.url)}">▶ Assistir videoaula no YouTube ↗</a></div>
   <div class="dl-row">
     <div class="dl-info"><h4>📄 PDF — Nível ${lv.id}: ${lv.title}</h4><p>Resumo completo para estudo offline</p></div>
     <button class="btn btn-green btn-sm" onclick="dlPDF(${id})">⬇ Baixar PDF</button>
