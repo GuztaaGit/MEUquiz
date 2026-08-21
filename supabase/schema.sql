@@ -11,6 +11,10 @@ create table if not exists public.profiles (
   score integer not null default 0 check (score >= 0),
   progress jsonb not null default '{}'::jsonb,
   ranking_visible boolean not null default true,
+  level_access_mode text not null default 'progressive'
+    check (level_access_mode in ('progressive', 'all', 'custom', 'blocked')),
+  level_access_levels jsonb not null default '[]'::jsonb
+    check (jsonb_typeof(level_access_levels) = 'array'),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -53,6 +57,30 @@ alter table public.profiles add column if not exists score integer not null defa
 alter table public.profiles add column if not exists progress jsonb not null default '{}'::jsonb;
 alter table public.profiles add column if not exists ranking_visible boolean not null default true;
 alter table public.profiles add column if not exists chat_muted_until timestamptz;
+alter table public.profiles add column if not exists level_access_mode text not null default 'progressive';
+alter table public.profiles add column if not exists level_access_levels jsonb not null default '[]'::jsonb;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'profiles_level_access_mode_check'
+      and conrelid = 'public.profiles'::regclass
+  ) then
+    alter table public.profiles
+      add constraint profiles_level_access_mode_check
+      check (level_access_mode in ('progressive', 'all', 'custom', 'blocked'));
+  end if;
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'profiles_level_access_levels_check'
+      and conrelid = 'public.profiles'::regclass
+  ) then
+    alter table public.profiles
+      add constraint profiles_level_access_levels_check
+      check (jsonb_typeof(level_access_levels) = 'array');
+  end if;
+end $$;
 
 create table if not exists public.community_presence (
   user_id uuid primary key references auth.users(id) on delete cascade,
