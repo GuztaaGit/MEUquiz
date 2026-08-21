@@ -25,6 +25,8 @@ const PLANS = Object.freeze({
   weekly: { name: 'Plano Semanal', value: 21.90, cycle: 'WEEKLY', days: 7 },
   monthly: { name: 'Plano Mensal', value: 75.99, cycle: 'MONTHLY', days: 30 }
 });
+const TOTAL_LEVELS = 60;
+const LEVEL_ACCESS_MODES = new Set(['progressive', 'all', 'custom', 'blocked']);
 
 function required(name) {
   const value = process.env[name]?.trim();
@@ -67,6 +69,26 @@ function hasPaidAccess(p) {
     p?.access_until && new Date(p.access_until).getTime() > Date.now();
 }
 
+function normalizeLevelAccess(p) {
+  const mode = LEVEL_ACCESS_MODES.has(p?.level_access_mode) ? p.level_access_mode : 'progressive';
+  const levels = [...new Set((Array.isArray(p?.level_access_levels) ? p.level_access_levels : [])
+    .map(Number)
+    .filter(level => Number.isInteger(level) && level >= 1 && level <= TOTAL_LEVELS))]
+    .sort((a, b) => a - b);
+  return { mode, levels };
+}
+
+function hasLevelAccess(p, levelId) {
+  const id = Number(levelId);
+  if (!Number.isInteger(id) || id < 1 || id > TOTAL_LEVELS) return false;
+  const access = normalizeLevelAccess(p);
+  if (access.mode === 'all') return true;
+  if (access.mode === 'blocked') return false;
+  if (access.mode === 'custom') return access.levels.includes(id);
+  const progress = p?.progress && typeof p.progress === 'object' ? p.progress : {};
+  return id === 1 || Number(progress[id] || 0) >= 100 || Number(progress[id - 1] || 0) >= 50;
+}
+
 const requestBuckets = new Map();
 function rateLimit({ windowMs, max, prefix }) {
   return (req, res, next) => {
@@ -97,6 +119,22 @@ async function requireActiveSubscription(req, res, next) {
   if (!active) return res.status(403).json({ error: 'Assinatura necessária.', subscriptionRequired: true });
   req.user = user;
   req.profile = p;
+  next();
+}
+
+function requireLevelAccess(req, res, next) {
+  const levelId = Number(req.body?.levelId);
+  if (!Number.isInteger(levelId) || levelId < 1 || levelId > TOTAL_LEVELS) {
+    return res.status(400).json({ error: 'Informe um nível válido.' });
+  }
+  if (!hasLevelAccess(req.profile, levelId)) {
+    return res.status(403).json({
+      error: 'Este nível não está liberado para a sua conta.',
+      levelBlocked: true,
+      levelAccess: normalizeLevelAccess(req.profile)
+    });
+  }
+  req.levelId = levelId;
   next();
 }
 
@@ -146,7 +184,8 @@ app.get('/api/subscription-status', async (req, res) => {
       accessUntil: p?.access_until || null,
       status: p?.subscription_status || 'inactive',
       recurring: Boolean(p?.asaas_subscription_id),
-      isAdmin: ADMIN_EMAILS.has(String(user.email || '').toLowerCase())
+      isAdmin: ADMIN_EMAILS.has(String(user.email || '').toLowerCase()),
+      levelAccess: normalizeLevelAccess(p)
     });
   } catch (err) {
     res.status(500).json({ error: 'Não foi possível verificar a assinatura.' });
@@ -191,7 +230,7 @@ app.get('/api/admin/users', requireAdmin, async (req, res) => {
     const profileById = new Map((profiles || []).map(p => [p.id, p]));
     const users = (authData?.users || []).map(user => {
       const p = profileById.get(user.id) || {};
-      return { id: user.id, email: user.email, name: p.name || user.user_metadata?.name || '', createdAt: user.created_at, lastSignInAt: user.last_sign_in_at, plan: p.subscription_plan || null, status: p.subscription_status || 'inactive', accessUntil: p.access_until || null, score: Number(p.score || 0), rankingVisible: p.ranking_visible !== false };
+      return { id: user.id, email: user.email, name: p.name || user.user_metadata?.name || '', createdAt: user.created_at, lastSignInAt: user.last_sign_in_at, plan: p.subscription_plan || null, status: p.subscription_status || 'inactive', accessUntil: p.access_until || null, score: Number(p.score || 0), rankingVisible: p.ranking_visible !== false, levelAccess: normalizeLevelAccess(p) };
     });
     res.json({ users });
   } catch (err) {
@@ -313,6 +352,30 @@ app.patch('/api/admin/users/:id/subscription', requireAdmin, async (req, res) =>
     res.json({ updated: true, accessUntil });
   } catch (err) {
     res.status(500).json({ error: 'Não foi possível alterar a assinatura.' });
+  }
+});
+
+app.patch('/api/admin/users/:id/levels', requireAdmin, async (req, res) => {
+  try {
+    const mode = String(req.body?.mode || '');
+    if (!LEVEL_ACCESS_MODES.has(mode)) return res.status(400).json({ error: 'Modo de acesso inválido.' });
+    const levels = [...new Set((Array.isArray(req.body?.levels) ? req.body.levels : [])
+      .map(Number)
+      .filter(level => Number.isInteger(level) && level >= 1 && level <= TOTAL_LEVELS))]
+      .sort((a, b) => a - b);
+    if (mode === 'custom' && !levels.length) {
+      return res.status(400).json({ error: 'Selecione pelo menos um nível ou use “Bloquear todos”.' });
+    }
+    const levelAccess = { mode, levels: mode === 'custom' ? levels : [] };
+    await axios.patch(`${required('SUPABASE_URL')}/rest/v1/profiles?id=eq.${encodeURIComponent(req.params.id)}`, {
+      level_access_mode: levelAccess.mode,
+      level_access_levels: levelAccess.levels,
+      updated_at: new Date().toISOString()
+    }, { headers: { ...supabaseHeaders(), Prefer: 'return=minimal' } });
+    res.json({ updated: true, levelAccess });
+  } catch (err) {
+    console.error('Falha ao alterar níveis:', err.response?.data || err.message);
+    res.status(500).json({ error: 'Não foi possível alterar o acesso aos níveis. Execute a atualização do banco no Supabase e tente novamente.' });
   }
 });
 
@@ -528,9 +591,9 @@ async function geminiResponse({ instructions, text, attachment, json = false, ma
   return output;
 }
 
-app.post('/api/generate-study', requireActiveSubscription, rateLimit({ windowMs: 10 * 60 * 1000, max: 20, prefix: 'study-ai' }), async (req, res) => {
+app.post('/api/generate-study', requireActiveSubscription, requireLevelAccess, rateLimit({ windowMs: 10 * 60 * 1000, max: 20, prefix: 'study-ai' }), async (req, res) => {
   try {
-    const levelId = Math.max(1, Math.min(60, Number(req.body?.levelId || 0)));
+    const levelId = req.levelId;
     const levelTitle = String(req.body?.levelTitle || '').trim().slice(0, 120);
     const topics = String(req.body?.topics || '').trim().slice(0, 700);
     if (!levelTitle || !topics) return res.status(400).json({ error: 'Dados do nível são obrigatórios.' });
@@ -549,7 +612,7 @@ app.post('/api/generate-study', requireActiveSubscription, rateLimit({ windowMs:
   }
 });
 
-app.post('/api/generate-quiz', requireActiveSubscription, rateLimit({ windowMs: 10 * 60 * 1000, max: 20, prefix: 'quiz-ai' }), async (req, res) => {
+app.post('/api/generate-quiz', requireActiveSubscription, requireLevelAccess, rateLimit({ windowMs: 10 * 60 * 1000, max: 20, prefix: 'quiz-ai' }), async (req, res) => {
   const { levelTitle, topics } = req.body;
   if (!levelTitle || !topics) return res.status(400).json({ error: 'Dados do quiz são obrigatórios.' });
   try {
@@ -566,7 +629,7 @@ app.post('/api/generate-quiz', requireActiveSubscription, rateLimit({ windowMs: 
   }
 });
 
-app.post('/api/grade-quiz', requireActiveSubscription, rateLimit({ windowMs: 10 * 60 * 1000, max: 30, prefix: 'grade-ai' }), async (req, res) => {
+app.post('/api/grade-quiz', requireActiveSubscription, requireLevelAccess, rateLimit({ windowMs: 10 * 60 * 1000, max: 30, prefix: 'grade-ai' }), async (req, res) => {
   try {
     const answers = Array.isArray(req.body?.answers) ? req.body.answers.slice(0, 12) : [];
     if (!answers.length) return res.status(400).json({ error: 'Respostas não recebidas.' });
