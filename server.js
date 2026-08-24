@@ -1111,7 +1111,13 @@ app.get('/api/electric-news', requireActiveSubscription, async (req, res) => {
   }
 });
 
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'Meu Quiz.html')));
+app.get('/', (req, res) => {
+  // O HTML sempre é revalidado. Os assets continuam com cache longo e usam
+  // uma versão no URL, evitando que uma atualização visual fique presa no
+  // cache do navegador ou da CDN.
+  res.set('Cache-Control', 'no-store, max-age=0, must-revalidate');
+  res.sendFile(path.join(__dirname, 'Meu Quiz.html'));
+});
 
 if (require.main === module) {
   app.listen(PORT, () => console.log(`Servidor iniciado em http://localhost:${PORT}`));
