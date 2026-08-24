@@ -21,3 +21,10 @@ create index if not exists support_tickets_status_idx on public.support_tickets(
 create index if not exists feedback_entries_created_idx on public.feedback_entries(created_at desc);
 alter table public.support_tickets enable row level security;
 alter table public.feedback_entries enable row level security;
+
+revoke all on public.support_tickets from anon, authenticated;
+revoke all on public.feedback_entries from anon, authenticated;
+grant select, insert, update, delete on public.support_tickets to service_role;
+grant select, insert, update, delete on public.feedback_entries to service_role;
+grant usage, select on sequence public.support_tickets_id_seq to service_role;
+grant usage, select on sequence public.feedback_entries_id_seq to service_role;

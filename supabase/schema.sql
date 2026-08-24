@@ -10,6 +10,10 @@ create table if not exists public.profiles (
   asaas_subscription_id text,
   score integer not null default 0 check (score >= 0),
   progress jsonb not null default '{}'::jsonb,
+  lesson_progress jsonb not null default '{}'::jsonb
+    check (jsonb_typeof(lesson_progress) = 'object'),
+  quiz_scores jsonb not null default '{}'::jsonb
+    check (jsonb_typeof(quiz_scores) = 'object'),
   ranking_visible boolean not null default true,
   level_access_mode text not null default 'progressive'
     check (level_access_mode in ('progressive', 'all', 'custom', 'blocked')),
@@ -55,10 +59,22 @@ for each row execute function public.handle_new_user();
 -- Migração segura para projetos que já possuem a tabela profiles.
 alter table public.profiles add column if not exists score integer not null default 0;
 alter table public.profiles add column if not exists progress jsonb not null default '{}'::jsonb;
+alter table public.profiles add column if not exists lesson_progress jsonb not null default '{}'::jsonb;
+alter table public.profiles add column if not exists quiz_scores jsonb not null default '{}'::jsonb;
 alter table public.profiles add column if not exists ranking_visible boolean not null default true;
 alter table public.profiles add column if not exists chat_muted_until timestamptz;
 alter table public.profiles add column if not exists level_access_mode text not null default 'progressive';
 alter table public.profiles add column if not exists level_access_levels jsonb not null default '[]'::jsonb;
+
+update public.profiles set lesson_progress = '{}'::jsonb
+where lesson_progress is null or jsonb_typeof(lesson_progress) is distinct from 'object';
+update public.profiles set quiz_scores = '{}'::jsonb
+where quiz_scores is null or jsonb_typeof(quiz_scores) is distinct from 'object';
+alter table public.profiles
+  alter column lesson_progress set default '{}'::jsonb,
+  alter column lesson_progress set not null,
+  alter column quiz_scores set default '{}'::jsonb,
+  alter column quiz_scores set not null;
 
 do $$
 begin
@@ -79,6 +95,24 @@ begin
     alter table public.profiles
       add constraint profiles_level_access_levels_check
       check (jsonb_typeof(level_access_levels) = 'array');
+  end if;
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'profiles_lesson_progress_object_check'
+      and conrelid = 'public.profiles'::regclass
+  ) then
+    alter table public.profiles
+      add constraint profiles_lesson_progress_object_check
+      check (jsonb_typeof(lesson_progress) = 'object');
+  end if;
+  if not exists (
+    select 1 from pg_constraint
+    where conname = 'profiles_quiz_scores_object_check'
+      and conrelid = 'public.profiles'::regclass
+  ) then
+    alter table public.profiles
+      add constraint profiles_quiz_scores_object_check
+      check (jsonb_typeof(quiz_scores) = 'object');
   end if;
 end $$;
 
@@ -133,3 +167,15 @@ create index if not exists support_tickets_status_idx on public.support_tickets(
 create index if not exists feedback_entries_created_idx on public.feedback_entries(created_at desc);
 alter table public.support_tickets enable row level security;
 alter table public.feedback_entries enable row level security;
+
+-- O navegador usa somente o Auth do Supabase. As tabelas de negócio são
+-- acessadas pelo backend com service_role e RLS permanece habilitado.
+revoke all on public.payment_grants, public.community_presence,
+  public.community_messages, public.support_tickets, public.feedback_entries
+from anon, authenticated;
+grant select on public.profiles to authenticated;
+grant select, insert, update, delete on public.profiles, public.payment_grants,
+  public.community_presence, public.community_messages,
+  public.support_tickets, public.feedback_entries
+to service_role;
+grant usage, select on all sequences in schema public to service_role;
