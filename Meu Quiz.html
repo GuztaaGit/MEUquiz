@@ -232,6 +232,8 @@ h1,h2,h3,h4{letter-spacing:-.035em}
 .nav-item.active{color:#fff;background:linear-gradient(135deg,rgba(89,160,255,.22),rgba(137,92,255,.22));box-shadow:inset 0 0 0 1px rgba(117,148,255,.24),0 8px 24px rgba(55,90,190,.13)}
 .content{max-width:1240px;padding:2rem clamp(1rem,3vw,2rem) 5rem}
 .app-layout{width:min(1840px,100%);margin:0 auto;display:grid;grid-template-columns:250px minmax(0,1240px) 250px;justify-content:center;gap:1rem;align-items:start;flex:1}.app-layout .content{max-width:none;min-width:0}.app-side{position:sticky;top:145px;max-height:calc(100vh - 165px);overflow:auto;margin-top:2rem;padding:.85rem;background:linear-gradient(145deg,rgba(20,30,57,.88),rgba(8,14,29,.88));border:1px solid var(--border2);border-radius:20px;box-shadow:0 18px 50px rgba(0,0,0,.22);backdrop-filter:blur(18px)}.app-side-left{height:calc(100vh - 165px);min-height:590px}.app-side-title{display:flex;align-items:center;justify-content:space-between;gap:.5rem;font-family:'Syne',sans-serif;font-size:.82rem;margin:.15rem .2rem .8rem}.side-news-list{display:flex;flex-direction:column;gap:.55rem;padding-bottom:.35rem}.side-news{display:grid;grid-template-columns:58px 1fr;gap:.6rem;padding:.55rem;border-radius:13px;color:inherit;text-decoration:none;border:1px solid transparent;transition:.2s}.side-news:hover{background:rgba(89,160,255,.07);border-color:var(--border);transform:translateX(2px)}.side-news img,.side-news-fallback{width:58px;height:54px;object-fit:cover;border-radius:10px;background:linear-gradient(135deg,#183d75,#4d2f91);display:grid;place-items:center}.side-news strong{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;font-size:.69rem;line-height:1.3}.side-news small{display:block;color:var(--green);font-size:.58rem;margin-bottom:.2rem}.side-stack{display:flex;flex-direction:column;gap:.5rem}.side-link{display:flex;align-items:center;gap:.65rem;width:100%;padding:.7rem .75rem;border:1px solid transparent;border-radius:13px;background:rgba(255,255,255,.025);color:var(--text2);font:inherit;font-size:.76rem;cursor:pointer;text-align:left;transition:.2s}.side-link:hover,.side-link.active{color:#fff;background:linear-gradient(135deg,rgba(89,160,255,.14),rgba(137,92,255,.12));border-color:var(--border2);transform:translateX(2px)}.side-progress{margin-top:.8rem;padding:.8rem;border-radius:14px;background:rgba(5,9,21,.55);border:1px solid var(--border)}.side-progress-row{display:flex;justify-content:space-between;gap:.5rem;font-size:.68rem;color:var(--text2);margin-bottom:.5rem}.side-tip{margin-top:.65rem;padding:.75rem;border-radius:14px;background:linear-gradient(135deg,rgba(33,230,176,.08),rgba(89,160,255,.07));border:1px solid rgba(33,230,176,.16);font-size:.68rem;line-height:1.5;color:var(--text2)}
+.side-news-updated{position:sticky;top:0;z-index:2;margin:-.2rem 0 .1rem;padding:.45rem .55rem;border-radius:10px;background:rgba(7,12,25,.92);color:var(--text3);font-size:.61rem;text-align:center;backdrop-filter:blur(10px)}
+.news-update-time{color:var(--green);font-weight:700;white-space:nowrap}
 .content>h2,.content>h3{margin-bottom:1.1rem}
 .banner{min-height:126px;padding:1.75rem 2rem;display:flex;flex-direction:column;justify-content:center;background:radial-gradient(circle at 82% 35%,rgba(137,92,255,.24),transparent 27%),linear-gradient(120deg,rgba(50,107,229,.24),rgba(21,30,57,.82) 52%,rgba(96,53,177,.18));border-color:rgba(111,151,255,.28);box-shadow:var(--shadow),inset 0 1px rgba(255,255,255,.06)}
 .banner::after{content:"";position:absolute;width:220px;height:220px;border:1px solid rgba(255,255,255,.08);border-radius:50%;right:-55px;top:-115px;box-shadow:0 0 0 35px rgba(255,255,255,.025),0 0 0 70px rgba(255,255,255,.015)}
@@ -735,6 +737,7 @@ function switchTab(t){
 // ─── NAVIGATION ───
 function go(t){
   if(t!=='community')stopCommunity();
+  activeAppPage=t;
   document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
   const n=document.getElementById('n-'+t); if(n)n.classList.add('active');
   if(t==='dashboard')renderDash();
@@ -752,17 +755,52 @@ function go(t){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-let sidebarNewsLoaded=false;
+const NEWS_SLOT_MS=30*60*1000;
+let activeAppPage='dashboard';
+let sidebarNewsLoaded=false,sidebarNewsSlot=-1,sidebarNewsLoading=false;
+let newsRefreshSlot=Math.floor(Date.now()/NEWS_SLOT_MS),newsRefreshTimer=null;
+function getNewsSlot(){return Math.floor(Date.now()/NEWS_SLOT_MS);}
+function newsEndpoint(){return `/api/electric-news?slot=${getNewsSlot()}`;}
+function formatNewsUpdate(value){
+  const date=new Date(value);
+  return Number.isNaN(date.getTime())?'agora':date.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+}
 function refreshAppSidebars(activePage){
   document.querySelectorAll('[data-side-page]').forEach(button=>button.classList.toggle('active',button.dataset.sidePage===activePage));
   const box=document.getElementById('side-progress');
   if(box&&me){const pr=DB.progress[me]||{};const done=LEVELS.filter(level=>Number(pr[level.id]||0)>=100).length;const percent=Math.round(done/LEVELS.length*100);box.innerHTML=`<div class="side-progress-row"><strong>Seu progresso</strong><span>${done}/${LEVELS.length}</span></div><div class="pb"><div class="pf" style="width:${percent}%"></div></div><div class="pm"><span>${percent}% concluído</span></div>`;}
   if(!sidebarNewsLoaded)loadSidebarNews();
 }
-async function loadSidebarNews(){
-  const list=document.getElementById('side-news-list');if(!list||sidebarNewsLoaded)return;
-  try{const res=await authFetch('/api/electric-news'),data=await res.json();if(!res.ok)throw new Error(data.error);const items=(data.items||[]).slice(0,10);list.innerHTML=items.map(item=>`<a class="side-news" href="${escapeAttr(item.url)}" target="_blank" rel="noopener noreferrer">${item.image?`<img src="${escapeAttr(item.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.outerHTML='<span class=&quot;side-news-fallback&quot;>⚡</span>'">`:'<span class="side-news-fallback">⚡</span>'}<span><small>${escapeHtml(item.source||'Notícia')}</small><strong>${escapeHtml(item.title)}</strong></span></a>`).join('')||'<div style="padding:.7rem;color:var(--text2);font-size:.7rem">Nenhuma notícia agora.</div>';sidebarNewsLoaded=true;}catch{list.innerHTML='<button class="side-link" onclick="sidebarNewsLoaded=false;loadSidebarNews()">↻ Tentar carregar notícias</button>';}
+async function loadSidebarNews(force=false){
+  const list=document.getElementById('side-news-list'),slot=getNewsSlot();
+  if(!list||sidebarNewsLoading||(!force&&sidebarNewsLoaded&&sidebarNewsSlot===slot))return;
+  const hadNews=sidebarNewsLoaded&&list.querySelector('.side-news');
+  sidebarNewsLoading=true;
+  try{
+    const res=await authFetch(newsEndpoint(),{cache:'no-store'}),data=await res.json();
+    if(!res.ok)throw new Error(data.error);
+    const items=(data.items||[]).slice(0,10);
+    list.innerHTML=`<div class="side-news-updated">Atualizado às ${formatNewsUpdate(data.updatedAt)} · a cada 30 min</div>${items.map(item=>`<a class="side-news" href="${escapeAttr(item.url)}" target="_blank" rel="noopener noreferrer">${item.image?`<img src="${escapeAttr(item.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.outerHTML='<span class=&quot;side-news-fallback&quot;>⚡</span>'">`:'<span class="side-news-fallback">⚡</span>'}<span><small>${escapeHtml(item.source||'Notícia')}</small><strong>${escapeHtml(item.title)}</strong></span></a>`).join('')||'<div style="padding:.7rem;color:var(--text2);font-size:.7rem">Nenhuma notícia agora.</div>'}`;
+    sidebarNewsLoaded=true;sidebarNewsSlot=slot;
+  }catch{
+    if(!hadNews)list.innerHTML='<button class="side-link" onclick="sidebarNewsLoaded=false;loadSidebarNews(true)">↻ Tentar carregar notícias</button>';
+  }finally{sidebarNewsLoading=false;}
 }
+function scheduleNewsRefresh(){
+  const slot=getNewsSlot(),changed=slot!==newsRefreshSlot;
+  newsRefreshSlot=slot;
+  if(changed&&me&&subscriptionActive){
+    loadSidebarNews(true);
+    if(activeAppPage==='news')renderNews(true);
+  }
+  clearTimeout(newsRefreshTimer);
+  const untilNextSlot=NEWS_SLOT_MS-(Date.now()%NEWS_SLOT_MS);
+  newsRefreshTimer=setTimeout(scheduleNewsRefresh,untilNextSlot+250);
+}
+scheduleNewsRefresh();
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)scheduleNewsRefresh();});
+window.addEventListener('focus',scheduleNewsRefresh);
+window.addEventListener('pageshow',scheduleNewsRefresh);
 
 let communityPoll=null,communityHeartbeat=null,communityUserId=null,communitySending=false;
 function stopCommunity(){clearInterval(communityPoll);clearInterval(communityHeartbeat);communityPoll=null;communityHeartbeat=null;}
@@ -842,9 +880,19 @@ function friendlyAuthError(error,context='login'){
   if(/network|fetch/.test(message))return 'Sem conexão com o sistema agora. Confira sua internet e tente novamente.';
   return context==='register'?'Não foi possível criar a conta agora. Tente novamente.':'Não foi possível entrar agora. Tente novamente.';
 }
-async function renderNews(){
-  document.getElementById('mc').innerHTML='<div class="spin-wrap"><div class="spin"></div><p>Atualizando o Mundo Elétrico…</p></div>';
-  try{const res=await authFetch('/api/electric-news'),data=await res.json();if(!res.ok)throw new Error(data.error);document.getElementById('mc').innerHTML=`<div class="banner"><span class="continue-eyebrow">Atualizado ao longo do dia</span><h2>🌐 Mundo Elétrico</h2><p>Novidades selecionadas sobre energia, tecnologia e indústria.</p></div><div class="news-grid">${data.items.map(n=>`<a class="news-card news-preview-card" href="${escapeAttr(n.url)}" target="_blank" rel="noopener noreferrer" style="text-decoration:none;color:inherit">${n.image?`<img class="news-cover" src="${escapeAttr(n.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=&quot;news-cover-fallback&quot;>⚡</div>'">`:'<div class="news-cover-fallback">⚡</div>'}<div class="news-body"><div class="chip on" style="width:max-content">${escapeHtml(n.source)}</div><h3 style="font-size:1rem;margin:.7rem 0;line-height:1.4">${escapeHtml(n.title)}</h3><p class="news-summary">${escapeHtml(n.summary||'Confira os detalhes e as informações completas diretamente na fonte da notícia.')}</p><div class="news-footer"><span>${new Date(n.publishedAt).toLocaleString('pt-BR')}</span><span>Abrir notícia ↗</span></div></div></a>`).join('')}</div>`;}catch(err){document.getElementById('mc').innerHTML=`<div class="state-card"><div class="state-icon">🌐</div><h2>Não foi possível atualizar as notícias</h2><p>${escapeHtml(err.message)}</p><button class="btn btn-primary" onclick="renderNews()">Tentar novamente</button></div>`;}
+async function renderNews(silent=false){
+  const container=document.getElementById('mc');
+  if(!silent)container.innerHTML='<div class="spin-wrap"><div class="spin"></div><p>Buscando as notícias mais recentes…</p></div>';
+  try{
+    const requestedSlot=getNewsSlot();
+    const res=await authFetch(newsEndpoint(),{cache:'no-store'}),data=await res.json();
+    if(!res.ok)throw new Error(data.error);
+    if(activeAppPage!=='news'||requestedSlot!==getNewsSlot())return;
+    const items=Array.isArray(data.items)?data.items:[];
+    container.innerHTML=`<div class="banner"><span class="continue-eyebrow">Atualização automática a cada 30 minutos</span><h2>🌐 Mundo Elétrico</h2><p>Novidades selecionadas sobre energia, tecnologia e indústria. <span class="news-update-time">Última atualização às ${formatNewsUpdate(data.updatedAt)}.</span></p></div><div class="news-grid">${items.map(n=>`<a class="news-card news-preview-card" href="${escapeAttr(n.url)}" target="_blank" rel="noopener noreferrer" style="text-decoration:none;color:inherit">${n.image?`<img class="news-cover" src="${escapeAttr(n.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=&quot;news-cover-fallback&quot;>⚡</div>'">`:'<div class="news-cover-fallback">⚡</div>'}<div class="news-body"><div class="chip on" style="width:max-content">${escapeHtml(n.source)}</div><h3 style="font-size:1rem;margin:.7rem 0;line-height:1.4">${escapeHtml(n.title)}</h3><p class="news-summary">${escapeHtml(n.summary||'Confira os detalhes e as informações completas diretamente na fonte da notícia.')}</p><div class="news-footer"><span>${new Date(n.publishedAt).toLocaleString('pt-BR')}</span><span>Abrir notícia ↗</span></div></div></a>`).join('')||'<div class="state-card"><div class="state-icon">🌐</div><h2>Nenhuma notícia nova agora</h2><p>O sistema tentará novamente no próximo ciclo de meia hora.</p></div>'}</div>`;
+  }catch(err){
+    if(!silent&&activeAppPage==='news')container.innerHTML=`<div class="state-card"><div class="state-icon">🌐</div><h2>Não foi possível atualizar as notícias</h2><p>${escapeHtml(err.message)}</p><button class="btn btn-primary" onclick="renderNews()">Tentar novamente</button></div>`;
+  }
 }
 
 // ─── DASHBOARD ───
