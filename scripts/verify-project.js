@@ -32,6 +32,9 @@ assert((professionalCss.match(/\{/g) || []).length === (professionalCss.match(/\
 assert(/<button[^>]+class="auth-tab/.test(html), 'As abas de autenticação não usam controles acessíveis.');
 
 assert(html.includes('/assets/professional.css'), 'O design profissional não está vinculado ao HTML.');
+assert(html.includes('MOTIVATION_SLOT_MS=30*60*1000'), 'As frases motivacionais não estão configuradas para mudar a cada 30 minutos.');
+assert(html.includes("document.addEventListener('visibilitychange'"), 'As frases motivacionais não sincronizam quando o usuário volta para a aba.');
+assert(html.includes("window.addEventListener('pageshow',scheduleMotivation)"), 'As frases motivacionais não sincronizam ao reabrir/restaurar a página.');
 const cssVersion = html.match(/\/assets\/professional\.css\?v=([a-f0-9]{12})/)?.[1];
 const expectedCssVersion = crypto.createHash('sha1').update(professionalCss).digest('hex').slice(0, 12);
 assert(cssVersion === expectedCssVersion, 'A versão do CSS está desatualizada; o navegador pode manter o visual antigo em cache.');

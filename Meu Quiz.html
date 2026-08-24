@@ -789,13 +789,29 @@ const VERSES_DAY=[
 const VERSES_HARD=[
   ['Mesmo na noite escura, permanece firme: Deus ainda trabalha.','cf. Salmo 23'],['Cansado não significa vencido. Levanta-te e continua.','cf. Isaías 40,31'],['A tribulação produz perseverança, caráter e esperança.','Romanos 5,3-4'],['Entrega teu caminho ao Senhor, confia, e Ele agirá.','Salmo 37,5']
 ];
+const MOTIVATION_SLOT_MS=30*60*1000;
+let motivationTimer=null;
 function updateMotivation(){
   const now=new Date(), h=now.getHours(), heavy=h<6||h>=18;
   const list=heavy?VERSES_HARD:VERSES_DAY;
-  const item=list[(Math.floor(now.getTime()/3600000))%list.length];
-  const el=document.getElementById('motivation'); if(el)el.textContent=`“${item[0]}” — ${item[1]}`;
+  const slot=Math.floor(now.getTime()/MOTIVATION_SLOT_MS);
+  const item=list[slot%list.length];
+  const el=document.getElementById('motivation');
+  if(el&&el.dataset.slot!==String(slot)){
+    el.textContent=`“${item[0]}” — ${item[1]}`;
+    el.dataset.slot=String(slot);
+  }
 }
-updateMotivation();setInterval(updateMotivation,60000);
+function scheduleMotivation(){
+  updateMotivation();
+  clearTimeout(motivationTimer);
+  const untilNextSlot=MOTIVATION_SLOT_MS-(Date.now()%MOTIVATION_SLOT_MS);
+  motivationTimer=setTimeout(scheduleMotivation,untilNextSlot+250);
+}
+scheduleMotivation();
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)scheduleMotivation();});
+window.addEventListener('focus',scheduleMotivation);
+window.addEventListener('pageshow',scheduleMotivation);
 
 function renderTutor(){
   document.getElementById('mc').innerHTML=`<div class="ai-shell"><div class="ai-card"><div class="tutor-brand"><div class="lbadge">🤖</div><div><strong>Tutor ElectroLearn</strong><span>Assistente de estudos com foco em elétrica</span></div><button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="clearTutorConversation()">Nova conversa</button></div><h2 style="margin:.75rem 0 .2rem">Como posso ajudar?</h2><p style="color:var(--text2);font-size:.82rem">Pergunte normalmente, envie uma foto de circuito ou anexe um PDF para analisar e resumir.</p><div class="tutor-suggestions"><button onclick="useTutorSuggestion('Explique a Lei de Ohm com um exemplo simples.')">Lei de Ohm</button><button onclick="useTutorSuggestion('Ajude-me a dimensionar um circuito com segurança.')">Dimensionamento</button><button onclick="useTutorSuggestion('Quais cuidados devo ter antes de trabalhar com eletricidade?')">Segurança</button></div><div class="chat-log" id="chat-log" aria-live="polite">${tutorConversation.map(message=>`<div class="msg ${message.role}">${escapeHtml(message.text).replace(/\n/g,'<br>')}</div>`).join('')}</div><div class="chat-compose"><input id="tutor-file" type="file" accept="image/png,image/jpeg,image/webp,application/pdf" hidden onchange="selectTutorFile(event)"><div class="file-chip" id="tutor-file-chip"></div><div class="composer-row"><button class="attach-btn" onclick="document.getElementById('tutor-file').click()" title="Adicionar foto ou PDF" aria-label="Adicionar foto ou PDF">＋</button><textarea id="tutor-input" rows="1" maxlength="2500" placeholder="Digite sua dúvida…" aria-label="Mensagem para o Tutor" oninput="autoGrowTutor(this)" onkeydown="tutorKeydown(event)"></textarea><button class="btn btn-primary" id="tutor-send" onclick="askTutor()">Enviar ➤</button></div></div></div></div>`;
