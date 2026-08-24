@@ -305,6 +305,7 @@ h1,h2,h3,h4{letter-spacing:-.035em}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style>
+<link rel="stylesheet" href="/assets/professional.css?v=20260820"/>
 </head>
 <body>
 
@@ -330,19 +331,19 @@ h1,h2,h3,h4{letter-spacing:-.035em}
     </div>
     <div class="auth-card">
       <div class="auth-offer"><strong>🔒 Acesso completo por assinatura</strong><div class="auth-prices"><span class="auth-price">Semanal <b>R$ 21,90</b></span><span class="auth-price">Mensal <b>R$ 75,99</b></span></div><small>Entre ou crie sua conta para escolher o plano e pagar com cartão ou PIX.</small></div>
-      <div class="auth-tabs">
-        <div class="auth-tab active" onclick="switchTab('login')">Entrar</div>
-        <div class="auth-tab" onclick="switchTab('register')">Cadastrar</div>
+      <div class="auth-tabs" role="tablist" aria-label="Acesso à conta">
+        <button type="button" class="auth-tab active" role="tab" aria-selected="true" onclick="switchTab('login')">Entrar</button>
+        <button type="button" class="auth-tab" role="tab" aria-selected="false" onclick="switchTab('register')">Cadastrar</button>
       </div>
       <div id="lf">
         <div class="field"><label>E-mail</label><input type="email" id="le" autocomplete="email" placeholder="seu@email.com"/></div>
         <div class="field"><label>Senha</label><input type="password" id="lp" autocomplete="current-password" placeholder="••••••••"/></div>
-        <div class="err" id="lerr">E-mail ou senha incorretos.</div>
+        <div class="err" id="lerr" role="alert" aria-live="polite">E-mail ou senha incorretos.</div>
         <button class="btn btn-primary" onclick="doLogin()" style="margin-top:.5rem">Entrar →</button>
         <div class="auth-helper-row"><button class="otp-link" onclick="showForgotPassword()">Esqueci minha senha</button></div>
       </div>
       <div id="rf" style="display:none">
-        <div id="register-fields"><div class="field"><label>Nome</label><input type="text" id="rn" autocomplete="name" maxlength="80" placeholder="Seu nome"/></div><div class="field"><label>E-mail</label><input type="email" id="re" autocomplete="email" placeholder="seu@email.com"/></div><div class="field"><label>Senha</label><input type="password" id="rp" autocomplete="new-password" minlength="8" placeholder="mín. 8 caracteres"/></div><div class="err" id="rerr">Preencha todos os campos.</div><button class="btn btn-primary" onclick="doRegister()" id="register-btn" style="margin-top:.5rem">Criar conta →</button></div>
+        <div id="register-fields"><div class="field"><label>Nome</label><input type="text" id="rn" autocomplete="name" maxlength="80" placeholder="Seu nome"/></div><div class="field"><label>E-mail</label><input type="email" id="re" autocomplete="email" placeholder="seu@email.com"/></div><div class="field"><label>Senha</label><input type="password" id="rp" autocomplete="new-password" minlength="8" placeholder="mín. 8 caracteres"/></div><div class="err" id="rerr" role="alert" aria-live="polite">Preencha todos os campos.</div><button class="btn btn-primary" onclick="doRegister()" id="register-btn" style="margin-top:.5rem">Criar conta →</button></div>
         <div class="otp-box" id="signup-confirmation"><div class="password-panel-icon">📩</div><h3>Confirme seu e-mail</h3><p>Enviamos uma mensagem para <strong id="confirmation-email"></strong>. Abra o e-mail e clique no botão <strong>Confirmar cadastro</strong>.</p><div class="email-confirm-card"><strong>Não precisa digitar código.</strong><br><span style="font-size:.72rem;color:var(--text2)">Depois da confirmação, você voltará ao ElectroLearn para entrar.</span></div><div class="otp-actions"><button class="otp-link" onclick="resendSignupConfirmation()">Reenviar e-mail</button><button class="otp-link" onclick="changeSignupEmail()">Trocar e-mail</button></div></div>
       </div>
       <div class="password-panel" id="forgot-password"><div class="password-panel-icon">🔐</div><h3>Recuperar senha</h3><p>Informe seu e-mail e enviaremos um link seguro para criar uma nova senha.</p><div class="field"><label>E-mail</label><input type="email" id="reset-email" placeholder="seu@email.com" onkeydown="if(event.key==='Enter')requestPasswordReset()"/></div><div class="err" id="reset-error"></div><button class="btn btn-primary" id="reset-send" onclick="requestPasswordReset()">Enviar link de recuperação</button><div class="otp-actions"><button class="otp-link" onclick="returnToLogin()">← Voltar para o login</button></div></div>
@@ -362,17 +363,17 @@ h1,h2,h3,h4{letter-spacing:-.035em}
       <button class="logout-btn" onclick="doLogout()">Sair</button>
     </div>
   </div>
-  <div class="main-nav">
-    <div class="nav-item active" onclick="go('dashboard')" id="n-dashboard">🏠 Início</div>
-    <div class="nav-item" onclick="go('tutor')" id="n-tutor">🤖 Tutor IA</div>
-    <div class="nav-item" onclick="go('community')" id="n-community">💬 Chat Global</div>
-    <div class="nav-item" onclick="go('news')" id="n-news">🌐 Mundo Elétrico</div>
-    <div class="nav-item" onclick="go('study')" id="n-study">📚 Estudar</div>
-    <div class="nav-item" onclick="go('quiz')" id="n-quiz">⚡ Quiz</div>
-    <div class="nav-item" onclick="go('ranking')" id="n-ranking">🏆 Ranking</div>
-    <div class="nav-item" onclick="go('profile')" id="n-profile">👤 Perfil</div>
-    <div class="nav-item" onclick="go('admin')" id="n-admin" style="display:none">🛠️ Administração</div>
-  </div>
+  <nav class="main-nav" aria-label="Navegação principal">
+    <button type="button" class="nav-item active" onclick="go('dashboard')" id="n-dashboard">🏠 Início</button>
+    <button type="button" class="nav-item" onclick="go('tutor')" id="n-tutor">🤖 Tutor IA</button>
+    <button type="button" class="nav-item" onclick="go('community')" id="n-community">💬 Chat Global</button>
+    <button type="button" class="nav-item" onclick="go('news')" id="n-news">🌐 Mundo Elétrico</button>
+    <button type="button" class="nav-item" onclick="go('study')" id="n-study">📚 Estudar</button>
+    <button type="button" class="nav-item" onclick="go('quiz')" id="n-quiz">⚡ Quiz</button>
+    <button type="button" class="nav-item" onclick="go('ranking')" id="n-ranking">🏆 Ranking</button>
+    <button type="button" class="nav-item" onclick="go('profile')" id="n-profile">👤 Perfil</button>
+    <button type="button" class="nav-item" onclick="go('admin')" id="n-admin" style="display:none">🛠️ Administração</button>
+  </nav>
   <div class="app-layout">
     <aside class="app-side app-side-left" aria-label="Notícias do Mundo Elétrico"><div class="app-side-title"><span>🌐 Mundo Elétrico</span><button class="help-close" onclick="go('news')" title="Ver todas">↗</button></div><div class="side-news-list" id="side-news-list"><div style="padding:.7rem;color:var(--text2);font-size:.7rem">Carregando notícias…</div></div></aside>
     <div class="content" id="mc"></div>
@@ -631,7 +632,7 @@ const LEVELS=[
 ];
 
 const VIDEO_LESSONS={
-  1:{title:"Eletrotécnica: conceitos básicos — Aula 1",url:"https://www.youtube.com/watch?v=1A3lnx_-1tw"},
+  1:{title:"Conceitos básicos de eletricidade — Aula 1",url:"https://www.youtube.com/watch?v=ktrk2rKjtmM"},
   2:{title:"Primeira Lei de Ohm — Eletrodinâmica",url:"https://www.youtube.com/watch?v=LC0nL4cjxYg"},
   3:{title:"Potência Elétrica — Eletrodinâmica",url:"https://www.youtube.com/watch?v=fwMDK4h3Bbg"},
   4:{title:"Circuito em Série e Circuito em Paralelo",url:"https://www.youtube.com/watch?v=Vfvk6c24pFQ"},
@@ -677,10 +678,10 @@ const VIDEO_LESSONS={
   44:{title:"Como funciona um carro elétrico?",url:"https://www.youtube.com/watch?v=k9lw8v8izfk"},
   45:{title:"Eficiência energética na eletrotécnica industrial",url:"https://www.youtube.com/watch?v=n_2eYI6q5cQ"},
   46:{title:"Manutenção Elétrica Industrial — Aula 3",url:"https://www.youtube.com/watch?v=0Ep7TiEB2_0"},
-  47:{title:"O que é Termografia? — Aula 1",url:"https://www.youtube.com/watch?v=W6sQLMPlUDM"},
+  47:{title:"Minicurso: termografia em instalações elétricas",url:"https://www.youtube.com/watch?v=IA9aQZGRv6k"},
   48:{title:"Ensaios elétricos de transformador",url:"https://www.youtube.com/watch?v=EP1Jve9kLBM"},
   49:{title:"Projetos de instalações elétricas",url:"https://www.youtube.com/watch?v=rOKdznExdxA"},
-  50:{title:"Projeto elétrico industrial: metodologia para dimensionamento",url:"https://www.youtube.com/watch?v=11eglBLnXK4"},
+  50:{title:"Projetos elétricos industriais — Aula 1",url:"https://www.youtube.com/watch?v=oYQiaufTwN8"},
   51:{title:"NR-10: o que é e como se aplica",url:"https://www.youtube.com/watch?v=vFwDdckuTCM"},
   52:{title:"NBR 5410: principais pontos em 30 minutos",url:"https://www.youtube.com/watch?v=vlYfRV1UGMo"},
   53:{title:"Montagem de painel elétrico industrial",url:"https://www.youtube.com/watch?v=2P6AXu2bB7M"},
@@ -698,9 +699,13 @@ let DB = JSON.parse(localStorage.getItem('el2_db')||'{}');
 if(!DB.users)    DB.users={};
 if(!DB.progress) DB.progress={};
 if(!DB.scores)   DB.scores={};
+if(!DB.lessonProgress) DB.lessonProgress={};
+if(!DB.quizScores) DB.quizScores={};
+Object.values(DB.users).forEach(user=>{if(user&&typeof user==='object')delete user.p;});
+localStorage.setItem('el2_db',JSON.stringify(DB));
 function save(){localStorage.setItem('el2_db',JSON.stringify(DB));if(typeof queueProgressSync==='function')queueProgressSync();}
 
-let me=null, slv=null, spdf=0, qlv=null, qq=[], qi=0, qs=0, qans=false, qresponses=[],qreviews=[];
+let me=null, slv=null, spdf=0, qlv=null, qq=[], qi=0, qs=0, qans=false, qresponses=[],qreviews=[],quizAttemptToken='',latestQuizOutcome=null;
 
 // ─── AUTH ───
 function openAuth(tab='login'){
@@ -723,45 +728,10 @@ function switchTab(t){
   restoreAuthChrome();
   document.getElementById('forgot-password')?.classList.remove('show');
   document.getElementById('new-password')?.classList.remove('show');
-  document.querySelectorAll('.auth-tab').forEach((el,i)=>el.classList.toggle('active',i===(t==='login'?0:1)));
+  document.querySelectorAll('.auth-tab').forEach((el,i)=>{const active=i===(t==='login'?0:1);el.classList.toggle('active',active);el.setAttribute('aria-selected',String(active));});
   document.getElementById('lf').style.display=t==='login'?'':'none';
   document.getElementById('rf').style.display=t==='register'?'':'none';
 }
-function doLogin(){
-  const e=document.getElementById('le').value.trim(), p=document.getElementById('lp').value;
-  const err=document.getElementById('lerr');
-  if(!DB.users[e]||DB.users[e].p!==p){err.style.display='block';return;}
-  err.style.display='none'; loginAs(e);
-}
-function demoLogin(){
-  if(!DB.users['demo@el.app']){DB.users['demo@el.app']={n:'Convidado',p:'x'};save();}
-  loginAs('demo@el.app');
-}
-function doRegister(){
-  const n=document.getElementById('rn').value.trim(), e=document.getElementById('re').value.trim(), p=document.getElementById('rp').value;
-  const err=document.getElementById('rerr');
-  if(!n||!e||p.length<8){err.style.display='block';err.textContent='Preencha os campos e use uma senha com pelo menos 8 caracteres.';return;}
-  if(DB.users[e]){err.style.display='block';err.textContent='E-mail já cadastrado.';return;}
-  DB.users[e]={n,p};DB.progress[e]={};DB.scores[e]=0;save();loginAs(e);
-}
-function loginAs(email){
-  me=email;
-  if(!DB.progress[me])DB.progress[me]={};
-  if(DB.scores[me]===undefined)DB.scores[me]=0;
-  const u=DB.users[me];
-  document.getElementById('tav').textContent=u.n[0].toUpperCase();
-  document.getElementById('tname').textContent=u.n;
-  document.getElementById('auth-screen').classList.remove('active');
-  document.getElementById('app-screen').classList.add('active');
-  setHelpDockVisible(true);
-  go('dashboard');
-}
-function doLogout(){
-  me=null;
-  document.getElementById('app-screen').classList.remove('active');
-  document.getElementById('auth-screen').classList.add('active');
-}
-
 // ─── NAVIGATION ───
 function go(t){
   if(t!=='community')stopCommunity();
@@ -777,6 +747,9 @@ function go(t){
   else if(t==='profile')renderProfile();
   else if(t==='admin')renderAdmin();
   refreshAppSidebars(t);
+  const labels={dashboard:'Início',tutor:'Tutor IA',community:'Chat Global',news:'Mundo Elétrico',study:'Estudar',quiz:'Quiz',ranking:'Ranking',profile:'Perfil',admin:'Administração'};
+  document.title=`${labels[t]||'ElectroLearn'} — ElectroLearn`;
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
 let sidebarNewsLoaded=false;
@@ -788,7 +761,7 @@ function refreshAppSidebars(activePage){
 }
 async function loadSidebarNews(){
   const list=document.getElementById('side-news-list');if(!list||sidebarNewsLoaded)return;
-  try{const res=await authFetch('/api/electric-news'),data=await res.json();if(!res.ok)throw new Error(data.error);const items=(data.items||[]).slice(0,10);list.innerHTML=items.map(item=>`<a class="side-news" href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer">${item.image?`<img src="${escapeHtml(item.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.outerHTML='<span class=&quot;side-news-fallback&quot;>⚡</span>'">`:'<span class="side-news-fallback">⚡</span>'}<span><small>${escapeHtml(item.source||'Notícia')}</small><strong>${escapeHtml(item.title)}</strong></span></a>`).join('')||'<div style="padding:.7rem;color:var(--text2);font-size:.7rem">Nenhuma notícia agora.</div>';sidebarNewsLoaded=true;}catch{list.innerHTML='<button class="side-link" onclick="sidebarNewsLoaded=false;loadSidebarNews()">↻ Tentar carregar notícias</button>';}
+  try{const res=await authFetch('/api/electric-news'),data=await res.json();if(!res.ok)throw new Error(data.error);const items=(data.items||[]).slice(0,10);list.innerHTML=items.map(item=>`<a class="side-news" href="${escapeAttr(item.url)}" target="_blank" rel="noopener noreferrer">${item.image?`<img src="${escapeAttr(item.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.outerHTML='<span class=&quot;side-news-fallback&quot;>⚡</span>'">`:'<span class="side-news-fallback">⚡</span>'}<span><small>${escapeHtml(item.source||'Notícia')}</small><strong>${escapeHtml(item.title)}</strong></span></a>`).join('')||'<div style="padding:.7rem;color:var(--text2);font-size:.7rem">Nenhuma notícia agora.</div>';sidebarNewsLoaded=true;}catch{list.innerHTML='<button class="side-link" onclick="sidebarNewsLoaded=false;loadSidebarNews()">↻ Tentar carregar notícias</button>';}
 }
 
 let communityPoll=null,communityHeartbeat=null,communityUserId=null,communitySending=false;
@@ -796,17 +769,18 @@ function stopCommunity(){clearInterval(communityPoll);clearInterval(communityHea
 async function communityBeat(){try{await authFetch('/api/community/heartbeat',{method:'POST'});}catch{}}
 function renderCommunity(){
   stopCommunity();
-  document.getElementById('mc').innerHTML=`<div class="community-shell"><div class="community-head"><div><strong>💬 Chat Global</strong><div style="font-size:.7rem;color:var(--text2);margin-top:.2rem">Comunidade exclusiva dos assinantes</div></div><span class="online-pill" id="community-online">● conectando…</span></div><div class="community-log" id="community-log"><div class="community-empty">Carregando conversas…</div></div><div class="community-compose"><textarea id="community-input" maxlength="600" placeholder="Converse com a comunidade…" onkeydown="communityKeydown(event)"></textarea><button class="btn btn-primary" id="community-send" onclick="sendCommunityMessage()">Enviar</button></div></div>`;
+  document.getElementById('mc').innerHTML=`<div class="community-shell"><div class="community-head"><div class="community-title"><div class="community-title-icon">💬</div><div><strong>Chat Global</strong><div style="font-size:.7rem;color:var(--text2);margin-top:.15rem">Comunidade exclusiva dos assinantes</div></div></div><span class="online-pill" id="community-online">● conectando…</span></div><div class="community-guidelines"><strong>Convivência:</strong><span>respeito sempre</span><span>sem dados pessoais</span><span>bots identificados</span></div><div class="community-log" id="community-log" aria-live="polite"><div class="community-empty">Carregando conversas…</div></div><div class="community-compose"><div class="community-compose-wrap"><textarea id="community-input" maxlength="600" placeholder="Converse com a comunidade…" aria-label="Mensagem para o Chat Global" oninput="updateCommunityCount(this)" onkeydown="communityKeydown(event)"></textarea><div class="community-compose-meta"><span id="community-count">0/600</span></div></div><button class="btn btn-primary" id="community-send" onclick="sendCommunityMessage()">Enviar</button></div></div>`;
   communityBeat();loadCommunity(true);communityHeartbeat=setInterval(communityBeat,45000);communityPoll=setInterval(()=>loadCommunity(false),4000);
 }
 function communityKeydown(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendCommunityMessage();}}
+function updateCommunityCount(input){const count=document.getElementById('community-count');if(count)count.textContent=`${input.value.length}/600`;input.style.height='auto';input.style.height=Math.min(input.scrollHeight,130)+'px';}
 async function loadCommunity(forceBottom=false){
   const log=document.getElementById('community-log');if(!log)return;
   try{const nearBottom=log.scrollHeight-log.scrollTop-log.clientHeight<90;const res=await authFetch('/api/community');const data=await res.json();if(!res.ok)throw new Error(data.error);communityUserId=data.userId;const online=document.getElementById('community-online');if(online)online.textContent=`● ${data.online} online agora`;log.innerHTML=data.messages.length?data.messages.map(m=>`<div class="community-msg${m.user_id===communityUserId?' mine':''}${m.is_bot?' bot':''}"><div class="community-author">${escapeHtml(m.author_name)}${m.is_bot?'<span class="bot-badge">BOT</span>':''}</div><div>${escapeHtml(m.message).replace(/\n/g,'<br>')}</div><div class="community-time">${new Date(m.created_at).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</div></div>`).join(''):'<div class="community-empty">Seja a primeira pessoa a conversar hoje 👋<br><small>Você também pode chamar o Léo ou a Marina.</small></div>';if(forceBottom||nearBottom)log.scrollTop=log.scrollHeight;}catch(err){if(forceBottom)log.innerHTML=`<div class="community-empty">${escapeHtml(err.message)}</div>`;}
 }
 async function sendCommunityMessage(){
   if(communitySending)return;const input=document.getElementById('community-input');const message=input?.value.trim();if(!message)return;communitySending=true;const button=document.getElementById('community-send');button.disabled=true;button.textContent='Verificando…';
-  try{const res=await authFetch('/api/community/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message})});const data=await res.json();if(!res.ok)throw new Error(data.error);input.value='';await loadCommunity(true);}catch(err){toast(err.message,'err');}finally{communitySending=false;button.disabled=false;button.textContent='Enviar';input?.focus();}
+  try{const res=await authFetch('/api/community/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message})});const data=await res.json();if(!res.ok)throw new Error(data.error);input.value='';input.style.height='';updateCommunityCount(input);await loadCommunity(true);}catch(err){toast(err.message,'err');}finally{communitySending=false;button.disabled=false;button.textContent='Enviar';input?.focus();}
 }
 
 const VERSES_DAY=[
@@ -824,58 +798,66 @@ function updateMotivation(){
 updateMotivation();setInterval(updateMotivation,60000);
 
 function renderTutor(){
-  document.getElementById('mc').innerHTML=`<div class="ai-shell"><div class="ai-card"><div class="tutor-brand"><div class="lbadge">🤖</div><div><strong>Tutor ElectroLearn</strong><span>Seu assistente de estudos em elétrica</span></div></div><h2 style="margin:.6rem 0">Em que posso ajudar?</h2><p style="color:var(--text2);font-size:.82rem">Converse normalmente, tire dúvidas de elétrica ou envie uma foto/PDF para analisar e resumir.</p><div class="chat-log" id="chat-log"><div class="msg ai">Fala comigo! Posso explicar circuitos, analisar uma foto, ajudar nos cálculos ou resumir um PDF.</div></div><div class="chat-compose"><input id="tutor-file" type="file" accept="image/png,image/jpeg,image/webp,application/pdf" hidden onchange="selectTutorFile(event)"><div class="file-chip" id="tutor-file-chip"></div><div class="composer-row"><button class="attach-btn" onclick="document.getElementById('tutor-file').click()" title="Adicionar foto ou PDF">＋</button><textarea id="tutor-input" rows="1" placeholder="Pergunte qualquer coisa…" oninput="autoGrowTutor(this)" onkeydown="tutorKeydown(event)"></textarea><button class="btn btn-primary" id="tutor-send" onclick="askTutor()">Enviar ➤</button></div></div></div></div>`;
+  document.getElementById('mc').innerHTML=`<div class="ai-shell"><div class="ai-card"><div class="tutor-brand"><div class="lbadge">🤖</div><div><strong>Tutor ElectroLearn</strong><span>Assistente de estudos com foco em elétrica</span></div><button class="btn btn-ghost btn-sm" style="margin-left:auto" onclick="clearTutorConversation()">Nova conversa</button></div><h2 style="margin:.75rem 0 .2rem">Como posso ajudar?</h2><p style="color:var(--text2);font-size:.82rem">Pergunte normalmente, envie uma foto de circuito ou anexe um PDF para analisar e resumir.</p><div class="tutor-suggestions"><button onclick="useTutorSuggestion('Explique a Lei de Ohm com um exemplo simples.')">Lei de Ohm</button><button onclick="useTutorSuggestion('Ajude-me a dimensionar um circuito com segurança.')">Dimensionamento</button><button onclick="useTutorSuggestion('Quais cuidados devo ter antes de trabalhar com eletricidade?')">Segurança</button></div><div class="chat-log" id="chat-log" aria-live="polite">${tutorConversation.map(message=>`<div class="msg ${message.role}">${escapeHtml(message.text).replace(/\n/g,'<br>')}</div>`).join('')}</div><div class="chat-compose"><input id="tutor-file" type="file" accept="image/png,image/jpeg,image/webp,application/pdf" hidden onchange="selectTutorFile(event)"><div class="file-chip" id="tutor-file-chip"></div><div class="composer-row"><button class="attach-btn" onclick="document.getElementById('tutor-file').click()" title="Adicionar foto ou PDF" aria-label="Adicionar foto ou PDF">＋</button><textarea id="tutor-input" rows="1" maxlength="2500" placeholder="Digite sua dúvida…" aria-label="Mensagem para o Tutor" oninput="autoGrowTutor(this)" onkeydown="tutorKeydown(event)"></textarea><button class="btn btn-primary" id="tutor-send" onclick="askTutor()">Enviar ➤</button></div></div></div></div>`;
+  const log=document.getElementById('chat-log');if(log)log.scrollTop=log.scrollHeight;
 }
 let tutorAttachment=null;
+let tutorConversation=[{role:'ai',text:'Olá! Posso explicar circuitos, ajudar em cálculos, analisar uma foto ou resumir um PDF. Por onde começamos?'}];
+function useTutorSuggestion(text){const input=document.getElementById('tutor-input');if(!input)return;input.value=text;input.focus();autoGrowTutor(input);}
+function clearTutorConversation(){tutorConversation=[{role:'ai',text:'Nova conversa iniciada. Qual é a sua dúvida?'}];renderTutor();}
 function autoGrowTutor(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,220)+'px';}
 function tutorKeydown(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();askTutor();}}
 function selectTutorFile(e){const file=e.target.files?.[0];if(!file)return;const allowed=['image/png','image/jpeg','image/webp','application/pdf'];if(!allowed.includes(file.type))return toast('Use PNG, JPG, WEBP ou PDF.','err');if(file.size>3*1024*1024){e.target.value='';return toast('O arquivo deve ter no máximo 3 MB.','err');}const reader=new FileReader();reader.onload=()=>{tutorAttachment={name:file.name,mime:file.type,data:reader.result};const chip=document.getElementById('tutor-file-chip');chip.className='file-chip show';chip.innerHTML=`<span>${file.type==='application/pdf'?'📄':'🖼️'} ${escapeHtml(file.name)}</span><button onclick="removeTutorFile()" style="border:0;background:none;color:inherit;cursor:pointer">✕</button>`;};reader.readAsDataURL(file);}
 function removeTutorFile(){tutorAttachment=null;const input=document.getElementById('tutor-file');if(input)input.value='';const chip=document.getElementById('tutor-file-chip');if(chip){chip.className='file-chip';chip.innerHTML='';}}
 async function askTutor(){
   const input=document.getElementById('tutor-input'), message=input.value.trim(); if(!message&&!tutorAttachment)return toast('Digite uma mensagem ou anexe um arquivo.','err');
-  const attachment=tutorAttachment;const log=document.getElementById('chat-log'),id='ai-'+Date.now();log.insertAdjacentHTML('beforeend',`<div class="msg user">${escapeHtml(message||'Analise este arquivo')}${attachment?`\n📎 ${escapeHtml(attachment.name)}`:''}</div><div class="msg ai" id="${id}">Analisando…</div>`);input.value='';input.style.height='auto';removeTutorFile();log.scrollTop=log.scrollHeight;const send=document.getElementById('tutor-send');send.disabled=true;
-  try{const res=await authFetch('/api/ai-tutor',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message,attachment,context:slv?LEVELS.find(l=>l.id===slv)?.topics:''})});const data=await res.json();if(!res.ok)throw new Error(data.error);document.getElementById(id).textContent=data.answer;}catch(err){document.getElementById(id).textContent='Não consegui responder agora: '+err.message;}finally{send.disabled=false;}log.scrollTop=log.scrollHeight;
+  const attachment=tutorAttachment;const log=document.getElementById('chat-log'),id='ai-'+Date.now(),userText=(message||'Analise este arquivo')+(attachment?`\n📎 ${attachment.name}`:'');tutorConversation.push({role:'user',text:userText});log.insertAdjacentHTML('beforeend',`<div class="msg user">${escapeHtml(userText).replace(/\n/g,'<br>')}</div><div class="msg ai" id="${id}"><span class="typing-dots"><i></i><i></i><i></i></span></div>`);input.value='';input.style.height='auto';removeTutorFile();log.scrollTop=log.scrollHeight;const send=document.getElementById('tutor-send');send.disabled=true;send.textContent='Respondendo…';
+  try{const res=await authFetch('/api/ai-tutor',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message,attachment,context:slv?LEVELS.find(l=>l.id===slv)?.topics:''})});const data=await res.json();if(!res.ok)throw new Error(data.error);document.getElementById(id).textContent=data.answer;tutorConversation.push({role:'ai',text:data.answer});}catch(err){const text=err.message||'O Tutor não conseguiu responder agora. Tente novamente em instantes.';document.getElementById(id).textContent=text;tutorConversation.push({role:'ai',text});}finally{send.disabled=false;send.textContent='Enviar ➤';}log.scrollTop=log.scrollHeight;
 }
 function escapeHtml(value){const d=document.createElement('div');d.textContent=String(value);return d.innerHTML;}
+function escapeAttr(value){return String(value??'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function friendlyAuthError(error,context='login'){
+  const message=String(error?.message||error||'').toLowerCase();
+  if(/invalid login credentials|invalid credentials/.test(message))return 'E-mail ou senha incorretos.';
+  if(/email not confirmed|confirm/.test(message))return 'Confirme seu e-mail antes de entrar.';
+  if(/already registered|user already/.test(message))return 'Este e-mail já possui uma conta. Use “Entrar” ou recupere sua senha.';
+  if(/password/.test(message)&&/weak|short|least/.test(message))return 'Crie uma senha com pelo menos 8 caracteres.';
+  if(/rate|too many|security purposes/.test(message))return 'Muitas tentativas. Aguarde alguns minutos e tente novamente.';
+  if(/network|fetch/.test(message))return 'Sem conexão com o sistema agora. Confira sua internet e tente novamente.';
+  return context==='register'?'Não foi possível criar a conta agora. Tente novamente.':'Não foi possível entrar agora. Tente novamente.';
+}
 async function renderNews(){
   document.getElementById('mc').innerHTML='<div class="spin-wrap"><div class="spin"></div><p>Atualizando o Mundo Elétrico…</p></div>';
-  try{const res=await authFetch('/api/electric-news'),data=await res.json();if(!res.ok)throw new Error(data.error);document.getElementById('mc').innerHTML=`<div class="banner"><h2>🌐 Mundo Elétrico</h2><p>Novidades em energia, tecnologia e indústria. Atualização automática ao longo do dia.</p></div><div class="news-grid">${data.items.map(n=>`<a class="news-card news-preview-card" href="${escapeHtml(n.url)}" target="_blank" rel="noopener noreferrer" style="text-decoration:none;color:inherit">${n.image?`<img class="news-cover" src="${escapeHtml(n.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=&quot;news-cover-fallback&quot;>⚡</div>'">`:'<div class="news-cover-fallback">⚡</div>'}<div class="news-body"><div class="chip on" style="width:max-content">${escapeHtml(n.source)}</div><h3 style="font-size:1rem;margin:.7rem 0;line-height:1.4">${escapeHtml(n.title)}</h3><p class="news-summary">${escapeHtml(n.summary||'Confira os detalhes e as informações completas diretamente na fonte da notícia.')}</p><div class="news-footer"><span>${new Date(n.publishedAt).toLocaleString('pt-BR')}</span><span>Abrir notícia ↗</span></div></div></a>`).join('')}</div>`;}catch(err){document.getElementById('mc').innerHTML=`<div class="ai-card"><h2>Não foi possível atualizar</h2><p>${escapeHtml(err.message)}</p><button class="btn btn-primary" onclick="renderNews()">Tentar novamente</button></div>`;}
+  try{const res=await authFetch('/api/electric-news'),data=await res.json();if(!res.ok)throw new Error(data.error);document.getElementById('mc').innerHTML=`<div class="banner"><span class="continue-eyebrow">Atualizado ao longo do dia</span><h2>🌐 Mundo Elétrico</h2><p>Novidades selecionadas sobre energia, tecnologia e indústria.</p></div><div class="news-grid">${data.items.map(n=>`<a class="news-card news-preview-card" href="${escapeAttr(n.url)}" target="_blank" rel="noopener noreferrer" style="text-decoration:none;color:inherit">${n.image?`<img class="news-cover" src="${escapeAttr(n.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=&quot;news-cover-fallback&quot;>⚡</div>'">`:'<div class="news-cover-fallback">⚡</div>'}<div class="news-body"><div class="chip on" style="width:max-content">${escapeHtml(n.source)}</div><h3 style="font-size:1rem;margin:.7rem 0;line-height:1.4">${escapeHtml(n.title)}</h3><p class="news-summary">${escapeHtml(n.summary||'Confira os detalhes e as informações completas diretamente na fonte da notícia.')}</p><div class="news-footer"><span>${new Date(n.publishedAt).toLocaleString('pt-BR')}</span><span>Abrir notícia ↗</span></div></div></a>`).join('')}</div>`;}catch(err){document.getElementById('mc').innerHTML=`<div class="state-card"><div class="state-icon">🌐</div><h2>Não foi possível atualizar as notícias</h2><p>${escapeHtml(err.message)}</p><button class="btn btn-primary" onclick="renderNews()">Tentar novamente</button></div>`;}
 }
 
 // ─── DASHBOARD ───
 function renderDash(){
   const pr=DB.progress[me]||{};
-  const done=Object.values(pr).filter(v=>v>=100).length;
+  const done=LEVELS.filter(level=>Number(pr[level.id]||0)>=100).length;
   const pts=DB.scores[me]||0;
   const u=DB.users[me];
   const available=LEVELS.filter(level=>isLevelUnlocked(level.id,pr));
   const current=available.find(level=>Number(pr[level.id]||0)<100)||available[available.length-1]||null;
   const currentIndex=current?LEVELS.indexOf(current):0;
-  const currentProgress=current?Number(pr[current.id]||0):0;
-  const recommended=LEVELS.slice(Math.max(0,currentIndex-1),Math.min(LEVELS.length,currentIndex+7));
-  const focus=current?`<div class="continue-card"><span class="continue-eyebrow">Continue de onde parou</span><div class="continue-main"><div class="lbadge" style="background:${current.color}22;color:${current.color}">${current.icon}</div><div><h3>Nível ${current.id} — ${current.title}</h3><p>${current.topics}</p></div></div><div class="pb"><div class="pf" style="width:${currentProgress}%"></div></div><div class="pm"><span>${currentProgress}% completo</span><span>Próximo passo recomendado</span></div><div class="continue-actions"><button class="btn btn-primary" onclick="openStudy(${current.id})">📚 Continuar estudando</button><button class="btn btn-ghost" onclick="startQuiz(${current.id})">⚡ Fazer quiz</button></div></div>`:`<div class="continue-card"><span class="continue-eyebrow">Acesso aos níveis</span><div class="continue-main"><div class="lbadge">🔒</div><div><h3>Nenhum nível liberado agora</h3><p>O restante do ElectroLearn continua disponível. Se isso não era esperado, envie uma mensagem ao suporte.</p></div></div></div>`;
+  const recommended=LEVELS.slice(Math.max(0,currentIndex-1),Math.min(LEVELS.length,currentIndex+5));
+  const metric=current?levelMetrics(current):null;
+  const focus=current?`<div class="continue-card"><span class="continue-eyebrow">Próximo passo recomendado</span><div class="continue-main"><div class="lbadge" style="background:${current.color}20;color:${current.color}">${current.icon}</div><div><h3>Nível ${current.id} — ${escapeHtml(current.title)}</h3><p>${metric.completedCount<LESSONS_PER_LEVEL?`Aula ${metric.nextLesson+1} de ${LESSONS_PER_LEVEL} · ${escapeHtml(current.topics)}`:`Aulas concluídas · faça o quiz para consolidar o nível`}</p></div></div><div class="pb"><div class="pf" style="width:${metric.progress}%;background:linear-gradient(90deg,${current.color},var(--accent2))"></div></div><div class="pm"><span>${metric.progress}% completo</span><span>${metric.completedCount}/${LESSONS_PER_LEVEL} aulas · melhor quiz ${metric.quizBest}%</span></div><div class="continue-actions"><button class="btn btn-primary" onclick="openStudy(${current.id})">▶ Continuar estudando</button><button class="btn btn-ghost" onclick="startQuiz(${current.id})">⚡ ${metric.quizBest?'Refazer':'Fazer'} quiz</button></div></div>`:`<div class="continue-card"><span class="continue-eyebrow">Acesso aos níveis</span><div class="continue-main"><div class="lbadge">🔒</div><div><h3>Nenhum nível liberado agora</h3><p>Se isso não era esperado, envie uma mensagem ao suporte para verificarmos sua conta.</p></div></div><button class="btn btn-ghost" onclick="toggleHelpPanel('support')">Falar com o suporte</button></div>`;
+  const overall=Math.round(LEVELS.reduce((sum,level)=>sum+Number(pr[level.id]||0),0)/LEVELS.length);
+  const planName=currentSubscriptionStatus?.plan==='weekly'?'Semanal':'Mensal';
+  const days=currentSubscriptionStatus?.accessUntil?Math.max(0,Math.ceil((new Date(currentSubscriptionStatus.accessUntil)-Date.now())/86400000)):0;
   document.getElementById('mc').innerHTML=`
-  <div class="banner"><h2>Olá, ${escapeHtml(u.n)}! 👋</h2><p>Continue sua jornada. ${done} de ${LEVELS.length} níveis concluídos.</p></div>
+  <div class="banner"><span class="continue-eyebrow">Sua trilha de aprendizagem</span><h2>Olá, ${escapeHtml(u.n)}! 👋</h2><p>${done?`Você já concluiu ${done} ${done===1?'nível':'níveis'}. Continue avançando.`:'Seu primeiro passo está pronto. Comece pela aula recomendada abaixo.'}</p></div>
   <div class="stats-grid">
-    <div class="stat blue"><div class="v">${done}</div><div class="l">Concluídos</div></div>
-    <div class="stat purple"><div class="v">${LEVELS.length-done}</div><div class="l">Restantes</div></div>
-    <div class="stat green"><div class="v">${pts}</div><div class="l">Pontos</div></div>
-    <div class="stat amber"><div class="v">${Math.round(done/LEVELS.length*100)}%</div><div class="l">Progresso</div></div>
+    <div class="stat blue"><div class="v">${overall}%</div><div class="l">Progresso geral</div></div>
+    <div class="stat purple"><div class="v">${done}<small style="font-size:.8rem;color:var(--text2)">/${LEVELS.length}</small></div><div class="l">Níveis concluídos</div></div>
+    <div class="stat green"><div class="v">${pts}</div><div class="l">Pontos conquistados</div></div>
+    <div class="stat amber"><div class="v">${days}</div><div class="l">Dias no plano ${planName}</div></div>
   </div>
   ${levelAccessNotice()}
-  <div class="dashboard-focus">${focus}<div class="daily-card"><div class="daily-icon">🎯</div><h3>Meta de hoje</h3><p>Avance pelo menos uma parte deste nível. Pequenos passos todos os dias constroem domínio de verdade.</p><span class="daily-streak">🔥 Mantenha a constância</span></div></div>
-  <div class="section-row"><h3>Próximos níveis</h3><button class="btn btn-ghost btn-sm" onclick="go('study')">Ver todos os 60 →</button></div>
-  <div class="lvl-grid">${recommended.map((lv)=>{
-    const p=pr[lv.id]||0, done=p>=100, locked=!isLevelUnlocked(lv.id,pr);
-    return `<div class="lc${done?' done':''}${locked?' locked':''}" onclick="if(guardLevelAccess(${lv.id}))openLv(${lv.id})">
-      <div style="position:absolute;top:.8rem;right:.8rem">${done?'✅':locked?'🔒':''}</div>
-      <div class="lbadge" style="background:${lv.color}22;color:${lv.color}">${lv.icon}</div>
-      <div style="font-weight:700;font-size:.88rem;margin-bottom:.15rem">Nível ${lv.id} — ${lv.title}</div>
-      <div style="font-size:.76rem;color:var(--text2);margin-bottom:.65rem">${lv.topics}</div>
-      <div class="pb"><div class="pf" style="width:${p}%"></div></div>
-      <div class="pm"><span>${p}% completo</span></div>
-    </div>`;
-  }).join('')}</div>`;
+  <div class="dashboard-focus">${focus}<div class="daily-card"><div class="daily-icon">🎯</div><h3>Meta de hoje</h3><p>Conclua uma aula e registre seu avanço. Aprender um pouco com constância funciona melhor do que tentar fazer tudo de uma vez.</p><span class="daily-streak">🔥 Um passo por dia</span></div></div>
+  <div class="section-row"><div><h3>Sua trilha agora</h3><p style="color:var(--text2);font-size:.76rem;margin-top:.18rem">Níveis próximos do ponto em que você está.</p></div><button class="btn btn-ghost btn-sm" onclick="go('study')">Explorar os 60 níveis →</button></div>
+  <div class="lvl-grid">${recommended.map(level=>renderLevelCard(level,'study')).join('')}</div>`;
 }
 
 let activeLevelFilter='all';
@@ -885,20 +867,10 @@ function applyLevelFilters(){const query=(document.getElementById('level-search-
 
 // ─── STUDY ───
 function renderStudyHome(){
-  const pr=DB.progress[me]||{};
   activeLevelFilter='all';
   document.getElementById('mc').innerHTML=`
-  <div class="section-row"><div><h2 style="font-size:1.2rem">📚 Material de Estudo</h2><p style="color:var(--text2);font-size:.76rem;margin-top:.25rem">Encontre rapidamente qualquer assunto da trilha.</p></div></div>${levelAccessNotice()}${levelExplorerToolbar()}
-  <div class="lvl-grid level-catalog">${LEVELS.map((lv)=>{
-    const locked=!isLevelUnlocked(lv.id,pr);
-    const progress=Number(pr[lv.id]||0),state=locked?'locked':progress>=100?'done':progress>0?'progress':'available';
-    return `<div class="lc${locked?' locked':''}${progress>=100?' done':''}" data-level-state="${state}" data-level-search="nível ${lv.id} ${escapeHtml(lv.title)} ${escapeHtml(lv.topics)}" onclick="if(guardLevelAccess(${lv.id}))openStudy(${lv.id})">
-      <div style="position:absolute;top:.8rem;right:.8rem">${locked?'🔒':''}</div>
-      <div class="lbadge" style="background:${lv.color}22;color:${lv.color}">${lv.icon}</div>
-      <div style="font-weight:700;font-size:.88rem;margin-bottom:.15rem">Nível ${lv.id} — ${lv.title}</div>
-      <div style="font-size:.76rem;color:var(--text2)">${lv.topics}</div>
-    </div>`;
-  }).join('')}</div>`;
+  <div class="section-row"><div><span class="continue-eyebrow">Trilha completa</span><h2 style="font-size:1.35rem;margin-top:.45rem">📚 Material de Estudo</h2><p style="color:var(--text2);font-size:.8rem;margin-top:.25rem">Cada nível possui 3 aulas, apoio em vídeo, PDF e quiz.</p></div></div>${levelAccessNotice()}${levelExplorerToolbar()}
+  <div class="lvl-grid level-catalog">${LEVELS.map(level=>renderLevelCard(level,'study')).join('')}</div>`;
 }
 
 function openLv(id){
@@ -933,25 +905,25 @@ async function openStudy(id){
   const video=VIDEO_LESSONS[id];
   let topics=CONTENT[id];
   if(!topics){document.getElementById('mc').innerHTML='<div class="spin-wrap"><div class="spin"></div><p>Preparando o material deste nível…</p></div>';topics=await loadExtendedStudy(lv);if(!topics)return renderStudyHome();}
-  document.getElementById('mc').innerHTML=`
-  <div class="study-hdr">
-    <button class="back-btn" onclick="renderStudyHome()">← Voltar</button>
-    <div><div style="font-size:.76rem;color:var(--text2)">Nível ${lv.id}</div><div style="font-family:Syne,sans-serif;font-size:1.25rem;font-weight:800">${lv.icon} ${lv.title}</div></div>
-  </div>
-  <div class="tabs-row">${topics.map((t,i)=>`<div class="ptab${i===0?' active':''}" id="pt${i}" onclick="switchS(${i})">${escapeHtml(t.title)}</div>`).join('')}</div>
+  const metric=levelMetrics(lv);
+  document.getElementById('mc').innerHTML=`<div class="study-shell">
+  <section class="study-hero">
+    <div class="study-hero-top"><div><span class="study-kicker">Nível ${lv.id} · ${levelStatusLabel(metric.state)}</span><h2>${lv.icon} ${escapeHtml(lv.title)}</h2><p>${escapeHtml(lv.topics)}</p></div><button class="back-btn" onclick="renderStudyHome()">← Voltar à trilha</button></div>
+    <div class="study-overview"><div>Aulas concluídas<strong>${metric.completedCount} de ${LESSONS_PER_LEVEL}</strong></div><div>Melhor resultado no quiz<strong>${metric.quizBest}%</strong></div><div>Progresso do nível<strong>${metric.progress}%</strong></div></div>
+    <div class="pb" style="margin-top:1rem"><div class="pf" style="width:${metric.progress}%;background:linear-gradient(90deg,${lv.color},var(--accent2))"></div></div>
+  </section>
+  <div class="tabs-row" role="tablist" aria-label="Aulas do nível">${topics.map((t,i)=>`<button class="ptab${i===0?' active':''}${metric.completedLessons.includes(i)?' complete':''}" id="pt${i}" role="tab" aria-selected="${i===0}" onclick="switchS(${i})"><span>Aula ${i+1}</span> ${escapeHtml(t.title)}</button>`).join('')}</div>
   <div id="sbody"></div>
-  <div class="video-box"><strong>▶ Videoaula de apoio</strong><p style="color:var(--text2);font-size:.8rem;margin:.35rem 0 .2rem">Conteúdo selecionado para complementar este nível:</p><p style="font-weight:700;margin:.2rem 0 .8rem">${escapeHtml(video.title)}</p><a class="btn btn-primary btn-sm" target="_blank" rel="noopener noreferrer" href="${escapeHtml(video.url)}">▶ Assistir videoaula no YouTube ↗</a></div>
-  <div class="dl-row">
-    <div class="dl-info"><h4>📄 PDF — Nível ${lv.id}: ${lv.title}</h4><p>Resumo completo para estudo offline</p></div>
-    <button class="btn btn-green btn-sm" onclick="dlPDF(${id})">⬇ Baixar PDF</button>
-  </div>
-  <div style="margin-top:.85rem"><button class="btn btn-primary btn-sm" onclick="startQuiz(${id})">⚡ Fazer quiz deste nível</button></div>`;
+  <div class="learning-resources"><div class="video-box"><span class="study-kicker">Apoio em vídeo</span><h3 style="font-size:1rem;margin:.45rem 0">▶ ${escapeHtml(video.title)}</h3><p style="color:var(--text2);font-size:.77rem;margin-bottom:.8rem">Aula selecionada no YouTube para complementar este nível. O link abre diretamente o vídeo.</p><a class="btn btn-primary btn-sm" target="_blank" rel="noopener noreferrer" href="${escapeAttr(video.url)}">Assistir no YouTube ↗</a></div>
+  <div class="dl-row"><div class="dl-info"><span class="study-kicker">Estudo offline</span><h4>📄 PDF do Nível ${lv.id}</h4><p>Resumo organizado das três aulas.</p></div><button class="btn btn-green btn-sm" onclick="dlPDF(${id})">Baixar PDF</button></div></div>
+  <div class="continue-card" style="margin-top:1rem"><span class="continue-eyebrow">Depois das aulas</span><div class="continue-main"><div class="lbadge" style="background:${lv.color}20;color:${lv.color}">⚡</div><div><h3>Teste o que você aprendeu</h3><p>Faça o quiz. Com as 3 aulas concluídas e pelo menos 70% de acerto, o nível fica concluído.</p></div></div><button class="btn btn-primary" style="width:auto" onclick="startQuiz(${id})">${metric.quizBest?'Refazer':'Fazer'} quiz deste nível →</button></div>
+  </div>`;
   showStudyTab(id,0);
 }
 
 function switchS(i){
   spdf=i;
-  document.querySelectorAll('.ptab').forEach((el,j)=>el.classList.toggle('active',j===i));
+  document.querySelectorAll('.ptab').forEach((el,j)=>{el.classList.toggle('active',j===i);el.setAttribute('aria-selected',String(j===i));});
   showStudyTab(slv,i);
 }
 
@@ -961,8 +933,11 @@ function showStudyTab(lvId, idx){
   if(!data||!data[idx]){document.getElementById('sbody').innerHTML='<p style="color:var(--red)">Conteúdo não encontrado.</p>';return;}
   const t=data[idx];
   const svg=getDiag(t.diag,lv.color);
+  const completed=completedLessonsFor(lvId).includes(idx);
+  const next=idx+1<data.length?idx+1:null;
   document.getElementById('sbody').innerHTML=`
   <div class="study-body">
+    <span class="study-kicker">Aula ${idx+1} de ${data.length}</span>
     <h3>${escapeHtml(t.title)}</h3>
     <p>${escapeHtml(t.intro)}</p>
     ${t.formula?`<div class="fml">📐 ${escapeHtml(t.formula)}</div>`:''}
@@ -970,7 +945,21 @@ function showStudyTab(lvId, idx){
     ${t.secs.map(s=>`<h4>${escapeHtml(s.h)}</h4><p>${escapeHtml(s.b)}</p>`).join('')}
     <div class="diag">${svg}<div class="cap">Diagrama — ${escapeHtml(t.title)}</div></div>
     ${t.ex?`<div class="ex-box"><div class="ex-lbl">✅ Exemplo prático</div><strong>${escapeHtml(t.ex.t)}</strong><p style="margin-top:.35rem">${escapeHtml(t.ex.b)}</p></div>`:''}
+    <div class="lesson-actions"><div class="lesson-complete-note">${completed?'✅ Esta aula já está concluída.':'Ao terminar a leitura, marque a aula como concluída para salvar seu progresso.'}</div><div style="display:flex;gap:.55rem;flex-wrap:wrap">${completed?'<span class="status-pill done completion-pop">✓ Aula concluída</span>':`<button class="btn btn-green btn-sm" id="complete-lesson-btn" onclick="completeLesson(${lvId},${idx})">✓ Concluir aula</button>`}${next!==null?`<button class="btn btn-primary btn-sm" onclick="switchS(${next})">Próxima aula →</button>`:`<button class="btn btn-primary btn-sm" onclick="startQuiz(${lvId})">Ir para o quiz →</button>`}</div></div>
   </div>`;
+}
+
+async function completeLesson(levelId,lessonIndex){
+  if(!guardLevelAccess(levelId))return;
+  const button=document.getElementById('complete-lesson-btn');if(button){button.disabled=true;button.textContent='Salvando…';}
+  try{
+    const res=await authFetch(`/api/learning/levels/${levelId}/lessons/${lessonIndex}/complete`,{method:'POST'}),data=await res.json();
+    if(!res.ok)throw new Error(data.error||'Não foi possível concluir a aula.');
+    applyLearningPayload(data);
+    document.getElementById(`pt${lessonIndex}`)?.classList.add('complete');
+    showStudyTab(levelId,lessonIndex);
+    toast(data.levelCompleted?'Nível concluído! Excelente trabalho. 🏆':'Aula concluída e progresso salvo!','ok');
+  }catch(err){toast(err.message,'err');if(button){button.disabled=false;button.textContent='✓ Concluir aula';}}
 }
 
 // ─── PDF ───
@@ -1045,26 +1034,15 @@ function dlPDF(levelId){
 
 // ─── QUIZ ───
 function renderQuizHome(){
-  const pr=DB.progress[me]||{};
   activeLevelFilter='all';
   document.getElementById('mc').innerHTML=`
-  <div class="section-row"><div><h2 style="font-size:1.2rem">⚡ Quiz por Nível</h2><p style="color:var(--text2);font-size:.76rem;margin-top:.25rem">Teste o que aprendeu e acompanhe sua evolução.</p></div></div>${levelAccessNotice()}${levelExplorerToolbar()}
-  <div class="lvl-grid level-catalog">${LEVELS.map((lv)=>{
-    const locked=!isLevelUnlocked(lv.id,pr);
-    const progress=Number(pr[lv.id]||0),state=locked?'locked':progress>=100?'done':progress>0?'progress':'available';
-    return `<div class="lc${locked?' locked':''}${progress>=100?' done':''}" data-level-state="${state}" data-level-search="nível ${lv.id} ${escapeHtml(lv.title)} ${escapeHtml(lv.topics)}" onclick="if(guardLevelAccess(${lv.id}))startQuiz(${lv.id})">
-      <div style="position:absolute;top:.8rem;right:.8rem">${locked?'🔒':''}</div>
-      <div class="lbadge" style="background:${lv.color}22;color:${lv.color}">${lv.icon}</div>
-      <div style="font-weight:700;font-size:.88rem;margin-bottom:.2rem">Nível ${lv.id} — ${lv.title}</div>
-      <div style="font-size:.76rem;color:var(--text2);margin-bottom:.65rem">${lv.topics}</div>
-      <span style="font-size:.76rem;padding:.28rem .75rem;border-radius:99px;background:${locked?'var(--bg2)':'rgba(79,142,247,.15)'};color:${locked?'var(--text3)':'var(--accent)'}">${locked?'🔒 Bloqueado':'▶ Iniciar Quiz'}</span>
-    </div>`;
-  }).join('')}</div>`;
+  <div class="section-row"><div><span class="continue-eyebrow">Prática e revisão</span><h2 style="font-size:1.35rem;margin-top:.45rem">⚡ Quiz por Nível</h2><p style="color:var(--text2);font-size:.8rem;margin-top:.25rem">A correção aparece ao final com os acertos, erros e o que faltou.</p></div></div>${levelAccessNotice()}${levelExplorerToolbar()}
+  <div class="lvl-grid level-catalog">${LEVELS.map(level=>renderLevelCard(level,'quiz')).join('')}</div>`;
 }
 
 function startQuiz(id){
   if(!guardLevelAccess(id))return renderQuizHome();
-  qlv=id;qi=0;qs=0;qans=false;qq=[];qresponses=[];qreviews=[];
+  qlv=id;qi=0;qs=0;qans=false;qq=[];qresponses=[];qreviews=[];quizAttemptToken='';latestQuizOutcome=null;
   document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
   document.getElementById('n-quiz').classList.add('active');
   document.getElementById('mc').innerHTML=`<div class="spin-wrap"><div class="spin"></div><p>Gerando quiz do Nível ${id} com IA…</p></div>`;
@@ -1075,9 +1053,9 @@ async function fetchQuiz(id){
   const lv=LEVELS.find(l=>l.id===id);
   const topics=(CONTENT[id]||[]).map(t=>t.title).join(', ')||lv.topics;
   try{
-    const res = await fetch('/api/generate-quiz', {
+    const res = await authFetch('/api/generate-quiz', {
       method: 'POST',
-      headers: {'Content-Type':'application/json', 'Authorization':'Bearer '+(currentSession?.access_token||'')},
+      headers: {'Content-Type':'application/json'},
       body: JSON.stringify({levelId:id,levelTitle: lv.title, topics})
     });
 
@@ -1089,76 +1067,25 @@ async function fetchQuiz(id){
     }
 
     const data = await res.json();
-    const raw = extractAiText(data);
-    const s = raw.indexOf('['), e = raw.lastIndexOf(']');
-    if(s < 0 || e < 0) throw new Error('Resposta inválida da IA');
-    qq = JSON.parse(raw.slice(s,e+1));
-    if(!Array.isArray(qq)||qq.length===0) throw new Error('Nenhuma pergunta recebida');
+    qq = Array.isArray(data.questions)?data.questions:[];
+    quizAttemptToken=String(data.attemptToken||'');
+    if(qq.length!==8||!quizAttemptToken) throw new Error('O quiz chegou incompleto. Tente novamente.');
     renderQ();
     return;
   }catch(err){
     console.warn('Quiz IA falhou:', err);
     if(err.levelBlocked){toast(err.message,'err');return renderQuizHome();}
-    qq=buildQuizFromContent(id);
-    if(qq.length){
-      toast('Quiz gerado localmente. O servidor IA falhou.','ok');
-      renderQ();
-      return;
-    }
     document.getElementById('mc').innerHTML=`
-    <div class="quiz-wrap" style="text-align:center;padding:3rem 1rem">
-      <div style="font-size:2.5rem;margin-bottom:.75rem">⚠️</div>
+    <div class="state-card">
+      <div class="state-icon">⚠️</div>
       <h3 style="margin-bottom:.6rem">Não foi possível gerar o quiz</h3>
-      <p style="color:var(--text2);font-size:.85rem;margin-bottom:1.5rem">${err.message}</p>
+      <p>${escapeHtml(err.message)}</p>
       <div style="display:flex;gap:.65rem;justify-content:center;flex-wrap:wrap">
         <button class="btn btn-primary" onclick="startQuiz(${id})">🔄 Tentar novamente</button>
         <button class="btn btn-ghost" onclick="renderQuizHome()">← Voltar</button>
       </div>
     </div>`;
   }
-}
-
-function extractAiText(data){
-  if(!data) return '';
-  if(typeof data === 'string') return data;
-  if(Array.isArray(data.content)) return data.content.map(b=>b.text||'').join('');
-  if(typeof data.completion === 'string') return data.completion;
-  if(Array.isArray(data.choices)){
-    return data.choices.map(c=>{
-      if(c.message) return c.message.content||'';
-      if(typeof c.text === 'string') return c.text;
-      return '';
-    }).join('');
-  }
-  if(typeof data.output_text === 'string') return data.output_text;
-  if(data.response && typeof data.response.output_text === 'string') return data.response.output_text;
-  return JSON.stringify(data);
-}
-
-function buildQuizFromContent(levelId){
-  const data=CONTENT[levelId]||[];
-  if(!data.length) return [];
-  const quiz=[];
-  for(let i=0;i<4;i++){
-    const t=data[i]||data[0];
-    quiz.push({
-      type:'tf',
-      question:`"${t.title}" é um tema abordado no Nível ${levelId}?`,
-      options:['Verdadeiro','Falso'],
-      answer:'Verdadeiro',
-      explanation:t.intro || 'Revise o conteúdo para confirmar a resposta.'
-    });
-  }
-  for(let i=0;i<4;i++){
-    const t=data[i]||data[0];
-    quiz.push({
-      type:'disc',
-      question:`Explique em poucas palavras o que significa "${t.title}".`,
-      answer:t.intro || 'Use o material do nível para responder.',
-      explanation:t.intro || 'Use o conteúdo do nível para formar sua resposta.'
-    });
-  }
-  return quiz.slice(0,8);
 }
 
 function renderQ(){
@@ -1170,7 +1097,7 @@ function renderQ(){
   if(q.type==='tf'){
     opts=`<div class="tf-opts">${q.options.map((o,i)=>`<div class="tf-opt" id="o${i}" onclick="doTF('${o}')">
       <span style="width:26px;height:26px;border-radius:50%;background:var(--bg2);border:1px solid var(--border2);display:inline-flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0">${i===0?'✓':'✗'}</span>
-      <span>${o}</span></div>`).join('')}</div>`;
+      <span>${escapeHtml(o)}</span></div>`).join('')}</div>`;
   }else{
     opts=`<textarea class="disc-ta" id="dta" placeholder="Escreva sua resposta com suas próprias palavras…"></textarea>
     <div class="qa"><button class="btn btn-primary" onclick="doDisc()">Confirmar →</button></div>`;
@@ -1183,7 +1110,7 @@ function renderQ(){
     <div class="qpb"><div class="qpf" style="width:${pct}%"></div></div>
     <div class="qnum">Pergunta ${qi+1} de ${qq.length}</div>
     <span class="qbadge ${q.type}">${q.type==='tf'?'✓ Verdadeiro ou Falso':'📝 Discursiva'}</span>
-    <div class="qq">${q.question}</div>
+    <div class="qq">${escapeHtml(q.question)}</div>
     <div id="oa">${opts}</div>
     <div id="fa"></div>
   </div>`;
@@ -1208,44 +1135,39 @@ function advanceWithoutFeedback(){
 
 async function gradeAndShow(){
   document.getElementById('mc').innerHTML='<div class="spin-wrap"><div class="spin"></div><p>Analisando cada resposta e preparando seu feedback…</p></div>';
-  const answers=qq.map((q,index)=>({type:q.type,question:q.question,reference:q.answer,explanation:q.explanation,userAnswer:qresponses[index]||''}));
-  try{const res=await authFetch('/api/grade-quiz',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({levelId:qlv,answers})});const data=await res.json();if(!res.ok){if(data.levelBlocked){currentLevelAccess=normalizeClientLevelAccess(data.levelAccess);toast(data.error,'err');return renderQuizHome();}throw new Error(data.error);}qreviews=data.results;}catch(err){qreviews=answers.map((a,index)=>{const correct=a.type==='tf'?a.userAnswer.trim().toLowerCase()===a.reference.trim().toLowerCase():false;return{index,correct,feedback:correct?'Resposta correta.':'A correção discursiva por IA ficou indisponível; a questão não recebeu ponto para evitar pontuação indevida.',missing:correct?'':'Compare sua resposta com a referência.',idealAnswer:a.reference};});toast('Correção IA indisponível; aplicado modo seguro.','err');}
-  qs=qreviews.filter(r=>r.correct).length;showRes();
-}
-
-function showFB(ok,txt){
-  const cls=ok===true?'ok':ok===false?'bad':'neu';
-  const lbl=ok===true?'✅ Correto!':ok===false?'❌ Incorreto':'📖 Veja a referência';
-  const last=qi+1>=qq.length;
-  document.getElementById('fa').innerHTML=`
-    <div class="fb ${cls}"><div class="fb-lbl">${lbl}</div><div>${txt}</div></div>
-    <div class="qa"><button class="btn btn-primary" onclick="${last?'showRes()':'nextQ()'}">${last?'Ver resultado →':'Próxima →'}</button></div>`;
+  const previous=Number(DB.progress?.[me]?.[qlv]||0);
+  try{
+    const res=await authFetch('/api/grade-quiz',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({levelId:qlv,attemptToken:quizAttemptToken,answers:qresponses.map(value=>value||'')})});
+    const data=await res.json();
+    if(!res.ok){if(data.levelBlocked){currentLevelAccess=normalizeClientLevelAccess(data.levelAccess);toast(data.error,'err');return renderQuizHome();}throw new Error(data.error||'Não foi possível corrigir o quiz.');}
+    qreviews=data.results||[];qs=Number(data.correct||qreviews.filter(result=>result.correct).length);latestQuizOutcome={...data,previous,gained:Math.max(0,Number(data.levelProgress||0)-previous)};applyLearningPayload(data);showRes();
+  }catch(err){
+    document.getElementById('mc').innerHTML=`<div class="state-card"><div class="state-icon">⚠️</div><h3>A correção não foi concluída</h3><p>${escapeHtml(err.message)}</p><div style="display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center"><button class="btn btn-primary" onclick="gradeAndShow()">Tentar corrigir novamente</button><button class="btn btn-ghost" onclick="startQuiz(${qlv})">Gerar outro quiz</button></div></div>`;
+  }
 }
 
 function nextQ(){qi++;renderQ();}
 
 function showRes(){
-  const total=qq.length, pct=Math.round(qs/total*100);
+  const total=qq.length, pct=latestQuizOutcome?.quizPercent??Math.round(qs/total*100);
   const emoji=pct>=80?'🏆':pct>=50?'👍':'💪';
   const msg=pct>=80?'Excelente! Você dominou este nível!':pct>=50?'Bom progresso! Continue praticando.':'Não desanime! Revise o material e tente novamente.';
   const lv=LEVELS.find(l=>l.id===qlv);
-  const pr=DB.progress[me]||{};
-  const previous=Number(pr[qlv]||0);
-  const np=Math.max(previous,pct);
-  pr[qlv]=np; DB.progress[me]=pr;
-  DB.scores[me]=Object.values(pr).reduce((sum,value)=>sum+Math.max(0,Math.min(100,Number(value)||0)),0);const gained=np-previous;save();
+  const np=Number(latestQuizOutcome?.levelProgress ?? DB.progress?.[me]?.[qlv] ?? 0);
+  const gained=Number(latestQuizOutcome?.gained||0);
+  const completed=latestQuizOutcome?.levelCompleted===true;
   document.getElementById('mc').innerHTML=`<div class="quiz-wrap"><div class="res">
-    <div style="font-size:3rem;margin-bottom:.6rem">${emoji}</div>
+    <div class="${completed?'completion-pop':''}" style="font-size:3rem;margin-bottom:.6rem">${completed?'🏆':emoji}</div>
     <div class="res-score">${qs}/${total}</div>
-    <div style="color:var(--text2);margin:.4rem 0 1.25rem">${msg}</div>
+    <div style="color:var(--text2);margin:.4rem 0 1.25rem">${completed?'Nível concluído! As aulas e o resultado mínimo do quiz foram registrados.':msg}</div>
     <div class="res-bd">
       <div class="rb"><span>Nível</span><span class="rv">${lv.icon} ${lv.title}</span></div>
       <div class="rb"><span>Acertos</span><span class="rv" style="color:var(--green)">${qs} / ${total}</span></div>
       <div class="rb"><span>Aproveitamento</span><span class="rv">${pct}%</span></div>
-      <div class="rb"><span>Pontos ganhos</span><span class="rv" style="color:var(--amber)">+${gained} pts</span></div>
+      <div class="rb"><span>Melhor nota no quiz</span><span class="rv" style="color:var(--amber)">${latestQuizOutcome?.quizBest??pct}%</span></div>
       <div class="rb"><span>Progresso do nível</span><span class="rv">${np}%</span></div>
     </div>
-    <div style="text-align:left;margin:1.25rem 0"><h3>Revisão das respostas</h3>${qreviews.map((r,index)=>`<div class="review-item ${r.correct?'ok':'bad'}"><strong>${r.correct?'✅':'❌'} Questão ${index+1}</strong><p style="margin:.45rem 0"><b>Sua resposta:</b> ${escapeHtml(qresponses[index]||'Não respondida')}</p><p>${escapeHtml(r.feedback||'')}</p>${r.correct?'':`<p style="color:var(--amber);margin-top:.35rem"><b>O que faltou/errou:</b> ${escapeHtml(r.missing||'Revise o conceito.')}</p><p style="margin-top:.35rem"><b>Resposta esperada:</b> ${escapeHtml(r.idealAnswer||qq[index].answer||'')}</p>`}</div>`).join('')}</div>
+    <div style="text-align:left;margin:1.25rem 0"><h3>Revisão das respostas</h3>${qreviews.map((r,index)=>`<div class="review-item ${r.correct?'ok':'bad'}"><strong>${r.correct?'✅':'❌'} Questão ${index+1}</strong><p style="margin:.45rem 0"><b>Sua resposta:</b> ${escapeHtml(qresponses[index]||'Não respondida')}</p><p>${escapeHtml(r.feedback||'')}</p>${r.correct?'':`<p style="color:var(--amber);margin-top:.35rem"><b>O que faltou/errou:</b> ${escapeHtml(r.missing||'Revise o conceito.')}</p><p style="margin-top:.35rem"><b>Resposta esperada:</b> ${escapeHtml(r.idealAnswer||'Revise o material do nível e tente novamente.')}</p>`}</div>`).join('')}</div>
     <div style="display:flex;gap:.65rem;justify-content:center;flex-wrap:wrap">
       <button class="btn btn-primary" onclick="startQuiz(${qlv})">🔄 Novo quiz (perguntas novas)</button>
       <button class="btn btn-ghost" onclick="openStudy(${qlv})">📚 Rever material</button>
@@ -1256,13 +1178,14 @@ function showRes(){
 
 // ─── RANKING ───
 async function renderRanking(){
+  document.getElementById('mc').innerHTML='<div class="spin-wrap"><div class="spin"></div><p>Carregando o ranking…</p></div>';
   let entries=[];
-  try{const res=await authFetch('/api/leaderboard');const data=await res.json();if(!res.ok)throw new Error(data.error);entries=data.entries||[];}catch(err){entries=Object.entries(DB.users).map(([e,u])=>({name:u.n,email:e,score:DB.scores[e]||0,done:Object.values(DB.progress[e]||{}).filter(v=>v>=100).length})).sort((a,b)=>b.score-a.score);}
+  try{const res=await authFetch('/api/leaderboard');const data=await res.json();if(!res.ok)throw new Error(data.error);entries=data.entries||[];}catch(err){document.getElementById('mc').innerHTML=`<div class="state-card"><div class="state-icon">🏆</div><h3>Ranking indisponível agora</h3><p>${escapeHtml(err.message)}</p><button class="btn btn-primary" onclick="renderRanking()">Tentar novamente</button></div>`;return;}
   const medals=['🥇','🥈','🥉'];
   document.getElementById('mc').innerHTML=`
-  <h2 style="font-size:1.2rem;margin-bottom:1rem">🏆 Ranking Global</h2>
+  <div class="section-row"><div><span class="continue-eyebrow">Comunidade ElectroLearn</span><h2 style="font-size:1.35rem;margin-top:.45rem">🏆 Ranking Global</h2><p style="color:var(--text2);font-size:.78rem;margin-top:.2rem">Pontuação baseada no progresso confirmado em aulas e quizzes.</p></div><span class="status-pill available">${entries.length} participantes</span></div>
   <div class="rank-list">
-    ${entries.length===0?'<p style="color:var(--text2);text-align:center;padding:2rem">Nenhum usuário ainda.</p>':''}
+    ${entries.length===0?'<div class="state-card" style="border:0"><div class="state-icon">🏁</div><h3>O ranking está começando</h3><p>Conclua sua primeira aula e faça um quiz para aparecer aqui.</p><button class="btn btn-primary" onclick="go(\'study\')">Começar a estudar</button></div>':''}
     ${entries.map((e,i)=>`<div class="rank-item">
       <div class="rpos ${i===0?'g':i===1?'s':i===2?'b':''}">${medals[i]||i+1}</div>
       <div class="av" style="font-size:.78rem">${String(e.name||'A')[0].toUpperCase()}</div>
@@ -1278,7 +1201,9 @@ async function renderRanking(){
 // ─── PROFILE ───
 function renderProfile(){
   const u=DB.users[me], pr=DB.progress[me]||{};
-  const done=Object.values(pr).filter(v=>v>=100).length, pts=DB.scores[me]||0;
+  const done=LEVELS.filter(level=>Number(pr[level.id]||0)>=100).length, pts=DB.scores[me]||0;
+  const overall=Math.round(LEVELS.reduce((sum,level)=>sum+Number(pr[level.id]||0),0)/LEVELS.length);
+  const started=LEVELS.filter(level=>Number(pr[level.id]||0)>0);
   const ach=[
     {l:'Primeiro passo ⚡',e:(pr[1]||0)>0},
     {l:'Intermediário 🔧',e:(pr[3]||0)>=50},
@@ -1290,12 +1215,13 @@ function renderProfile(){
     {l:'1000 pontos 👑',e:pts>=1000}
   ];
   document.getElementById('mc').innerHTML=`
-  <h2 style="font-size:1.2rem;margin-bottom:1rem">👤 Meu Perfil</h2>
+  <div class="section-row"><div><span class="continue-eyebrow">Conta e evolução</span><h2 style="font-size:1.35rem;margin-top:.45rem">👤 Meu Perfil</h2></div></div>
   <div class="pcard">
     <div class="pav">${String(u.n||'A')[0].toUpperCase()}</div>
     <h3 style="font-size:1.1rem;margin-bottom:.15rem">${escapeHtml(u.n)}</h3>
     <div style="font-size:.8rem;color:var(--text2);margin-bottom:1.1rem">${escapeHtml(me)}</div>
-    <div class="stats-grid" style="margin-bottom:1.1rem">
+    <div class="stats-grid" style="margin-bottom:1.1rem;grid-template-columns:repeat(3,1fr)">
+      <div class="stat purple"><div class="v">${overall}%</div><div class="l">Progresso geral</div></div>
       <div class="stat blue"><div class="v">${done}</div><div class="l">Concluídos</div></div>
       <div class="stat amber"><div class="v">${pts}</div><div class="l">Pontos</div></div>
     </div>
@@ -1307,14 +1233,14 @@ function renderProfile(){
       ${currentSubscriptionStatus?.status==='cancelled'?'<span class="subscription-note">Renovação cancelada; seu acesso continua até o vencimento.</span>':currentSubscriptionStatus?.recurring?'<button class="btn btn-ghost btn-sm" style="margin-top:.7rem" onclick="cancelMySubscription()">Cancelar renovação automática</button>':''}
     </div>
     <div style="margin-top:1.4rem;padding-top:1.1rem;border-top:1px solid var(--border)">
-      <div style="font-size:.78rem;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.8rem">Progresso por nível</div>
-      ${LEVELS.map(lv=>{const p=pr[lv.id]||0;return`<div style="margin-bottom:.7rem">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:.6rem;margin-bottom:.8rem"><div style="font-size:.78rem;color:var(--text2);text-transform:uppercase;letter-spacing:.05em">Níveis iniciados</div><button class="btn btn-ghost btn-sm" onclick="go('study')">Ver trilha completa</button></div>
+      ${started.length?started.map(lv=>{const p=pr[lv.id]||0,metric=levelMetrics(lv);return`<div style="margin-bottom:.85rem">
         <div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:.25rem">
           <span>${lv.icon} Nível ${lv.id} — ${lv.title}</span>
-          <span style="color:var(--text2)">${p}%</span>
+          <span style="color:var(--text2)">${metric.completedCount}/${LESSONS_PER_LEVEL} aulas · ${p}%</span>
         </div>
         <div class="pb"><div class="pf" style="width:${p}%;background:${lv.color}"></div></div>
-      </div>`;}).join('')}
+      </div>`;}).join(''):'<div class="state-card" style="min-height:180px"><div class="state-icon">⚡</div><h3>Sua jornada começa no Nível 1</h3><p>Conclua a primeira aula para ver seu histórico aqui.</p><button class="btn btn-primary" onclick="openStudy(1)">Começar agora</button></div>'}
     </div>
   </div>`;
 }
@@ -1327,11 +1253,13 @@ async function renderAdmin(){
   try{const res=await authFetch('/api/admin/users');const data=await res.json();if(!res.ok)throw new Error(data.error);adminUsers=data.users||[];drawAdminUsers(adminUsers);}catch(err){document.getElementById('mc').innerHTML=`<div class="admin-wrap"><div class="ai-card"><h2>Erro ao abrir administração</h2><p>${escapeHtml(err.message)}</p></div></div>`;}
 }
 function daysRemaining(date){if(!date)return 0;return Math.max(0,Math.ceil((new Date(date).getTime()-Date.now())/86400000));}
+function adminStatusLabel(status){return {active:'Ativo',inactive:'Inativo',cancelled:'Cancelado'}[status]||'Inativo';}
 function adminLevelAccessLabel(access){const value=normalizeClientLevelAccess(access);if(value.mode==='all')return 'Todos os 60';if(value.mode==='blocked')return 'Todos bloqueados';if(value.mode==='custom')return `${value.levels.length} selecionado${value.levels.length===1?'':'s'}`;return 'Progressão normal';}
 function adminTabs(active){return `<div class="admin-tabs"><button class="admin-tab ${active==='users'?'active':''}" onclick="renderAdmin()">👥 Usuários</button><button class="admin-tab ${active==='community'?'active':''}" onclick="renderAdminCommunity()">💬 Chat Global</button><button class="admin-tab ${active==='support'?'active':''}" onclick="renderAdminSupport()">🎧 Suporte</button><button class="admin-tab ${active==='feedback'?'active':''}" onclick="renderAdminFeedback()">⭐ Feedbacks</button></div>`;}
-function adminUserRows(users){return users.length?users.map(user=>`<tr><td><strong>${escapeHtml(user.name||'Sem nome')}</strong><br><span style="color:var(--text2)">${escapeHtml(user.email||'')}</span></td><td>${user.plan==='weekly'?'Semanal':user.plan==='monthly'?'Mensal':'—'}</td><td><span class="chip ${user.status==='active'?'on':'off'}">${escapeHtml(user.status)}</span></td><td>${daysRemaining(user.accessUntil)}</td><td>${user.accessUntil?new Date(user.accessUntil).toLocaleDateString('pt-BR'):'—'}</td><td><span class="level-access-summary">${escapeHtml(adminLevelAccessLabel(user.levelAccess))}</span></td><td>${user.score}</td><td>${user.lastSignInAt?new Date(user.lastSignInAt).toLocaleString('pt-BR'):'Nunca'}</td><td><div class="admin-actions"><button class="admin-btn" onclick="openSubscriptionAdmin('${user.id}')">Assinatura</button><button class="admin-btn" onclick="openLevelAccessAdmin('${user.id}')">🎛️ Níveis</button><button class="admin-btn" onclick="sendPasswordReset('${user.id}','${escapeHtml(user.email||'')}')">Redefinir senha</button><button class="admin-btn" onclick="removeFromRanking('${user.id}')">Remover ranking</button><button class="admin-btn danger" onclick="deleteAdminUser('${user.id}','${escapeHtml(user.email||'')}')">Excluir conta</button></div></td></tr>`).join(''):'<tr><td colspan="9" class="admin-no-results">🔎 Nenhum usuário encontrado com esse nome ou e-mail.</td></tr>';}
+function adminUserRows(users){return users.length?users.map(user=>`<tr><td><strong>${escapeHtml(user.name||'Sem nome')}</strong><br><span style="color:var(--text2)">${escapeHtml(user.email||'')}</span></td><td>${user.plan==='weekly'?'Semanal':user.plan==='monthly'?'Mensal':'—'}</td><td><span class="chip ${user.status==='active'?'on':'off'}">${adminStatusLabel(user.status)}</span></td><td>${daysRemaining(user.accessUntil)}</td><td>${user.accessUntil?new Date(user.accessUntil).toLocaleDateString('pt-BR'):'—'}</td><td><span class="level-access-summary">${escapeHtml(adminLevelAccessLabel(user.levelAccess))}</span></td><td>${user.score}</td><td>${user.lastSignInAt?new Date(user.lastSignInAt).toLocaleString('pt-BR'):'Nunca'}</td><td><div class="admin-actions"><button class="admin-btn" onclick="openSubscriptionAdmin('${user.id}')">Assinatura</button><button class="admin-btn" onclick="openLevelAccessAdmin('${user.id}')">🎛️ Níveis</button><button class="admin-btn" onclick="sendPasswordReset('${user.id}')">Redefinir senha</button><button class="admin-btn" onclick="removeFromRanking('${user.id}')">Ranking</button><button class="admin-btn danger" onclick="deleteAdminUser('${user.id}')">Excluir</button></div></td></tr>`).join(''):'<tr><td colspan="9" class="admin-no-results">🔎 Nenhum usuário encontrado com esse nome ou e-mail.</td></tr>';}
 function drawAdminUsers(users){
-  document.getElementById('mc').innerHTML=`<div class="admin-wrap"><div class="admin-toolbar"><div><h2>🛠️ Administração</h2><p style="color:var(--text2);font-size:.8rem">${users.length} contas cadastradas</p></div><label class="admin-search-box"><span class="admin-search-icon">⌕</span><input class="admin-search-input" id="admin-user-search" type="search" autocomplete="off" placeholder="Buscar por nome ou e-mail…" oninput="filterAdmin(this.value)"><button type="button" class="admin-search-clear" id="admin-search-clear" onclick="clearAdminSearch()" title="Limpar busca">✕</button><span class="admin-search-count" id="admin-search-count">${users.length}</span></label></div>${adminTabs('users')}<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Usuário</th><th>Plano</th><th>Status</th><th>Dias</th><th>Vencimento</th><th>Níveis</th><th>Pontos</th><th>Último acesso</th><th>Ações</th></tr></thead><tbody id="admin-users-body">${adminUserRows(users)}</tbody></table></div></div><div class="admin-modal" id="admin-modal"></div>`;
+  const active=users.filter(user=>user.status==='active'&&daysRemaining(user.accessUntil)>0).length,expiring=users.filter(user=>user.status==='active'&&daysRemaining(user.accessUntil)<=7).length,custom=users.filter(user=>normalizeClientLevelAccess(user.levelAccess).mode!=='progressive').length;
+  document.getElementById('mc').innerHTML=`<div class="admin-wrap"><div class="admin-toolbar"><div><span class="continue-eyebrow">Gestão da plataforma</span><h2 style="margin-top:.45rem">🛠️ Administração</h2><p style="color:var(--text2);font-size:.8rem">Usuários, assinaturas, níveis e atendimento em um só lugar.</p></div><label class="admin-search-box"><span class="admin-search-icon">⌕</span><input class="admin-search-input" id="admin-user-search" type="search" autocomplete="off" placeholder="Buscar por nome ou e-mail…" oninput="filterAdmin(this.value)"><button type="button" class="admin-search-clear" id="admin-search-clear" onclick="clearAdminSearch()" title="Limpar busca">✕</button><span class="admin-search-count" id="admin-search-count">${users.length}</span></label></div><div class="stats-grid" style="margin-top:0"><div class="stat blue"><div class="v">${users.length}</div><div class="l">Contas cadastradas</div></div><div class="stat green"><div class="v">${active}</div><div class="l">Assinaturas ativas</div></div><div class="stat amber"><div class="v">${expiring}</div><div class="l">Vencem em até 7 dias</div></div><div class="stat purple"><div class="v">${custom}</div><div class="l">Acessos personalizados</div></div></div>${adminTabs('users')}<div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Usuário</th><th>Plano</th><th>Status</th><th>Dias</th><th>Vencimento</th><th>Níveis</th><th>Pontos</th><th>Último acesso</th><th>Ações</th></tr></thead><tbody id="admin-users-body">${adminUserRows(users)}</tbody></table></div></div><div class="admin-modal" id="admin-modal" onclick="if(event.target===this)closeAdminModal()"></div>`;
 }
 function filterAdmin(value){const q=value.trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();const filtered=adminUsers.filter(user=>`${user.name||''} ${user.email||''}`.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().includes(q));const body=document.getElementById('admin-users-body');if(body)body.innerHTML=adminUserRows(filtered);const count=document.getElementById('admin-search-count');if(count)count.textContent=`${filtered.length}/${adminUsers.length}`;document.getElementById('admin-search-clear')?.classList.toggle('show',Boolean(value));}
 function clearAdminSearch(){const input=document.getElementById('admin-user-search');if(input){input.value='';filterAdmin('');input.focus();}}
@@ -1344,11 +1272,12 @@ function openLevelAccessAdmin(id){
     {value:'custom',icon:'🎛️',title:'Escolher níveis',description:'Você marca exatamente quais níveis serão liberados.'},
     {value:'blocked',icon:'🔒',title:'Bloquear todos',description:'Pausa o acesso a todos os níveis sem cancelar a assinatura.'}
   ];
-  const modal=document.getElementById('admin-modal');modal.className='admin-modal show';modal.innerHTML=`<div class="admin-modal-card level-access-card"><h3>Controle de níveis</h3><p style="color:var(--text2);font-size:.8rem;margin:.3rem 0">${escapeHtml(user.name||'Usuário')} · ${escapeHtml(user.email||'')}</p><div class="level-access-options">${options.map(option=>`<label class="level-access-option"><span><input type="radio" name="admin-level-mode" value="${option.value}" ${access.mode===option.value?'checked':''} onchange="toggleLevelPicker()">${option.icon} <strong>${option.title}</strong></span><small>${option.description}</small></label>`).join('')}</div><div id="admin-level-custom" style="display:${access.mode==='custom'?'block':'none'}"><div class="level-picker-tools"><div><strong style="font-size:.8rem">Selecione os níveis</strong><div style="color:var(--text2);font-size:.68rem;margin-top:.2rem" id="admin-level-count"></div></div><div class="admin-actions"><button class="admin-btn" onclick="setLevelSelection(10)">1–10</button><button class="admin-btn" onclick="setLevelSelection(20)">1–20</button><button class="admin-btn" onclick="setLevelSelection(35)">1–35</button><button class="admin-btn" onclick="setLevelSelection(0)">Limpar</button></div></div><div class="level-picker">${LEVELS.map(level=>`<label class="level-toggle" title="Nível ${level.id} — ${escapeHtml(level.title)}"><input type="checkbox" name="admin-level-check" value="${level.id}" ${access.levels.includes(level.id)?'checked':''} onchange="updateSelectedLevelsCount()">${level.id}</label>`).join('')}</div></div><div style="display:flex;justify-content:flex-end;gap:.5rem;margin-top:1rem"><button class="btn btn-ghost" onclick="closeAdminModal()">Cancelar</button><button class="btn btn-primary" id="admin-level-save" onclick="saveLevelAccessAdmin('${id}')">Salvar acesso</button></div></div>`;updateSelectedLevelsCount();
+  const modal=document.getElementById('admin-modal');modal.className='admin-modal show';modal.innerHTML=`<div class="admin-modal-card level-access-card"><h3>Controle de níveis</h3><p style="color:var(--text2);font-size:.8rem;margin:.3rem 0">${escapeHtml(user.name||'Usuário')} · ${escapeHtml(user.email||'')}</p><div class="level-access-options">${options.map(option=>`<label class="level-access-option"><span><input type="radio" name="admin-level-mode" value="${option.value}" ${access.mode===option.value?'checked':''} onchange="toggleLevelPicker()">${option.icon} <strong>${option.title}</strong></span><small>${option.description}</small></label>`).join('')}</div><div id="admin-level-custom" style="display:${access.mode==='custom'?'block':'none'}"><div class="level-picker-tools"><div><strong style="font-size:.8rem">Níveis personalizados</strong><div style="color:var(--text2);font-size:.68rem;margin-top:.2rem">Marcado = liberado · desmarcado = bloqueado</div><div style="color:var(--accent);font-size:.7rem;margin-top:.25rem" id="admin-level-count"></div></div><div class="admin-actions"><button class="admin-btn" onclick="setLevelSelection(60)">Liberar todos</button><button class="admin-btn" onclick="setLevelSelection(10)">1–10</button><button class="admin-btn" onclick="setLevelSelection(35)">1–35</button><button class="admin-btn" onclick="invertLevelSelection()">Inverter</button><button class="admin-btn danger" onclick="setLevelSelection(0)">Bloquear todos</button></div></div><div class="level-picker">${LEVELS.map(level=>`<label class="level-toggle" title="Nível ${level.id} — ${escapeAttr(level.title)}"><input type="checkbox" name="admin-level-check" value="${level.id}" ${access.levels.includes(level.id)?'checked':''} onchange="updateSelectedLevelsCount()">${level.id}</label>`).join('')}</div></div><div style="display:flex;justify-content:flex-end;gap:.5rem;margin-top:1rem"><button class="btn btn-ghost" onclick="closeAdminModal()">Cancelar</button><button class="btn btn-primary" id="admin-level-save" onclick="saveLevelAccessAdmin('${id}')">Salvar acesso</button></div></div>`;updateSelectedLevelsCount();
 }
 function toggleLevelPicker(){const mode=document.querySelector('input[name="admin-level-mode"]:checked')?.value;const picker=document.getElementById('admin-level-custom');if(picker)picker.style.display=mode==='custom'?'block':'none';updateSelectedLevelsCount();}
 function updateSelectedLevelsCount(){const count=document.querySelectorAll('input[name="admin-level-check"]:checked').length;const box=document.getElementById('admin-level-count');if(box)box.textContent=`${count} de 60 níveis selecionados`;}
 function setLevelSelection(limit){document.querySelectorAll('input[name="admin-level-check"]').forEach(input=>{input.checked=limit>0&&Number(input.value)<=limit;});updateSelectedLevelsCount();}
+function invertLevelSelection(){document.querySelectorAll('input[name="admin-level-check"]').forEach(input=>{input.checked=!input.checked;});updateSelectedLevelsCount();}
 async function saveLevelAccessAdmin(id){
   const mode=document.querySelector('input[name="admin-level-mode"]:checked')?.value||'progressive';
   const levels=[...document.querySelectorAll('input[name="admin-level-check"]:checked')].map(input=>Number(input.value));
@@ -1359,9 +1288,9 @@ async function saveLevelAccessAdmin(id){
 }
 function closeAdminModal(){const modal=document.getElementById('admin-modal');if(modal)modal.className='admin-modal';}
 async function saveSubscriptionAdmin(id){const res=await authFetch(`/api/admin/users/${id}/subscription`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({plan:document.getElementById('admin-plan').value,status:document.getElementById('admin-status').value,days:Number(document.getElementById('admin-days').value)})});const data=await res.json();if(!res.ok)return toast(data.error,'err');toast('Assinatura atualizada.','ok');closeAdminModal();renderAdmin();}
-async function sendPasswordReset(id,email){if(!confirm(`Enviar redefinição de senha para ${email}?`))return;const res=await authFetch(`/api/admin/users/${id}/password-reset`,{method:'POST'});const data=await res.json();toast(res.ok?'E-mail de redefinição enviado.':data.error,res.ok?'ok':'err');}
+async function sendPasswordReset(id){const user=adminUsers.find(item=>item.id===id);if(!user||!confirm(`Enviar redefinição de senha para ${user.email}?`))return;const res=await authFetch(`/api/admin/users/${id}/password-reset`,{method:'POST'});const data=await res.json();toast(res.ok?'E-mail de redefinição enviado.':data.error,res.ok?'ok':'err');}
 async function removeFromRanking(id){if(!confirm('Remover este usuário do ranking e zerar pontos/progresso?'))return;const res=await authFetch(`/api/admin/users/${id}/ranking`,{method:'DELETE'});const data=await res.json();toast(res.ok?'Usuário removido do ranking.':data.error,res.ok?'ok':'err');if(res.ok)renderAdmin();}
-async function deleteAdminUser(id,email){if(!confirm(`EXCLUIR permanentemente a conta ${email}? Esta ação não pode ser desfeita.`))return;const typed=prompt('Digite EXCLUIR para confirmar:');if(typed!=='EXCLUIR')return;const res=await authFetch(`/api/admin/users/${id}`,{method:'DELETE'});const data=await res.json();toast(res.ok?'Conta excluída permanentemente.':data.error,res.ok?'ok':'err');if(res.ok)renderAdmin();}
+async function deleteAdminUser(id){const user=adminUsers.find(item=>item.id===id);if(!user||!confirm(`EXCLUIR permanentemente a conta ${user.email}? Esta ação não pode ser desfeita.`))return;const typed=prompt('Digite EXCLUIR para confirmar:');if(typed!=='EXCLUIR')return;const res=await authFetch(`/api/admin/users/${id}`,{method:'DELETE'});const data=await res.json();toast(res.ok?'Conta excluída permanentemente.':data.error,res.ok?'ok':'err');if(res.ok)renderAdmin();}
 
 async function renderAdminCommunity(){
   document.getElementById('mc').innerHTML='<div class="spin-wrap"><div class="spin"></div><p>Carregando moderação do chat…</p></div>';
@@ -1403,7 +1332,6 @@ let supabaseClient = null;
 let currentSession = null;
 let subscriptionActive = false, currentSubscriptionStatus = null, isAdmin = false;
 let currentLevelAccess = { mode: 'progressive', levels: [] };
-let progressSyncTimer = null;
 let pendingSignupEmail = '';
 let authLinkType = new URLSearchParams(location.hash.replace(/^#/,'')).get('type') || new URLSearchParams(location.search).get('type') || '';
 let handlingAuthLink = false;
@@ -1434,6 +1362,43 @@ function levelAccessNotice(){
   if(currentLevelAccess.mode==='custom')return `<div class="level-access-alert"><strong>🎛️ Acesso personalizado.</strong> Sua conta possui ${currentLevelAccess.levels.length} ${currentLevelAccess.levels.length===1?'nível liberado':'níveis liberados'} pela administração.</div>`;
   if(currentLevelAccess.mode==='all')return '<div class="level-access-alert"><strong>⚡ Trilha completa liberada.</strong> Todos os 60 níveis estão disponíveis para sua conta.</div>';
   return '';
+}
+
+const LESSONS_PER_LEVEL=3;
+function completedLessonsFor(levelId){
+  const raw=DB.lessonProgress?.[me]?.[levelId];
+  return [...new Set((Array.isArray(raw)?raw:[]).map(Number).filter(index=>Number.isInteger(index)&&index>=0&&index<LESSONS_PER_LEVEL))].sort((a,b)=>a-b);
+}
+function quizBestFor(levelId){return Math.max(0,Math.min(100,Number(DB.quizScores?.[me]?.[levelId]||0)));}
+function levelMetrics(level){
+  const progress=Math.max(0,Math.min(100,Number(DB.progress?.[me]?.[level.id]||0)));
+  const completedLessons=completedLessonsFor(level.id);
+  const locked=!isLevelUnlocked(level.id);
+  const state=locked?'locked':progress>=100?'done':progress>0?'progress':'available';
+  const nextLesson=Math.min(LESSONS_PER_LEVEL-1,Math.max(0,[0,1,2].find(index=>!completedLessons.includes(index))??2));
+  return {progress,completedLessons,completedCount:completedLessons.length,quizBest:quizBestFor(level.id),locked,state,nextLesson};
+}
+function levelStatusLabel(state){return {locked:'Bloqueado',done:'Concluído',progress:'Em andamento',available:'Disponível'}[state]||'Disponível';}
+function applyLearningPayload(payload){
+  if(!me||!payload)return;
+  if(payload.progress)DB.progress[me]=payload.progress;
+  if(payload.lessonProgress)DB.lessonProgress[me]=payload.lessonProgress;
+  if(payload.quizScores)DB.quizScores[me]=payload.quizScores;
+  if(payload.score!==undefined)DB.scores[me]=Number(payload.score||0);
+  localStorage.setItem('el2_db',JSON.stringify(DB));
+  refreshAppSidebars(document.querySelector('.nav-item.active')?.id?.replace('n-','')||'dashboard');
+}
+function renderLevelCard(level,context='study'){
+  const metric=levelMetrics(level);
+  const action=context==='quiz'?`startQuiz(${level.id})`:`openStudy(${level.id})`;
+  const actionLabel=metric.locked?'Ver requisito':context==='quiz'?(metric.quizBest?'Refazer quiz':'Fazer quiz'):(metric.completedCount?'Continuar aula':'Começar nível');
+  return `<article class="lc ${metric.state==='locked'?'locked':''} ${metric.state==='done'?'done':''}" style="--level-color:${escapeAttr(level.color)}" data-level-state="${metric.state}" data-level-search="nível ${level.id} ${escapeAttr(level.title)} ${escapeAttr(level.topics)}" role="button" tabindex="0" aria-label="Nível ${level.id}: ${escapeAttr(level.title)}. ${levelStatusLabel(metric.state)}" onclick="if(guardLevelAccess(${level.id}))${action}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();if(guardLevelAccess(${level.id}))${action}}">
+    <div class="level-card-top"><div class="lbadge" style="background:${level.color}20;color:${level.color}">${level.icon}</div><span class="status-pill ${metric.state}">${metric.state==='locked'?'🔒':metric.state==='done'?'✓':metric.state==='progress'?'●':'○'} ${levelStatusLabel(metric.state)}</span></div>
+    <div class="level-card-title">Nível ${level.id} — ${escapeHtml(level.title)}</div>
+    <div class="level-card-description">${escapeHtml(level.topics)}</div>
+    <div class="level-card-meta"><span>📖 ${metric.completedCount}/${LESSONS_PER_LEVEL} aulas</span><span>⚡ Quiz ${metric.quizBest}%</span></div>
+    <div class="level-card-footer"><div class="pb"><div class="pf" style="width:${metric.progress}%;background:linear-gradient(90deg,${level.color},var(--accent2))"></div></div><div class="level-card-actions"><span class="pm">${metric.progress}% do nível</span><span class="level-card-action">${actionLabel} ${metric.locked?'':'→'}</span></div></div>
+  </article>`;
 }
 
 function hideAuthFlows(){
@@ -1471,15 +1436,11 @@ function showNewPasswordForm(){
 }
 
 function queueProgressSync(){
-  if(!currentSession?.access_token||!me)return;
-  clearTimeout(progressSyncTimer);
-  progressSyncTimer=setTimeout(async()=>{
-    try{await authFetch('/api/my-progress',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({score:DB.scores[me]||0,progress:DB.progress[me]||{}})});}catch(err){console.warn('Progresso será sincronizado depois.');}
-  },900);
+  // O avanço é salvo exclusivamente pelo backend ao concluir aulas e quizzes.
 }
 
 async function loadCloudProgress(){
-  try{const res=await authFetch('/api/my-progress');if(!res.ok)return;const cloud=await res.json();DB.scores[me]=Math.max(DB.scores[me]||0,Number(cloud.score||0));const local=DB.progress[me]||{};for(const [level,value] of Object.entries(cloud.progress||{}))local[level]=Math.max(Number(local[level]||0),Number(value||0));DB.progress[me]=local;localStorage.setItem('el2_db',JSON.stringify(DB));queueProgressSync();}catch(err){console.warn('Progresso local em uso.');}
+  try{const res=await authFetch('/api/my-progress');if(!res.ok)throw new Error('Falha ao carregar progresso');const cloud=await res.json();DB.scores[me]=Number(cloud.score||0);DB.progress[me]=cloud.progress||{};DB.lessonProgress[me]=cloud.lessonProgress||{};DB.quizScores[me]=cloud.quizScores||{};localStorage.setItem('el2_db',JSON.stringify(DB));return true;}catch(err){console.warn('Progresso remoto indisponível.');DB.scores[me]=0;DB.progress[me]={};DB.lessonProgress[me]={};DB.quizScores[me]={};toast('Não foi possível carregar seu progresso. Tente atualizar a página.','err');return false;}
 }
 
 (async function initPayments(){
@@ -1508,9 +1469,12 @@ async function doLogin(){
   const password = document.getElementById('lp').value;
   const err = document.getElementById('lerr');
   err.style.display = 'none';
+  if(!/^\S+@\S+\.\S+$/.test(email)||!password){err.textContent='Informe seu e-mail e sua senha.';err.style.display='block';return;}
+  const button=document.querySelector('#lf .btn-primary');button.disabled=true;button.textContent='Entrando…';
   const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+  button.disabled=false;button.textContent='Entrar →';
   if (error) {
-    err.textContent = /confirm/i.test(error.message) ? 'Confirme seu e-mail antes de entrar.' : 'E-mail ou senha incorretos.';
+    err.textContent = friendlyAuthError(error,'login');
     err.style.display = 'block';
     return;
   }
@@ -1535,7 +1499,7 @@ async function doRegister(){
   });
   registerButton.disabled = false; registerButton.textContent = 'Criar conta →';
   if (error) {
-    err.textContent = error.message.includes('registered') ? 'E-mail já cadastrado.' : 'Não foi possível criar a conta.';
+    err.textContent = friendlyAuthError(error,'register');
     err.style.display = 'block';
     return;
   }
@@ -1598,6 +1562,8 @@ async function enterAuthenticatedApp(user){
   if (!DB.users[email]) DB.users[email] = { n: name };
   DB.users[email].n = name;
   if (!DB.progress[email]) DB.progress[email] = {};
+  if (!DB.lessonProgress[email]) DB.lessonProgress[email] = {};
+  if (!DB.quizScores[email]) DB.quizScores[email] = {};
   if (DB.scores[email] === undefined) DB.scores[email] = 0;
   save();
 
@@ -1607,8 +1573,8 @@ async function enterAuthenticatedApp(user){
   document.getElementById('app-screen').classList.add('active');
   document.getElementById('n-admin').style.display = 'none';
   setHelpDockVisible(true);
-  await refreshSubscription();
-  if(subscriptionActive)await loadCloudProgress();
+  await refreshSubscription(false);
+  if(subscriptionActive){await loadCloudProgress();go('dashboard');}
 }
 
 async function authFetch(url, options = {}){
@@ -1619,7 +1585,7 @@ async function authFetch(url, options = {}){
   });
 }
 
-async function refreshSubscription(){
+async function refreshSubscription(navigate=true){
   const res = await authFetch('/api/subscription-status');
   if (res.status === 401) return doLogout();
   const status = await res.json();
@@ -1632,7 +1598,7 @@ async function refreshSubscription(){
   updateSubscriptionBubble(status);
   if (subscriptionActive) {
     document.querySelector('.main-nav').style.display = '';
-    go('dashboard');
+    if(navigate){await loadCloudProgress();go('dashboard');}
   } else {
     document.querySelector('.main-nav').style.display = 'none';
     renderPaywall(status);
@@ -1682,8 +1648,8 @@ function renderPaywall(status = {}){
           <p style="color:var(--text2);margin-bottom:1rem">Cobrança recorrente a cada 7 dias.</p>
           <div class="plan-feature">✓ Acesso a todos os 60 níveis</div><div class="plan-feature">✓ Tutor IA e correção detalhada</div><div class="plan-feature">✓ Cancele quando quiser</div>
           <div style="display:grid;gap:.55rem">
-            <button class="btn btn-primary" onclick="subscribe('weekly','card')">💳 Cartão recorrente</button>
-            <button class="btn btn-ghost" style="border-color:rgba(34,211,160,.45);color:var(--green)" onclick="subscribe('weekly','pix')">⚡ Pagar com PIX</button>
+            <button class="btn btn-primary" onclick="subscribe('weekly','card',this)">💳 Cartão recorrente</button>
+            <button class="btn btn-ghost" style="border-color:rgba(34,211,160,.45);color:var(--green)" onclick="subscribe('weekly','pix',this)">⚡ Pagar com PIX</button>
           </div>
         </div>
         <div class="pcard" style="border-color:var(--accent)">
@@ -1692,8 +1658,8 @@ function renderPaywall(status = {}){
           <p style="color:var(--text2);margin-bottom:1rem">Cobrança recorrente mensal.</p>
           <div class="plan-feature">✓ Economia comparada ao semanal</div><div class="plan-feature">✓ Acesso a todos os recursos</div><div class="plan-feature">✓ Liberação automática confirmada</div>
           <div style="display:grid;gap:.55rem">
-            <button class="btn btn-primary" onclick="subscribe('monthly','card')">💳 Cartão recorrente</button>
-            <button class="btn btn-ghost" style="border-color:rgba(34,211,160,.45);color:var(--green)" onclick="subscribe('monthly','pix')">⚡ Pagar com PIX</button>
+            <button class="btn btn-primary" onclick="subscribe('monthly','card',this)">💳 Cartão recorrente</button>
+            <button class="btn btn-ghost" style="border-color:rgba(34,211,160,.45);color:var(--green)" onclick="subscribe('monthly','pix',this)">⚡ Pagar com PIX</button>
           </div>
         </div>
       </div>
@@ -1702,8 +1668,7 @@ function renderPaywall(status = {}){
     </div>`;
 }
 
-async function subscribe(plan, method){
-  const button = event?.currentTarget;
+async function subscribe(plan, method, button){
   if (button) { button.disabled = true; button.textContent = 'Abrindo pagamento…'; }
   try {
     const res = await authFetch('/api/create-checkout', {

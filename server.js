@@ -1,6 +1,7 @@
 const express = require('express');
 const axios = require('axios');
 const path = require('path');
+const crypto = require('crypto');
 
 const app = express();
 app.use(express.json({ limit: '4mb' }));
@@ -9,12 +10,30 @@ app.use((req, res, next) => {
   res.set({
     'X-Content-Type-Options': 'nosniff',
     'X-Frame-Options': 'DENY',
+    'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
     'Referrer-Policy': 'strict-origin-when-cross-origin',
-    'Permissions-Policy': 'camera=(), microphone=(), geolocation=()'
+    'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+    'Content-Security-Policy': [
+      "default-src 'self'",
+      "base-uri 'self'",
+      "frame-ancestors 'none'",
+      "object-src 'none'",
+      "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "font-src 'self' data: https://fonts.gstatic.com",
+      "img-src 'self' data: blob: https:",
+      "connect-src 'self' https://*.supabase.co",
+      "form-action 'self'"
+    ].join('; ')
   });
   if (req.path.startsWith('/api/') && req.path !== '/api/electric-news') res.set('Cache-Control', 'no-store');
   next();
 });
+app.use('/assets', express.static(path.join(__dirname, 'assets'), {
+  immutable: true,
+  maxAge: '365d',
+  fallthrough: false
+}));
 const PORT = process.env.PORT || 3000;
 const SITE_URL = (process.env.SITE_URL || 'https://meu-quiz-six.vercel.app').replace(/\/$/, '');
 const ASAAS_URL = process.env.ASAAS_ENV === 'production'
@@ -26,12 +45,19 @@ const PLANS = Object.freeze({
   monthly: { name: 'Plano Mensal', value: 75.99, cycle: 'MONTHLY', days: 30 }
 });
 const TOTAL_LEVELS = 60;
+const LESSONS_PER_LEVEL = 3;
 const LEVEL_ACCESS_MODES = new Set(['progressive', 'all', 'custom', 'blocked']);
 
 function required(name) {
   const value = process.env[name]?.trim();
   if (!value) throw new Error(`${name} não configurada.`);
   return value;
+}
+
+function secureTokenEquals(received, expected) {
+  const left = Buffer.from(String(received || ''));
+  const right = Buffer.from(String(expected || ''));
+  return left.length === right.length && left.length > 0 && crypto.timingSafeEqual(left, right);
 }
 
 function supabaseHeaders(token) {
@@ -89,6 +115,102 @@ function hasLevelAccess(p, levelId) {
   return id === 1 || Number(progress[id] || 0) >= 100 || Number(progress[id - 1] || 0) >= 50;
 }
 
+function normalizeProgressMap(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+  return Object.fromEntries(Object.entries(value).slice(0, TOTAL_LEVELS).flatMap(([key, raw]) => {
+    const level = Number(key);
+    if (!Number.isInteger(level) || level < 1 || level > TOTAL_LEVELS) return [];
+    return [[String(level), Math.max(0, Math.min(100, Math.round(Number(raw) || 0)))]];
+  }));
+}
+
+function normalizeLessonProgress(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+  return Object.fromEntries(Object.entries(value).slice(0, TOTAL_LEVELS).flatMap(([key, raw]) => {
+    const level = Number(key);
+    if (!Number.isInteger(level) || level < 1 || level > TOTAL_LEVELS) return [];
+    const lessons = [...new Set((Array.isArray(raw) ? raw : [])
+      .map(Number)
+      .filter(index => Number.isInteger(index) && index >= 0 && index < LESSONS_PER_LEVEL))]
+      .sort((a, b) => a - b);
+    return [[String(level), lessons]];
+  }));
+}
+
+function normalizeQuizScores(value) {
+  return normalizeProgressMap(value);
+}
+
+function calculateLevelProgress(completedLessons, quizScore) {
+  const lessons = Math.max(0, Math.min(LESSONS_PER_LEVEL, Number(completedLessons) || 0));
+  const quiz = Math.max(0, Math.min(100, Number(quizScore) || 0));
+  if (lessons === LESSONS_PER_LEVEL && quiz >= 70) return 100;
+  return Math.min(99, Math.round(lessons * 20 + quiz * 0.4));
+}
+
+function quizSigningKey() {
+  return process.env.QUIZ_SIGNING_SECRET?.trim() || required('SUPABASE_SERVICE_ROLE_KEY');
+}
+
+function quizEncryptionKey() {
+  return crypto.createHash('sha256').update(quizSigningKey()).digest();
+}
+
+function sealQuizAttempt(payload) {
+  const iv = crypto.randomBytes(12);
+  const cipher = crypto.createCipheriv('aes-256-gcm', quizEncryptionKey(), iv);
+  const encrypted = Buffer.concat([cipher.update(JSON.stringify(payload), 'utf8'), cipher.final()]);
+  return `${iv.toString('base64url')}.${encrypted.toString('base64url')}.${cipher.getAuthTag().toString('base64url')}`;
+}
+
+function openQuizAttempt(token, userId, levelId) {
+  const [ivRaw, encryptedRaw, tagRaw, extra] = String(token || '').split('.');
+  if (!ivRaw || !encryptedRaw || !tagRaw || extra) throw new Error('Tentativa de quiz inválida. Gere um novo quiz.');
+  let payload;
+  try {
+    const iv = Buffer.from(ivRaw, 'base64url');
+    const encrypted = Buffer.from(encryptedRaw, 'base64url');
+    const tag = Buffer.from(tagRaw, 'base64url');
+    if (iv.length !== 12 || tag.length !== 16 || encrypted.length > 64 * 1024) throw new Error('Formato inválido.');
+    const decipher = crypto.createDecipheriv('aes-256-gcm', quizEncryptionKey(), iv);
+    decipher.setAuthTag(tag);
+    payload = JSON.parse(Buffer.concat([decipher.update(encrypted), decipher.final()]).toString('utf8'));
+  } catch {
+    throw new Error('Tentativa de quiz inválida. Gere um novo quiz.');
+  }
+  if (payload?.userId !== userId || Number(payload?.levelId) !== Number(levelId) || Number(payload?.expiresAt) < Date.now()) {
+    throw new Error('Esta tentativa expirou. Gere um novo quiz.');
+  }
+  if (!Array.isArray(payload.questions) || !payload.questions.length) throw new Error('Tentativa de quiz incompleta.');
+  return payload;
+}
+
+function normalizeQuizQuestion(item, index) {
+  const type = item?.type === 'tf' ? 'tf' : 'disc';
+  const question = String(item?.question || '').trim().slice(0, 600);
+  let answer = String(item?.answer || '').trim().slice(0, 1000);
+  const explanation = String(item?.explanation || '').trim().slice(0, 1000);
+  if (!question || !answer) throw new Error(`Pergunta ${index + 1} incompleta.`);
+  if (type === 'tf') {
+    const normalized = answer.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    if (/^(verdadeiro|true|v)$/.test(normalized)) answer = 'Verdadeiro';
+    else if (/^(falso|false|f)$/.test(normalized)) answer = 'Falso';
+    else throw new Error(`Gabarito da pergunta ${index + 1} inválido.`);
+  }
+  const options = type === 'tf' ? ['Verdadeiro', 'Falso'] : [];
+  return { type, question, answer, explanation, options };
+}
+
+async function saveLearningState(userId, state) {
+  await axios.patch(`${required('SUPABASE_URL')}/rest/v1/profiles?id=eq.${encodeURIComponent(userId)}`, {
+    score: state.score,
+    progress: state.progress,
+    lesson_progress: state.lessonProgress,
+    quiz_scores: state.quizScores,
+    updated_at: new Date().toISOString()
+  }, { headers: { ...supabaseHeaders(), Prefer: 'return=minimal' } });
+}
+
 const requestBuckets = new Map();
 function rateLimit({ windowMs, max, prefix }) {
   return (req, res, next) => {
@@ -112,14 +234,19 @@ function rateLimit({ windowMs, max, prefix }) {
 }
 
 async function requireActiveSubscription(req, res, next) {
-  const user = await authenticatedUser(req);
-  if (!user) return res.status(401).json({ error: 'Faça login para continuar.' });
-  const p = await profile(user.id);
-  const active = hasPaidAccess(p);
-  if (!active) return res.status(403).json({ error: 'Assinatura necessária.', subscriptionRequired: true });
-  req.user = user;
-  req.profile = p;
-  next();
+  try {
+    const user = await authenticatedUser(req);
+    if (!user) return res.status(401).json({ error: 'Faça login para continuar.' });
+    const p = await profile(user.id);
+    const active = hasPaidAccess(p);
+    if (!active) return res.status(403).json({ error: 'Assinatura necessária.', subscriptionRequired: true });
+    req.user = user;
+    req.profile = p;
+    next();
+  } catch (err) {
+    console.error('Falha ao validar assinatura:', err.response?.data || err.message);
+    res.status(503).json({ error: 'Não foi possível validar sua assinatura agora. Tente novamente em instantes.' });
+  }
 }
 
 function requireLevelAccess(req, res, next) {
@@ -139,11 +266,16 @@ function requireLevelAccess(req, res, next) {
 }
 
 async function requireAuthenticated(req, res, next) {
-  const user = await authenticatedUser(req);
-  if (!user) return res.status(401).json({ error: 'Faça login para continuar.' });
-  req.user = user;
-  req.profile = await profile(user.id);
-  next();
+  try {
+    const user = await authenticatedUser(req);
+    if (!user) return res.status(401).json({ error: 'Faça login para continuar.' });
+    req.user = user;
+    req.profile = await profile(user.id);
+    next();
+  } catch (err) {
+    console.error('Falha ao validar usuário:', err.response?.data || err.message);
+    res.status(503).json({ error: 'Não foi possível validar sua conta agora. Tente novamente em instantes.' });
+  }
 }
 const ADMIN_EMAILS = new Set(
   (process.env.ADMIN_EMAILS || 'gustavodivino886@gmail.com')
@@ -151,14 +283,23 @@ const ADMIN_EMAILS = new Set(
 );
 
 async function requireAdmin(req, res, next) {
-  const user = await authenticatedUser(req);
-  if (!user) return res.status(401).json({ error: 'Faça login para continuar.' });
-  if (!ADMIN_EMAILS.has(String(user.email || '').toLowerCase())) {
-    return res.status(403).json({ error: 'Acesso exclusivo do administrador.' });
+  try {
+    const user = await authenticatedUser(req);
+    if (!user) return res.status(401).json({ error: 'Faça login para continuar.' });
+    if (!ADMIN_EMAILS.has(String(user.email || '').toLowerCase())) {
+      return res.status(403).json({ error: 'Acesso exclusivo do administrador.' });
+    }
+    req.user = user;
+    next();
+  } catch (err) {
+    console.error('Falha ao validar administrador:', err.response?.data || err.message);
+    res.status(503).json({ error: 'Não foi possível validar o acesso administrativo agora.' });
   }
-  req.user = user;
-  next();
 }
+
+app.get('/api/health', (req, res) => {
+  res.json({ ok: true, service: 'electrolearn' });
+});
 
 app.get('/api/config', (req, res) => {
   try {
@@ -193,21 +334,58 @@ app.get('/api/subscription-status', async (req, res) => {
 });
 
 app.get('/api/my-progress', requireActiveSubscription, async (req, res) => {
-  res.json({ score: Number(req.profile?.score || 0), progress: req.profile?.progress || {} });
+  res.json({
+    score: Number(req.profile?.score || 0),
+    progress: normalizeProgressMap(req.profile?.progress),
+    lessonProgress: normalizeLessonProgress(req.profile?.lesson_progress),
+    quizScores: normalizeQuizScores(req.profile?.quiz_scores)
+  });
 });
 
 app.put('/api/my-progress', requireActiveSubscription, async (req, res) => {
+  res.status(409).json({
+    error: 'O progresso agora é atualizado automaticamente ao concluir aulas e quizzes.',
+    score: Number(req.profile?.score || 0),
+    progress: normalizeProgressMap(req.profile?.progress)
+  });
+});
+
+app.post('/api/learning/levels/:levelId/lessons/:lessonIndex/complete', requireActiveSubscription, async (req, res) => {
   try {
-    const rawProgress = req.body?.progress && typeof req.body.progress === 'object' ? req.body.progress : {};
-    const progress = Object.fromEntries(Object.entries(rawProgress).slice(0, 60).map(([key, value]) => [String(key), Math.max(0, Math.min(100, Math.round(Number(value || 0))))]));
+    const levelId = Number(req.params.levelId);
+    const lessonIndex = Number(req.params.lessonIndex);
+    if (!Number.isInteger(levelId) || levelId < 1 || levelId > TOTAL_LEVELS ||
+        !Number.isInteger(lessonIndex) || lessonIndex < 0 || lessonIndex >= LESSONS_PER_LEVEL) {
+      return res.status(400).json({ error: 'Aula inválida.' });
+    }
+    if (!hasLevelAccess(req.profile, levelId)) {
+      return res.status(403).json({
+        error: 'Este nível não está liberado para a sua conta.',
+        levelBlocked: true,
+        levelAccess: normalizeLevelAccess(req.profile)
+      });
+    }
+    const lessonProgress = normalizeLessonProgress(req.profile?.lesson_progress);
+    const quizScores = normalizeQuizScores(req.profile?.quiz_scores);
+    const progress = normalizeProgressMap(req.profile?.progress);
+    const completed = new Set(lessonProgress[levelId] || []);
+    completed.add(lessonIndex);
+    lessonProgress[levelId] = [...completed].sort((a, b) => a - b);
+    progress[levelId] = Math.max(Number(progress[levelId] || 0), calculateLevelProgress(completed.size, quizScores[levelId] || 0));
     const score = Object.values(progress).reduce((total, value) => total + Number(value || 0), 0);
-    await axios.patch(`${required('SUPABASE_URL')}/rest/v1/profiles?id=eq.${req.user.id}`, {
-      score: Math.round(score), progress, updated_at: new Date().toISOString()
-    }, { headers: { ...supabaseHeaders(), Prefer: 'return=minimal' } });
-    res.json({ saved: true });
+    await saveLearningState(req.user.id, { score, progress, lessonProgress, quizScores });
+    res.json({
+      saved: true,
+      score,
+      progress,
+      lessonProgress,
+      quizScores,
+      levelProgress: progress[levelId],
+      levelCompleted: progress[levelId] >= 100
+    });
   } catch (err) {
-    console.error('Falha ao salvar progresso:', err.response?.data || err.message);
-    res.status(500).json({ error: 'Não foi possível salvar o progresso.' });
+    console.error('Falha ao concluir aula:', err.response?.data || err.message);
+    res.status(500).json({ error: 'Não foi possível concluir a aula. Verifique a atualização do banco e tente novamente.' });
   }
 });
 
@@ -391,7 +569,8 @@ app.post('/api/admin/users/:id/password-reset', requireAdmin, async (req, res) =
     const { data: targetUser } = await axios.get(`${required('SUPABASE_URL')}/auth/v1/admin/users/${encodeURIComponent(req.params.id)}`, { headers: supabaseHeaders() });
     const email = String(targetUser?.email || '').trim();
     if (!email) return res.status(404).json({ error: 'Conta não encontrada.' });
-    await axios.post(`${required('SUPABASE_URL')}/auth/v1/recover`, { email, redirect_to: SITE_URL }, { headers: { apikey: required('SUPABASE_ANON_KEY'), 'Content-Type': 'application/json' } });
+    const recoverUrl = `${required('SUPABASE_URL')}/auth/v1/recover?redirect_to=${encodeURIComponent(SITE_URL)}`;
+    await axios.post(recoverUrl, { email }, { headers: { apikey: required('SUPABASE_ANON_KEY'), 'Content-Type': 'application/json' } });
     res.json({ sent: true });
   } catch (err) {
     console.error('Falha reset:', err.response?.data || err.message);
@@ -489,7 +668,7 @@ app.post('/api/webhooks/asaas', async (req, res) => {
   try {
     const receivedToken = req.headers['asaas-access-token'];
     const expectedToken = required('ASAAS_WEBHOOK_TOKEN');
-    if (!receivedToken || receivedToken !== expectedToken) {
+    if (!secureTokenEquals(receivedToken, expectedToken)) {
       return res.status(401).json({ error: 'Webhook não autorizado.' });
     }
 
@@ -622,7 +801,23 @@ app.post('/api/generate-quiz', requireActiveSubscription, requireLevelAccess, ra
       json: true,
       maxOutputTokens: 1800
     });
-    res.json({ output_text: text });
+    const parsed = JSON.parse(text);
+    if (!Array.isArray(parsed) || parsed.length !== 8) throw new Error('Quiz incompleto.');
+    const questions = parsed.map(normalizeQuizQuestion);
+    const trueFalse = questions.filter(question => question.type === 'tf').length;
+    if (trueFalse !== 4) throw new Error('O quiz deve conter quatro questões de verdadeiro ou falso.');
+    const attemptToken = sealQuizAttempt({
+      version: 1,
+      userId: req.user.id,
+      levelId: req.levelId,
+      expiresAt: Date.now() + 45 * 60 * 1000,
+      questions
+    });
+    res.json({
+      questions: questions.map(({ type, question, options }) => ({ type, question, options })),
+      attemptToken,
+      expiresInSeconds: 2700
+    });
   } catch (err) {
     console.error('Falha quiz IA:', err.response?.data || err.message);
     res.status(err.response?.status || 500).json({ error: 'Falha ao gerar quiz.' });
@@ -631,28 +826,88 @@ app.post('/api/generate-quiz', requireActiveSubscription, requireLevelAccess, ra
 
 app.post('/api/grade-quiz', requireActiveSubscription, requireLevelAccess, rateLimit({ windowMs: 10 * 60 * 1000, max: 30, prefix: 'grade-ai' }), async (req, res) => {
   try {
-    const answers = Array.isArray(req.body?.answers) ? req.body.answers.slice(0, 12) : [];
-    if (!answers.length) return res.status(400).json({ error: 'Respostas não recebidas.' });
-    const safe = answers.map((item, index) => ({
+    const attempt = openQuizAttempt(req.body?.attemptToken, req.user.id, req.levelId);
+    const submitted = Array.isArray(req.body?.answers) ? req.body.answers.slice(0, attempt.questions.length) : [];
+    if (submitted.length !== attempt.questions.length) return res.status(400).json({ error: 'Responda todas as questões antes de concluir.' });
+    const safe = attempt.questions.map((question, index) => ({
       index,
-      type: item.type === 'tf' ? 'tf' : 'disc',
-      question: String(item.question || '').slice(0, 600),
-      reference: String(item.reference || '').slice(0, 1000),
-      explanation: String(item.explanation || '').slice(0, 1000),
-      userAnswer: String(item.userAnswer || '').slice(0, 1800)
+      type: question.type,
+      question: question.question,
+      reference: question.answer,
+      explanation: question.explanation,
+      userAnswer: String(submitted[index] || '').trim().slice(0, 1800)
     }));
-    const text = await geminiResponse({
-      instructions: 'Você corrige quizzes de eletrotécnica em português do Brasil. Aceite sinônimos e respostas conceitualmente equivalentes. Não dê ponto a respostas vazias, contraditórias, perigosas ou com conceito essencial ausente. Retorne somente JSON válido.',
-      text: `Corrija as respostas abaixo. Para cada uma retorne {index, correct:boolean, feedback:string, missing:string, idealAnswer:string}. Em verdadeiro/falso compare exatamente. Em discursivas avalie aderência técnica, não igualdade literal. JSON final: {"results":[...]}\n${JSON.stringify(safe)}`,
-      json: true,
-      maxOutputTokens: 2200
+    if (safe.some(answer => !answer.userAnswer)) return res.status(400).json({ error: 'Responda todas as questões antes de concluir.' });
+
+    let results = safe.filter(answer => answer.type === 'tf').map(answer => {
+      const correct = answer.userAnswer.toLowerCase() === answer.reference.toLowerCase();
+      return {
+        index: answer.index,
+        correct,
+        feedback: correct ? 'Resposta correta.' : 'A alternativa escolhida não corresponde ao gabarito.',
+        missing: correct ? '' : `O gabarito desta afirmação é “${answer.reference}”.`,
+        idealAnswer: answer.reference
+      };
     });
-    const parsed = JSON.parse(text);
-    if (!Array.isArray(parsed.results) || parsed.results.length !== safe.length) throw new Error('Correção incompleta.');
-    res.json({ results: parsed.results });
+    const discursive = safe.filter(answer => answer.type === 'disc');
+    try {
+      const text = await geminiResponse({
+        instructions: 'Você corrige quizzes de eletrotécnica em português do Brasil. Aceite sinônimos e respostas conceitualmente equivalentes. Não dê ponto a respostas vazias, contraditórias, perigosas ou com conceito essencial ausente. Retorne somente JSON válido.',
+        text: `Corrija somente as respostas discursivas abaixo. Para cada uma retorne {index, correct:boolean, feedback:string, missing:string, idealAnswer:string}. Avalie aderência técnica e conceitos essenciais, não igualdade literal. JSON final: {"results":[...]}\n${JSON.stringify(discursive)}`,
+        json: true,
+        maxOutputTokens: 2200
+      });
+      const parsed = JSON.parse(text);
+      if (!Array.isArray(parsed.results) || parsed.results.length !== discursive.length) throw new Error('Correção incompleta.');
+      const expectedIndexes = new Set(discursive.map(answer => answer.index));
+      const aiResults = parsed.results.map((result, position) => ({
+        index: expectedIndexes.has(Number(result?.index)) ? Number(result.index) : discursive[position].index,
+        correct: result?.correct === true,
+        feedback: String(result?.feedback || '').slice(0, 1000),
+        missing: String(result?.missing || '').slice(0, 1000),
+        idealAnswer: String(result?.idealAnswer || discursive[position].reference).slice(0, 1200)
+      }));
+      if (new Set(aiResults.map(result => result.index)).size !== discursive.length) throw new Error('Índices de correção inválidos.');
+      results.push(...aiResults);
+    } catch (gradingError) {
+      console.error('Correção IA em modo seguro:', gradingError.response?.data || gradingError.message);
+      results.push(...discursive.map(answer => ({
+        index: answer.index,
+        correct: false,
+        feedback: 'A resposta discursiva não recebeu ponto porque a correção inteligente ficou temporariamente indisponível.',
+        missing: 'Compare sua resposta com a referência e tente novamente.',
+        idealAnswer: answer.reference
+      })));
+    }
+    results.sort((a, b) => a.index - b.index);
+
+    const correct = results.filter(result => result.correct).length;
+    const quizPercent = Math.round(correct / results.length * 100);
+    const lessonProgress = normalizeLessonProgress(req.profile?.lesson_progress);
+    const quizScores = normalizeQuizScores(req.profile?.quiz_scores);
+    const progress = normalizeProgressMap(req.profile?.progress);
+    quizScores[req.levelId] = Math.max(Number(quizScores[req.levelId] || 0), quizPercent);
+    const completedLessons = (lessonProgress[req.levelId] || []).length;
+    progress[req.levelId] = Math.max(Number(progress[req.levelId] || 0), calculateLevelProgress(completedLessons, quizScores[req.levelId]));
+    const score = Object.values(progress).reduce((total, value) => total + Number(value || 0), 0);
+    await saveLearningState(req.user.id, { score, progress, lessonProgress, quizScores });
+    res.json({
+      results,
+      correct,
+      total: results.length,
+      quizPercent,
+      quizBest: quizScores[req.levelId],
+      levelProgress: progress[req.levelId],
+      levelCompleted: progress[req.levelId] >= 100,
+      score,
+      progress,
+      lessonProgress,
+      quizScores
+    });
   } catch (err) {
     console.error('Falha correção IA:', err.response?.data || err.message);
-    res.status(err.response?.status || 500).json({ error: 'Não foi possível corrigir o quiz agora.' });
+    const message = /tentativa|expirou|quiz inválid/i.test(err.message || '') ? err.message : 'Não foi possível corrigir o quiz agora.';
+    res.status(/tentativa|expirou|quiz inválid/i.test(err.message || '') ? 400 : (err.response?.status || 500)).json({ error: message });
   }
 });
 
@@ -687,9 +942,15 @@ app.post('/api/ai-tutor', requireActiveSubscription, rateLimit({ windowMs: 10 * 
       .replace(/sk-[\w-]+/g, '[chave protegida]')
       .slice(0, 500);
     console.error('Falha tutor IA:', { status: err.response?.status, code, message: safeMessage });
-    res.status(err.response?.status || 500).json({
-      error: `Tutor indisponível (${code}): ${safeMessage}`
-    });
+    const status = Number(err.response?.status || 500);
+    const friendly = status === 429
+      ? 'O Tutor está recebendo muitas perguntas agora. Aguarde um instante e tente novamente.'
+      : status === 401 || status === 403
+        ? 'O Tutor precisa de uma atualização de configuração. A equipe já pode verificar isso pelo painel técnico.'
+        : status === 404
+          ? 'O Tutor está sendo atualizado. Tente novamente em alguns minutos.'
+          : 'O Tutor não conseguiu responder agora. Sua mensagem não foi perdida; tente novamente em instantes.';
+    res.status(status).json({ error: friendly, code });
   }
 });
 

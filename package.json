@@ -4,7 +4,9 @@
   "description": "Backend para geração de quiz com IA para ElectroLearn",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "check": "node --check server.js && node scripts/verify-project.js",
+    "test": "npm run check && node scripts/integration-mock.test.js"
   },
   "dependencies": {
     "axios": "^1.6.5",

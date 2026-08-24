@@ -1,6 +1,6 @@
 # ElectroLearn
 
-Plataforma de estudo de eletrotécnica com conteúdo, PDFs, quizzes e assinaturas recorrentes pelo Asaas.
+Plataforma de estudo de eletrotécnica com 60 níveis, aulas, PDFs, videoaulas diretas, quizzes corrigidos no servidor, Tutor IA, comunidade e assinaturas pelo Asaas.
 
 ## Assinaturas
 
@@ -12,6 +12,7 @@ Plataforma de estudo de eletrotécnica com conteúdo, PDFs, quizzes e assinatura
 ## Configuração
 
 1. Crie um projeto no Supabase e execute `supabase/schema.sql` no SQL Editor.
+   - Em um projeto que já está em uso, execute também `supabase/learning_progress.sql` para adicionar o progresso confiável por aula e quiz.
 2. Copie as variáveis de `.env.example` para o projeto na Vercel.
 3. No Asaas, configure o webhook:
    - URL: `https://meu-quiz-six.vercel.app/api/webhooks/asaas`
@@ -19,6 +20,10 @@ Plataforma de estudo de eletrotécnica com conteúdo, PDFs, quizzes e assinatura
    - Envio: sequencial
    - Eventos: `PAYMENT_CONFIRMED`, `PAYMENT_RECEIVED`, `PAYMENT_REFUNDED`
 4. Teste primeiro com `ASAAS_ENV=sandbox`. Somente depois altere para `production` e use a chave de produção.
+
+## Verificação técnica
+
+Execute `npm test` antes de publicar. Além da sintaxe e dos 60 links diretos de videoaula, o teste simula autenticação, assinatura, conclusão de aula, correção segura do quiz, rejeição de progresso adulterado e bloqueio progressivo dos níveis.
 
 ## Antes de vender
 
