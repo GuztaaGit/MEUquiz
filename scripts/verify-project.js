@@ -35,6 +35,11 @@ assert(html.includes('/assets/professional.css'), 'O design profissional não es
 assert(html.includes('MOTIVATION_SLOT_MS=30*60*1000'), 'As frases motivacionais não estão configuradas para mudar a cada 30 minutos.');
 assert(html.includes("document.addEventListener('visibilitychange'"), 'As frases motivacionais não sincronizam quando o usuário volta para a aba.');
 assert(html.includes("window.addEventListener('pageshow',scheduleMotivation)"), 'As frases motivacionais não sincronizam ao reabrir/restaurar a página.');
+assert(html.includes('NEWS_SLOT_MS=30*60*1000'), 'As notícias não estão configuradas para atualizar a cada 30 minutos.');
+assert(html.includes('/api/electric-news?slot='), 'As notícias não usam uma chave de cache diferente em cada ciclo de meia hora.');
+assert(html.includes("window.addEventListener('pageshow',scheduleNewsRefresh)"), 'As notícias não sincronizam ao reabrir/restaurar a página.');
+assert(server.includes('refreshEveryMinutes: 30'), 'A API de notícias não informa o ciclo de atualização de 30 minutos.');
+assert(!server.includes('stale-while-revalidate=86400'), 'A API de notícias ainda permite reutilizar conteúdo antigo por 24 horas.');
 const cssVersion = html.match(/\/assets\/professional\.css\?v=([a-f0-9]{12})/)?.[1];
 const expectedCssVersion = crypto.createHash('sha1').update(professionalCss).digest('hex').slice(0, 12);
 assert(cssVersion === expectedCssVersion, 'A versão do CSS está desatualizada; o navegador pode manter o visual antigo em cache.');

@@ -1103,8 +1103,15 @@ app.get('/api/electric-news', requireActiveSubscription, async (req, res) => {
         return { ...item, image: item.image || item.thematicImage, summary: `Entenda os destaques de ${item.title.toLowerCase()} e sua importância para energia, tecnologia e o setor elétrico.`.slice(0, 240) };
       }
     }));
-    res.set('Cache-Control', 'public, s-maxage=1800, stale-while-revalidate=86400');
-    res.json({ updatedAt: new Date().toISOString(), items });
+    const newsSlot = Math.floor(Date.now() / (30 * 60 * 1000));
+    res.set('Cache-Control', 'public, s-maxage=1800, stale-while-revalidate=60');
+    res.set('X-ElectroLearn-News-Slot', String(newsSlot));
+    res.json({
+      updatedAt: new Date().toISOString(),
+      nextRefreshAt: new Date((newsSlot + 1) * 30 * 60 * 1000).toISOString(),
+      refreshEveryMinutes: 30,
+      items
+    });
   } catch (err) {
     console.error('Falha notícias:', err.message);
     res.status(502).json({ error: 'Não foi possível atualizar as notícias agora.' });
