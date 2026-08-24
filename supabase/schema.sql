@@ -37,7 +37,8 @@ alter table public.payment_grants enable row level security;
 drop policy if exists "Usuário lê o próprio perfil" on public.profiles;
 create policy "Usuário lê o próprio perfil"
 on public.profiles for select
-using (auth.uid() = id);
+to authenticated
+using ((select auth.uid()) = id);
 
 create or replace function public.handle_new_user()
 returns trigger
@@ -50,6 +51,10 @@ begin
   return new;
 end;
 $$;
+
+-- A função é acionada somente pelo trigger do Auth. Ela não deve ficar
+-- disponível como RPC para visitantes ou usuários autenticados.
+revoke all on function public.handle_new_user() from public, anon, authenticated;
 
 drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
@@ -135,6 +140,7 @@ alter table public.community_messages alter column user_id drop not null;
 alter table public.community_messages add column if not exists is_bot boolean not null default false;
 
 create index if not exists community_messages_created_idx on public.community_messages(created_at desc);
+create index if not exists community_messages_user_idx on public.community_messages(user_id);
 create index if not exists community_presence_updated_idx on public.community_presence(updated_at desc);
 alter table public.community_presence enable row level security;
 alter table public.community_messages enable row level security;
@@ -165,6 +171,8 @@ create table if not exists public.feedback_entries (
 create index if not exists support_tickets_user_idx on public.support_tickets(user_id, created_at desc);
 create index if not exists support_tickets_status_idx on public.support_tickets(status, created_at desc);
 create index if not exists feedback_entries_created_idx on public.feedback_entries(created_at desc);
+create index if not exists feedback_entries_user_idx on public.feedback_entries(user_id);
+create index if not exists payment_grants_user_idx on public.payment_grants(user_id);
 alter table public.support_tickets enable row level security;
 alter table public.feedback_entries enable row level security;
 
