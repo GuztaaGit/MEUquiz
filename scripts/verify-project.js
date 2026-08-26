@@ -43,6 +43,15 @@ assert(!server.includes('stale-while-revalidate=86400'), 'A API de notícias ain
 const cssVersion = html.match(/\/assets\/professional\.css\?v=([a-f0-9]{12})/)?.[1];
 const expectedCssVersion = crypto.createHash('sha1').update(professionalCss).digest('hex').slice(0, 12);
 assert(cssVersion === expectedCssVersion, 'A versão do CSS está desatualizada; o navegador pode manter o visual antigo em cache.');
+const showcaseAssets = [...html.matchAll(/image:'(\/assets\/showcase\/[^']+)'/g)].map(match => match[1]);
+assert(showcaseAssets.length === 8, `Esperadas 8 telas reais no carrossel; encontradas ${showcaseAssets.length}.`);
+assert(new Set(showcaseAssets).size === 8, 'Existem telas repetidas no carrossel da apresentação.');
+assert(showcaseAssets.every(asset => {
+  const localPath = path.join(root, asset.replace(/^\//, ''));
+  return fs.existsSync(localPath) && fs.statSync(localPath).size > 8 * 1024;
+}), 'Uma ou mais capturas reais do carrossel estão ausentes ou inválidas.');
+assert(html.includes('aria-roledescription="carrossel"') && html.includes('moveShowcase(-1)') && html.includes('moveShowcase(1)'), 'O carrossel não possui navegação acessível para avançar e voltar.');
+assert(html.includes('showcase-description') && html.includes('showcase-dots'), 'O carrossel não atualiza a explicação e os indicadores de cada aba.');
 assert(server.includes("app.use('/assets'"), 'O servidor não está entregando os arquivos visuais.');
 assert(server.includes('sealQuizAttempt') && server.includes('openQuizAttempt'), 'O gabarito do quiz não está protegido por token opaco.');
 assert(server.includes("/api/learning/levels/:levelId/lessons/:lessonIndex/complete"), 'A conclusão segura de aula não está implementada.');
