@@ -40,6 +40,11 @@ assert(html.includes('/api/electric-news?slot='), 'As notícias não usam uma ch
 assert(html.includes("window.addEventListener('pageshow',scheduleNewsRefresh)"), 'As notícias não sincronizam ao reabrir/restaurar a página.');
 assert(server.includes('refreshEveryMinutes: 30'), 'A API de notícias não informa o ciclo de atualização de 30 minutos.');
 assert(!server.includes('stale-while-revalidate=86400'), 'A API de notícias ainda permite reutilizar conteúdo antigo por 24 horas.');
+assert(server.includes("const CANONICAL_SITE_URL = 'https://eletrolearn.vercel.app'"), 'O endereço oficial do ElectroLearn não está configurado no servidor.');
+assert(server.includes('successUrl: `${SITE_URL}/?payment=success`'), 'O retorno de pagamento aprovado não usa o endereço oficial do site.');
+assert(server.includes('cancelUrl: `${SITE_URL}/?payment=cancel`'), 'O retorno de pagamento cancelado não usa o endereço oficial do site.');
+assert(server.includes('expiredUrl: `${SITE_URL}/?payment=expired`'), 'O retorno de pagamento expirado não usa o endereço oficial do site.');
+assert(!/https:\/\/meu-quiz(?:-[a-z0-9-]+)?\.vercel\.app/i.test(`${html}\n${server}`), 'Ainda existe um endereço antigo do Meu Quiz no site ou no servidor.');
 const cssVersion = html.match(/\/assets\/professional\.css\?v=([a-f0-9]{12})/)?.[1];
 const expectedCssVersion = crypto.createHash('sha1').update(professionalCss).digest('hex').slice(0, 12);
 assert(cssVersion === expectedCssVersion, 'A versão do CSS está desatualizada; o navegador pode manter o visual antigo em cache.');
