@@ -307,7 +307,7 @@ h1,h2,h3,h4{letter-spacing:-.035em}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style>
-<link rel="stylesheet" href="/assets/professional.css?v=306486ee77da"/>
+<link rel="stylesheet" href="/assets/professional.css?v=2acc74213af2"/>
 </head>
 <body>
 
@@ -446,7 +446,10 @@ function selectShowcase(index){renderShowcase(index);restartShowcaseTimer();}
       <button class="logout-btn" onclick="doLogout()">Sair</button>
     </div>
   </div>
-  <button type="button" class="mobile-nav-toggle" id="mobile-nav-toggle" aria-controls="main-nav" aria-expanded="false" onclick="openMobileNav()" style="display:none"><span aria-hidden="true">☰</span><strong>Atalhos</strong></button>
+  <div class="mobile-side-actions" id="mobile-side-actions" style="display:none">
+    <button type="button" class="mobile-nav-toggle" id="mobile-nav-toggle" aria-controls="main-nav" aria-expanded="false" onclick="openMobileNav()"><span aria-hidden="true">☰</span><strong>Atalhos</strong></button>
+    <button type="button" class="mobile-admin-shortcut" id="mobile-admin-shortcut" onclick="go('admin')" style="display:none" aria-label="Abrir painel administrativo"><span aria-hidden="true">🛠️</span><strong>ADM</strong></button>
+  </div>
   <button type="button" class="mobile-nav-backdrop" id="mobile-nav-backdrop" aria-label="Fechar atalhos" onclick="closeMobileNav()"></button>
   <nav class="main-nav" id="main-nav" aria-label="Navegação principal">
     <div class="mobile-nav-head"><div><span>⚡</span><strong>Atalhos</strong></div><button type="button" onclick="closeMobileNav()" aria-label="Fechar atalhos">✕</button></div>
@@ -834,8 +837,10 @@ function closeMobileNav(){
   document.getElementById('mobile-nav-toggle')?.setAttribute('aria-expanded','false');
 }
 function syncMobileNavAvailability(available){
-  const toggle=document.getElementById('mobile-nav-toggle');
-  if(toggle)toggle.style.display=available?'':'none';
+  const actions=document.getElementById('mobile-side-actions');
+  const adminShortcut=document.getElementById('mobile-admin-shortcut');
+  if(actions)actions.style.display=available?'':'none';
+  if(adminShortcut)adminShortcut.style.display=available&&isAdmin?'':'none';
   if(!available)closeMobileNav();
 }
 function go(t){
