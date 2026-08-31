@@ -58,9 +58,11 @@ assert(showcaseAssets.every(asset => {
 assert(html.includes('aria-roledescription="carrossel"') && html.includes('moveShowcase(-1)') && html.includes('moveShowcase(1)'), 'O carrossel não possui navegação acessível para avançar e voltar.');
 assert(html.includes('showcase-description') && html.includes('showcase-dots'), 'O carrossel não atualiza a explicação e os indicadores de cada aba.');
 assert(html.includes('id="mobile-nav-toggle"') && html.includes('aria-controls="main-nav"'), 'O botão lateral de atalhos não está acessível no celular.');
+assert(html.includes('id="mobile-admin-shortcut"') && html.includes("available&&isAdmin"), 'O atalho ADM móvel não está protegido pela permissão administrativa.');
 assert(html.includes('function openMobileNav()') && html.includes('function closeMobileNav()'), 'O painel lateral de atalhos não possui controle de abertura e fechamento.');
 assert(html.includes('class="nav-item nav-item-admin"') && html.includes('id="n-admin"'), 'O atalho ADM não está no mesmo painel de navegação.');
 assert(professionalCss.includes('.main-nav.mobile-open') && professionalCss.includes('width:min(84vw,330px)'), 'O painel lateral móvel não está configurado com uma área de toque adequada.');
+assert(professionalCss.includes('right:0;top:calc(78px + env(safe-area-inset-top))'), 'Os atalhos móveis não estão fixados no canto superior direito.');
 assert(server.includes("app.use('/assets'"), 'O servidor não está entregando os arquivos visuais.');
 assert(server.includes('sealQuizAttempt') && server.includes('openQuizAttempt'), 'O gabarito do quiz não está protegido por token opaco.');
 assert(server.includes("/api/learning/levels/:levelId/lessons/:lessonIndex/complete"), 'A conclusão segura de aula não está implementada.');
