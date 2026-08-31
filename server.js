@@ -35,7 +35,11 @@ app.use('/assets', express.static(path.join(__dirname, 'assets'), {
   fallthrough: false
 }));
 const PORT = process.env.PORT || 3000;
-const SITE_URL = (process.env.SITE_URL || 'https://meu-quiz-six.vercel.app').replace(/\/$/, '');
+const CANONICAL_SITE_URL = 'https://eletrolearn.vercel.app';
+const configuredSiteUrl = (process.env.SITE_URL || CANONICAL_SITE_URL).replace(/\/$/, '');
+const SITE_URL = /^https:\/\/meu-quiz(?:-[a-z0-9-]+)?\.vercel\.app$/i.test(configuredSiteUrl)
+  ? CANONICAL_SITE_URL
+  : configuredSiteUrl;
 const ASAAS_URL = process.env.ASAAS_ENV === 'production'
   ? 'https://api.asaas.com/v3'
   : 'https://api-sandbox.asaas.com/v3';
@@ -1089,7 +1093,7 @@ app.get('/api/electric-news', requireActiveSubscription, async (req, res) => {
     const items = await Promise.all(baseItems.map(async item => {
       try {
         const articleUrl = await resolveGoogleNewsUrl(item.url);
-        const response = await axios.get(articleUrl, { timeout: 5500, maxContentLength: 1200000, headers: { 'User-Agent': 'Mozilla/5.0 (compatible; ElectroLearn/2.0; +https://meu-quiz-six.vercel.app)' } });
+        const response = await axios.get(articleUrl, { timeout: 5500, maxContentLength: 1200000, headers: { 'User-Agent': `Mozilla/5.0 (compatible; ElectroLearn/2.0; +${CANONICAL_SITE_URL})` } });
         const html = String(response.data || '').slice(0, 1200000);
         const description = meta(html, 'og:description') || meta(html, 'twitter:description') || meta(html, 'description');
         const image = meta(html, 'og:image') || meta(html, 'twitter:image');
