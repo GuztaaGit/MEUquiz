@@ -307,7 +307,7 @@ h1,h2,h3,h4{letter-spacing:-.035em}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style>
-<link rel="stylesheet" href="/assets/professional.css?v=9ca4cbba6453"/>
+<link rel="stylesheet" href="/assets/professional.css?v=306486ee77da"/>
 </head>
 <body>
 
@@ -446,7 +446,10 @@ function selectShowcase(index){renderShowcase(index);restartShowcaseTimer();}
       <button class="logout-btn" onclick="doLogout()">Sair</button>
     </div>
   </div>
-  <nav class="main-nav" aria-label="Navegação principal">
+  <button type="button" class="mobile-nav-toggle" id="mobile-nav-toggle" aria-controls="main-nav" aria-expanded="false" onclick="openMobileNav()" style="display:none"><span aria-hidden="true">☰</span><strong>Atalhos</strong></button>
+  <button type="button" class="mobile-nav-backdrop" id="mobile-nav-backdrop" aria-label="Fechar atalhos" onclick="closeMobileNav()"></button>
+  <nav class="main-nav" id="main-nav" aria-label="Navegação principal">
+    <div class="mobile-nav-head"><div><span>⚡</span><strong>Atalhos</strong></div><button type="button" onclick="closeMobileNav()" aria-label="Fechar atalhos">✕</button></div>
     <button type="button" class="nav-item active" onclick="go('dashboard')" id="n-dashboard">🏠 Início</button>
     <button type="button" class="nav-item" onclick="go('tutor')" id="n-tutor">🤖 Tutor IA</button>
     <button type="button" class="nav-item" onclick="go('community')" id="n-community">💬 Chat Global</button>
@@ -455,7 +458,7 @@ function selectShowcase(index){renderShowcase(index);restartShowcaseTimer();}
     <button type="button" class="nav-item" onclick="go('quiz')" id="n-quiz">⚡ Quiz</button>
     <button type="button" class="nav-item" onclick="go('ranking')" id="n-ranking">🏆 Ranking</button>
     <button type="button" class="nav-item" onclick="go('profile')" id="n-profile">👤 Perfil</button>
-    <button type="button" class="nav-item" onclick="go('admin')" id="n-admin" style="display:none">🛠️ Administração</button>
+    <button type="button" class="nav-item nav-item-admin" onclick="go('admin')" id="n-admin" style="display:none" title="Painel de administração">🛠️ ADM</button>
   </nav>
   <div class="app-layout">
     <aside class="app-side app-side-left" aria-label="Notícias do Mundo Elétrico"><div class="app-side-title"><span>🌐 Mundo Elétrico</span><button class="help-close" onclick="go('news')" title="Ver todas">↗</button></div><div class="side-news-list" id="side-news-list"><div style="padding:.7rem;color:var(--text2);font-size:.7rem">Carregando notícias…</div></div></aside>
@@ -816,7 +819,27 @@ function switchTab(t){
   document.getElementById('rf').style.display=t==='register'?'':'none';
 }
 // ─── NAVIGATION ───
+function openMobileNav(){
+  if(!window.matchMedia('(max-width:620px)').matches)return;
+  const nav=document.getElementById('main-nav'),toggle=document.getElementById('mobile-nav-toggle');
+  if(!nav||nav.style.display==='none')return;
+  nav.classList.add('mobile-open');
+  document.body.classList.add('mobile-nav-open');
+  toggle?.setAttribute('aria-expanded','true');
+  window.setTimeout(()=>nav.querySelector('.nav-item.active:not([style*="display: none"])')?.focus(),180);
+}
+function closeMobileNav(){
+  document.getElementById('main-nav')?.classList.remove('mobile-open');
+  document.body.classList.remove('mobile-nav-open');
+  document.getElementById('mobile-nav-toggle')?.setAttribute('aria-expanded','false');
+}
+function syncMobileNavAvailability(available){
+  const toggle=document.getElementById('mobile-nav-toggle');
+  if(toggle)toggle.style.display=available?'':'none';
+  if(!available)closeMobileNav();
+}
 function go(t){
+  closeMobileNav();
   if(t!=='community')stopCommunity();
   activeAppPage=t;
   document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
@@ -835,6 +858,8 @@ function go(t){
   document.title=`${labels[t]||'ElectroLearn'} — ElectroLearn`;
   window.scrollTo({top:0,behavior:'smooth'});
 }
+document.addEventListener('keydown',event=>{if(event.key==='Escape')closeMobileNav();});
+window.addEventListener('resize',()=>{if(!window.matchMedia('(max-width:620px)').matches)closeMobileNav();});
 
 const NEWS_SLOT_MS=30*60*1000;
 let activeAppPage='dashboard';
@@ -1743,9 +1768,11 @@ async function refreshSubscription(navigate=true){
   updateSubscriptionBubble(status);
   if (subscriptionActive) {
     document.querySelector('.main-nav').style.display = '';
+    syncMobileNavAvailability(true);
     if(navigate){await loadCloudProgress();go('dashboard');}
   } else {
     document.querySelector('.main-nav').style.display = 'none';
+    syncMobileNavAvailability(false);
     renderPaywall(status);
   }
 }
