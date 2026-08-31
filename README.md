@@ -15,7 +15,7 @@ Plataforma de estudo de eletrotécnica com 60 níveis, aulas, PDFs, videoaulas d
    - Em um projeto que já está em uso, execute também `supabase/learning_progress.sql` para adicionar o progresso confiável por aula e quiz.
 2. Copie as variáveis de `.env.example` para o projeto na Vercel.
 3. No Asaas, configure o webhook:
-   - URL: `https://meu-quiz-six.vercel.app/api/webhooks/asaas`
+   - URL: `https://eletrolearn.vercel.app/api/webhooks/asaas`
    - Token: o mesmo valor de `ASAAS_WEBHOOK_TOKEN`
    - Envio: sequencial
    - Eventos: `PAYMENT_CONFIRMED`, `PAYMENT_RECEIVED`, `PAYMENT_REFUNDED`
