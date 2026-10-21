@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "check": "node --check server.js && node scripts/verify-project.js",
+    "check": "node --check server.js && node --check legal-pages.js && node scripts/verify-project.js",
     "test": "npm run check && node scripts/integration-mock.test.js"
   },
   "dependencies": {
