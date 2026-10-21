@@ -35,6 +35,7 @@ assert(/<button[^>]+class="auth-tab/.test(html), 'As abas de autenticação não
 assert(html.includes('/assets/professional.css'), 'O design profissional não está vinculado ao HTML.');
 assert(html.includes('id="privacy-ack"') && html.includes("document.getElementById('privacy-ack')?.checked"), 'O cadastro não exige ciência da Política de Privacidade.');
 assert(html.includes('href="/politica-de-cookies"') && html.includes('href="/politica-de-privacidade"'), 'O rodapé/aviso não aponta para as políticas legais.');
+assert(html.includes('class="auth-legal-links"'), 'Os links legais não estão disponíveis na tela de login/cadastro.');
 assert(server.includes("require('./legal-pages')") && server.includes('for (const legalPath of legalPaths)'), 'As páginas legais não estão registradas no servidor.');
 assert(legalPages.includes("'/politica-de-privacidade'") && legalPages.includes("'/termos-de-uso'") && legalPages.includes("'/politica-de-cookies'") && legalPages.includes("'/cancelamento-e-reembolso'"), 'Uma ou mais páginas legais não estão definidas.');
 assert(legalPages.includes('GEMINI') || legalPages.includes('Google Gemini'), 'A política não identifica o fornecedor do Tutor IA.');
