@@ -1811,7 +1811,7 @@ function renderPaywall(status = {}){
   document.getElementById('mc').innerHTML = `
     <div class="pay-hero" style="max-width:880px;margin:1.5rem auto;text-align:center">
       <div class="bolt">🔒</div>
-      <span class="chip on">FORMAÇÃO COMPLETA EM ELETROTÉCNICA</span><h2 style="font-size:2rem;margin:.8rem 0">Aprenda do básico ao profissional</h2>
+      <span class="chip on">TRILHA DE ESTUDOS EM ELETROTÉCNICA</span><h2 style="font-size:2rem;margin:.8rem 0">Estude do básico aos conceitos avançados</h2>
       <p style="color:var(--text2);margin:0 auto 1.5rem;max-width:620px">60 níveis, PDFs, videoaulas, quizzes corrigidos por IA, Tutor ElectroLearn e notícias do Mundo Elétrico. Acesso liberado após a confirmação real do Asaas.</p>
       ${new URLSearchParams(location.search).get('payment') === 'success'
         ? '<div class="hl" style="margin-bottom:1rem">Pagamento enviado. Assim que o Asaas confirmar, o acesso será liberado.</div>' : ''}
@@ -1831,7 +1831,7 @@ function renderPaywall(status = {}){
           <span class="chip on">MENSAL · MELHOR VALOR</span>
           <h3 style="font-size:2rem;margin:1rem 0">R$ 75,99</h3>
           <p style="color:var(--text2);margin-bottom:1rem">Cobrança recorrente mensal.</p>
-          <div class="plan-feature">✓ Economia comparada ao semanal</div><div class="plan-feature">✓ Acesso a todos os recursos</div><div class="plan-feature">✓ Liberação automática confirmada</div>
+          <div class="plan-feature">✓ 30 dias de acesso</div><div class="plan-feature">✓ Acesso a todos os recursos</div><div class="plan-feature">✓ Liberação automática confirmada</div>
           <div style="display:grid;gap:.55rem">
             <button class="btn btn-primary" onclick="subscribe('monthly','card',this)">💳 Cartão recorrente</button>
             <button class="btn btn-ghost" style="border-color:rgba(34,211,160,.45);color:var(--green)" onclick="subscribe('monthly','pix',this)">⚡ Pagar com PIX</button>
