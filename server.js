@@ -1,6 +1,7 @@
 const express = require('express');
 const axios = require('axios');
 const path = require('path');
+const { renderLegalPage, legalPaths } = require('./legal-pages');
 const crypto = require('crypto');
 
 const app = express();
@@ -1121,6 +1122,15 @@ app.get('/api/electric-news', requireActiveSubscription, async (req, res) => {
     res.status(502).json({ error: 'Não foi possível atualizar as notícias agora.' });
   }
 });
+
+for (const legalPath of legalPaths) {
+  app.get(legalPath, (req, res) => {
+    const page = renderLegalPage(req.path);
+    if (!page) return res.status(404).send('Página não encontrada.');
+    res.set('Cache-Control', 'no-store, max-age=0, must-revalidate');
+    res.type('html').send(page);
+  });
+}
 
 app.get('/', (req, res) => {
   // O HTML sempre é revalidado. Os assets continuam com cache longo e usam
