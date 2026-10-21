@@ -7,7 +7,7 @@ const SITE = {
   seller: 'Gustavo Divino',
   email: 'eletrolearnprojeto1@gmail.com',
   address: '[PREENCHER: endereço para contato comercial do vendedor]',
-  cnpj: 'Não informado. O responsável declarou atuar como pessoa física.'
+  cnpj: '[PREENCHER/CONFIRMAR: situação do CNPJ; o número não foi informado pelo responsável].'
 };
 
 const pages = {
@@ -17,7 +17,7 @@ const pages = {
     body: `
       <p class="notice"><strong>Informação pendente:</strong> o endereço comercial do responsável ainda não foi informado. Esta página é uma versão operacional e precisa ser revisada antes de ser considerada juridicamente final.</p>
       <h2>1. Quem é responsável pelos dados</h2>
-      <p>A plataforma ElectroLearn é operada por <strong>${escapeHtml(SITE.seller)}</strong>, declarado como vendedor pessoa física. Contato para privacidade e suporte: <a href="mailto:${SITE.email}">${SITE.email}</a>. Endereço para contato: <strong>${escapeHtml(SITE.address)}</strong>. CNPJ: ${escapeHtml(SITE.cnpj)}</p>
+      <p>A plataforma ElectroLearn é operada por <strong>${escapeHtml(SITE.seller)}</strong>, declarado como vendedor pessoa física. Contato para privacidade e suporte: <a href="mailto:${SITE.email}">${SITE.email}</a>. Endereço para contato: <strong>${escapeHtml(SITE.address)}</strong>. CNPJ/situação cadastral: ${escapeHtml(SITE.cnpj)}</p>
       <h2>2. Dados tratados e finalidades</h2>
       <ul>
         <li><strong>Conta:</strong> nome, e-mail e dados de autenticação para criar, proteger e administrar o acesso.</li>
@@ -31,6 +31,7 @@ const pages = {
       <p>O Tutor IA utiliza a API do Google Gemini. O conteúdo enviado ao Tutor IA é transmitido ao Google para processar a solicitação. Não envie senhas, documentos de identidade, dados financeiros ou informações pessoais de terceiros em perguntas, imagens ou PDFs. O tratamento realizado pelo fornecedor também está sujeito aos termos e políticas dele. Consulte a documentação oficial do <a href="https://ai.google.dev/gemini-api/terms" target="_blank" rel="noopener noreferrer">Gemini API</a> e a <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Política de Privacidade do Google</a>.</p>
       <p>A operação também depende de serviços de infraestrutura e autenticação, incluindo Supabase e Vercel, e de processamento de pagamentos pelo Asaas. Bibliotecas externas e fontes podem ser carregadas de CDNs e do Google Fonts, o que pode gerar requisições aos respectivos fornecedores.</p>
       <h2>4. Bases e compartilhamento</h2>
+      <p>Esta política descreve o tratamento à luz da Lei Geral de Proteção de Dados Pessoais (Lei nº 13.709/2018 — LGPD). A base legal deve ser avaliada por finalidade e registrada pelo responsável; a simples leitura desta política não é tratada como consentimento geral.</p>
       <p>Os dados são tratados conforme a finalidade de cada operação e a base legal aplicável, como execução do serviço contratado, cumprimento de obrigações legais ou regulatórias, exercício regular de direitos, legítimo interesse quando cabível ou consentimento quando necessário. Não declare consentimento como base universal para todas as operações. Os dados podem ser compartilhados com fornecedores necessários à operação, com autoridades quando houver obrigação válida e nos demais casos permitidos por lei. A plataforma não declara vender dados pessoais.</p>
       <h2>5. Armazenamento e segurança</h2>
       <p>Os dados ficam armazenados pelo tempo necessário às finalidades descritas, à manutenção da conta, à resolução de solicitações, à segurança e ao cumprimento de obrigações aplicáveis. Os prazos exatos de retenção e descarte precisam ser definidos e documentados pelo responsável. São adotadas medidas técnicas de proteção, mas nenhum serviço conectado à internet pode prometer segurança absoluta.</p>
@@ -90,6 +91,7 @@ const pages = {
       <h2>2. Cancelar renovação</h2>
       <p>Quando houver assinatura recorrente no cartão, a renovação futura pode ser cancelada na área <strong>Perfil → Minha assinatura</strong>, conforme os recursos disponíveis na conta. O cancelamento da renovação impede novas cobranças recorrentes futuras após o processamento do cancelamento, mas não implica, por si só, reembolso automático de um período já pago. O acesso e eventuais exceções legais seguem a contratação e a legislação aplicável. Pagamentos por PIX correspondem ao período adquirido e não renovam automaticamente.</p>
       <h2>3. Solicitar reembolso ou exercer direito de arrependimento</h2>
+      <p>O artigo 49 do Código de Defesa do Consumidor (Lei nº 8.078/1990) prevê direito de arrependimento nas contratações fora do estabelecimento comercial, observadas as condições legais aplicáveis. Esta política não pretende limitar esse direito. A aplicação e o termo inicial no caso concreto de serviço digital devem ser confirmados em revisão jurídica.</p>
       <p>Envie a solicitação para <a href="mailto:${SITE.email}">${SITE.email}</a> usando o e-mail cadastrado e, se disponível, a identificação da cobrança. Informe apenas os dados necessários para localizar a transação. O pedido será analisado sem afastar o direito de arrependimento quando aplicável, nem outros direitos previstos no Código de Defesa do Consumidor. Esta política não cria prazos menores que os previstos em lei.</p>
       <h2>4. Falhas de pagamento e acesso</h2>
       <p>Se o pagamento foi confirmado e o acesso não foi liberado, entre em contato pelo e-mail acima e inclua a data aproximada, o plano e a identificação da transação, evitando enviar dados completos do cartão ou senhas.</p>
