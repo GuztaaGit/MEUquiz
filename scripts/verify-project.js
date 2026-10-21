@@ -38,7 +38,11 @@ assert(html.includes('href="/politica-de-cookies"') && html.includes('href="/pol
 assert(html.includes('class="auth-legal-links"'), 'Os links legais não estão disponíveis na tela de login/cadastro.');
 assert(server.includes("require('./legal-pages')") && server.includes('for (const legalPath of legalPaths)'), 'As páginas legais não estão registradas no servidor.');
 assert(legalPages.includes("'/politica-de-privacidade'") && legalPages.includes("'/termos-de-uso'") && legalPages.includes("'/politica-de-cookies'") && legalPages.includes("'/cancelamento-e-reembolso'"), 'Uma ou mais páginas legais não estão definidas.');
-assert(legalPages.includes('GEMINI') || legalPages.includes('Google Gemini'), 'A política não identifica o fornecedor do Tutor IA.');
+assert(legalPages.includes('Google Gemini') && legalPages.includes('Lei nº 13.709/2018'), 'A política não identifica o fornecedor do Tutor IA e a LGPD.');
+assert(legalPages.includes('artigo 49 do Código de Defesa do Consumidor'), 'A política de reembolso não explica o direito de arrependimento previsto no CDC.');
+assert(html.includes('aria-label="Liberar nível ${level.id}"'), 'Os controles de nível não possuem nomes acessíveis.');
+assert(html.includes('Ao enviar, você compartilha sua avaliação com a equipe.'), 'O formulário de feedback não possui aviso de privacidade.');
+assert(html.includes('Perguntas, imagens e PDFs enviados ao Tutor IA são processados pelo Google Gemini.'), 'O Tutor IA não avisa sobre o envio de conteúdo ao Google Gemini.');
 assert(!html.includes('gustavodivino886@gmail.com'), 'O HTML ainda exibe o e-mail de contato antigo.');
 assert(html.includes('[PREENCHER: endereço comercial para contato]'), 'O rodapé não informa que o endereço comercial está pendente.');
 assert(!html.includes('Economia comparada ao semanal') && !html.includes('FORMAÇÃO COMPLETA EM ELETROTÉCNICA') && !html.includes('Aprenda do básico ao profissional'), 'Ainda existe uma promessa comercial sem comprovação.');
