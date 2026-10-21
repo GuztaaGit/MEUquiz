@@ -32,6 +32,11 @@ assert((professionalCss.match(/\{/g) || []).length === (professionalCss.match(/\
 assert(/<button[^>]+class="auth-tab/.test(html), 'As abas de autenticação não usam controles acessíveis.');
 
 assert(html.includes('/assets/professional.css'), 'O design profissional não está vinculado ao HTML.');
+assert(html.includes('id="privacy-ack"') && html.includes("document.getElementById('privacy-ack')?.checked"), 'O cadastro não exige ciência da Política de Privacidade.');
+assert(html.includes('href="/politica-de-cookies"') && html.includes('href="/politica-de-privacidade"'), 'O rodapé/aviso não aponta para as políticas legais.');
+assert(server.includes("require('./legal-pages')") && server.includes('for (const legalPath of legalPaths)'), 'As páginas legais não estão registradas no servidor.');
+assert(!html.includes('gustavodivino886@gmail.com'), 'O HTML ainda exibe o e-mail de contato antigo.');
+assert(html.includes('[PREENCHER: endereço comercial para contato]'), 'O rodapé não informa que o endereço comercial está pendente.');
 assert(html.includes('MOTIVATION_SLOT_MS=30*60*1000'), 'As frases motivacionais não estão configuradas para mudar a cada 30 minutos.');
 assert(html.includes("document.addEventListener('visibilitychange'"), 'As frases motivacionais não sincronizam quando o usuário volta para a aba.');
 assert(html.includes("window.addEventListener('pageshow',scheduleMotivation)"), 'As frases motivacionais não sincronizam ao reabrir/restaurar a página.');
