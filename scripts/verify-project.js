@@ -5,6 +5,7 @@ const crypto = require('crypto');
 const root = path.resolve(__dirname, '..');
 const html = fs.readFileSync(path.join(root, 'Meu Quiz.html'), 'utf8');
 const server = fs.readFileSync(path.join(root, 'server.js'), 'utf8');
+const legalPages = fs.readFileSync(path.join(root, 'legal-pages.js'), 'utf8');
 const schema = fs.readFileSync(path.join(root, 'supabase', 'schema.sql'), 'utf8');
 const professionalCss = fs.readFileSync(path.join(root, 'assets', 'professional.css'), 'utf8');
 
@@ -32,6 +33,20 @@ assert((professionalCss.match(/\{/g) || []).length === (professionalCss.match(/\
 assert(/<button[^>]+class="auth-tab/.test(html), 'As abas de autenticação não usam controles acessíveis.');
 
 assert(html.includes('/assets/professional.css'), 'O design profissional não está vinculado ao HTML.');
+assert(html.includes('id="privacy-ack"') && html.includes("document.getElementById('privacy-ack')?.checked"), 'O cadastro não exige ciência da Política de Privacidade.');
+assert(html.includes('href="/politica-de-cookies"') && html.includes('href="/politica-de-privacidade"'), 'O rodapé/aviso não aponta para as políticas legais.');
+assert(html.includes('class="auth-legal-links"'), 'Os links legais não estão disponíveis na tela de login/cadastro.');
+assert(server.includes("require('./legal-pages')") && server.includes('for (const legalPath of legalPaths)'), 'As páginas legais não estão registradas no servidor.');
+assert(legalPages.includes("'/politica-de-privacidade'") && legalPages.includes("'/termos-de-uso'") && legalPages.includes("'/politica-de-cookies'") && legalPages.includes("'/cancelamento-e-reembolso'"), 'Uma ou mais páginas legais não estão definidas.');
+assert(legalPages.includes('Google Gemini') && legalPages.includes('Lei nº 13.709/2018'), 'A política não identifica o fornecedor do Tutor IA e a LGPD.');
+assert(legalPages.includes('artigo 49 do Código de Defesa do Consumidor'), 'A política de reembolso não explica o direito de arrependimento previsto no CDC.');
+assert(html.includes('aria-label="Liberar nível ${level.id}"'), 'Os controles de nível não possuem nomes acessíveis.');
+assert(html.includes('Ao enviar, você compartilha sua avaliação com a equipe.'), 'O formulário de feedback não possui aviso de privacidade.');
+assert(html.includes('Perguntas, imagens e PDFs enviados ao Tutor IA são processados pelo Google Gemini.'), 'O Tutor IA não avisa sobre o envio de conteúdo ao Google Gemini.');
+assert(!html.includes('gustavodivino886@gmail.com'), 'O HTML ainda exibe o e-mail de contato antigo.');
+assert(html.includes('[PREENCHER: endereço comercial para contato]'), 'O rodapé não informa que o endereço comercial está pendente.');
+assert(!html.includes('Economia comparada ao semanal') && !html.includes('FORMAÇÃO COMPLETA EM ELETROTÉCNICA') && !html.includes('Aprenda do básico ao profissional'), 'Ainda existe uma promessa comercial sem comprovação.');
+assert(html.includes('Google Gemini') && html.includes('Política de Privacidade'), 'Os avisos de dados do Tutor IA estão ausentes.');
 assert(html.includes('MOTIVATION_SLOT_MS=30*60*1000'), 'As frases motivacionais não estão configuradas para mudar a cada 30 minutos.');
 assert(html.includes("document.addEventListener('visibilitychange'"), 'As frases motivacionais não sincronizam quando o usuário volta para a aba.');
 assert(html.includes("window.addEventListener('pageshow',scheduleMotivation)"), 'As frases motivacionais não sincronizam ao reabrir/restaurar a página.');

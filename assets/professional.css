@@ -283,3 +283,20 @@ button:disabled{cursor:not-allowed;opacity:.58;transform:none!important}
 }
 @media(max-width:380px){.topbar-logo{font-size:1.15rem}.motivation{display:none}.subscription-bubble{padding:.32rem .48rem}.stats-grid{grid-template-columns:1fr 1fr}.nav-item{min-width:64px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.lc{animation:none}}
+
+/* Revisão de acessibilidade, privacidade e avisos legais */
+:focus-visible{outline:3px solid #ffd166!important;outline-offset:3px}
+.field label{color:#c7d2ea;text-transform:none;letter-spacing:0}
+:root{--text2:#b5c0dc;--text3:#9aa8c9}
+.privacy-ack{display:flex;align-items:flex-start;gap:.65rem;margin:.9rem 0 .3rem;padding:.8rem;border:1px solid var(--border2);border-radius:12px;background:rgba(7,12,23,.55)}
+.privacy-ack input{width:20px;height:20px;flex:0 0 20px;margin-top:.15rem;accent-color:var(--accent)}
+.privacy-ack label{color:var(--text);font-size:.78rem;line-height:1.55;text-transform:none;letter-spacing:0}
+.privacy-ack a,.cookie-notice a{color:#b7d3ff;text-decoration:underline;text-underline-offset:3px}
+.privacy-note{color:#b5c0dc;font-size:.72rem;line-height:1.5;margin-bottom:.7rem}
+.cookie-notice{position:fixed;left:16px;right:16px;bottom:16px;z-index:10000;display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:1rem 1.15rem;background:#101a31;border:1px solid #465779;border-radius:16px;box-shadow:0 20px 65px rgba(0,0,0,.55);color:#f4f6ff}
+.cookie-notice[hidden]{display:none}.cookie-notice p{color:#c0c9df;font-size:.8rem;line-height:1.5;margin-top:.25rem;max-width:900px}.cookie-notice .btn{width:auto;flex-shrink:0}.legal-links{align-items:center}.legal-link{color:#c0c9df}
+@media(max-width:650px){.cookie-notice{left:8px;right:8px;bottom:8px;align-items:stretch;flex-direction:column;padding:.9rem}.cookie-notice .btn{width:100%}}
+
+.privacy-field-label{display:block;color:#c7d2ea;font-size:.78rem;font-weight:600;margin:.25rem 0 .35rem}.privacy-note a{color:#b7d3ff;text-decoration:underline;text-underline-offset:3px}
+
+.auth-legal-links{display:flex;justify-content:center;gap:.7rem;flex-wrap:wrap;margin:-.55rem 0 1rem}.auth-legal-links a{font-size:.72rem;color:#c0c9df;text-decoration:underline;text-underline-offset:3px}.auth-legal-links a:hover{color:#fff}
