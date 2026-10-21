@@ -40,6 +40,8 @@ assert(legalPages.includes("'/politica-de-privacidade'") && legalPages.includes(
 assert(legalPages.includes('GEMINI') || legalPages.includes('Google Gemini'), 'A política não identifica o fornecedor do Tutor IA.');
 assert(!html.includes('gustavodivino886@gmail.com'), 'O HTML ainda exibe o e-mail de contato antigo.');
 assert(html.includes('[PREENCHER: endereço comercial para contato]'), 'O rodapé não informa que o endereço comercial está pendente.');
+assert(!html.includes('Economia comparada ao semanal') && !html.includes('FORMAÇÃO COMPLETA EM ELETROTÉCNICA') && !html.includes('Aprenda do básico ao profissional'), 'Ainda existe uma promessa comercial sem comprovação.');
+assert(html.includes('Google Gemini') && html.includes('Política de Privacidade'), 'Os avisos de dados do Tutor IA estão ausentes.');
 assert(html.includes('MOTIVATION_SLOT_MS=30*60*1000'), 'As frases motivacionais não estão configuradas para mudar a cada 30 minutos.');
 assert(html.includes("document.addEventListener('visibilitychange'"), 'As frases motivacionais não sincronizam quando o usuário volta para a aba.');
 assert(html.includes("window.addEventListener('pageshow',scheduleMotivation)"), 'As frases motivacionais não sincronizam ao reabrir/restaurar a página.');
