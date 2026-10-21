@@ -307,7 +307,7 @@ h1,h2,h3,h4{letter-spacing:-.035em}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style>
-<link rel="stylesheet" href="/assets/professional.css?v=d81fb5929c3e"/>
+<link rel="stylesheet" href="/assets/professional.css?v=59cab2e023a8"/>
 </head>
 <body>
 <section id="cookie-notice" class="cookie-notice" role="region" aria-label="Aviso de privacidade e armazenamento" hidden><div><strong>Privacidade e armazenamento</strong><p>A ElectroLearn usa armazenamento necessário para login e funcionamento. Consulte nossa <a href="/politica-de-cookies">Política de Cookies</a> e <a href="/politica-de-privacidade">Política de Privacidade</a>. Não identificamos ferramentas opcionais de publicidade/analytics nesta revisão estática; não há consentimento de marketing ativado aqui.</p></div><button type="button" class="btn btn-ghost" id="cookie-notice-close">Entendi</button></section>
@@ -1660,7 +1660,7 @@ async function doRegister(){
   const email = document.getElementById('re').value.trim();
   const password = document.getElementById('rp').value;
   const err = document.getElementById('rerr');
-  if (!name || !/^\S+@\S+\.\S+$/.test(email) || password.length < 8) {
+  if (!name || !/^\S+@\S+\.\S+$/.test(email) || password.length < 8 || !document.getElementById('privacy-ack')?.checked) {
     err.textContent = !document.getElementById('privacy-ack')?.checked ? 'Leia a Política de Privacidade e marque a confirmação para continuar.' : 'Informe nome, e-mail válido e uma senha com pelo menos 8 caracteres.';
     err.style.display = 'block';
     return;
